@@ -1,12 +1,10 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
 datasource db {
   provider = "sqlserver"
   url      = env("DATABASE_URL")
-  referentialIntegrity = "prisma"
-}
-
-generator client {
-  provider = "prisma-client-js"
-  previewFeatures = ["multiSchema", "referentialIntegrity"]
 }
 
 model Origen {
@@ -101,7 +99,7 @@ model Contacto {
   cargo            String      @db.NVarChar(50)
   mail             String      @db.NVarChar(50)
   phone            String      @db.NVarChar(50)
-  beneficiario     Beneficiario @relation(fields: [id_beneficiario], references: [id_beneficiario], onDelete: NoAction)
+  beneficiario     Beneficiario @relation(fields: [id_beneficiario], references: [id_beneficiario], onDelete: Cascade)
 }
 
 model Rol {
@@ -115,7 +113,7 @@ model Usuario {
   nombre     String   @db.NVarChar(50)
   mail       String   @db.NVarChar(50)
   id_rol     Int
-  rol        Rol      @relation(fields: [id_rol], references: [id_rol], onDelete: NoAction)
+  rol        Rol      @relation(fields: [id_rol], references: [id_rol], onDelete: Cascade)
 }
 
 model Tarea {
@@ -125,12 +123,12 @@ model Tarea {
   nombre       String      @db.NVarChar(100)
   descripcion  String      @db.NVarChar(500)
   estado       Int
-  valle        Valle       @relation(fields: [id_valle], references: [id_valle], onDelete: NoAction)
-  faena        Faena       @relation(fields: [id_faena], references: [id_faena], onDelete: NoAction)
-  tarea_estado TareaEstado @relation(fields: [estado], references: [id_tarea_estado], onDelete: NoAction)
+  valle        Valle       @relation(fields: [id_valle], references: [id_valle], onDelete: Cascade)
+  faena        Faena       @relation(fields: [id_faena], references: [id_faena], onDelete: Cascade)
+  tarea_estado TareaEstado @relation(fields: [estado], references: [id_tarea_estado], onDelete: Cascade)
   info_tarea   InfoTarea?
-  subtareas    Subtarea[]  @relation("TareaSubtareas")
-  documentos   Documento[] @relation("TareaDocumentos")
+  subtareas    Subtarea[]
+  documentos   Documento[]
 }
 
 model InfoTarea {
@@ -142,13 +140,13 @@ model InfoTarea {
   id_alcance      Int
   id_interaccion  Int
   id_riesgo       Int
-  tarea           Tarea       @relation(fields: [id_tarea], references: [id_tarea], onDelete: NoAction)
-  origen          Origen      @relation(fields: [id_origen], references: [id_origen], onDelete: NoAction)
-  inversion       Inversion   @relation(fields: [id_inversion], references: [id_inversion], onDelete: NoAction)
-  tipo            Tipo        @relation(fields: [id_tipo], references: [id_tipo], onDelete: NoAction)
-  alcance         Alcance     @relation(fields: [id_alcance], references: [id_alcance], onDelete: NoAction)
-  interaccion     Interaccion @relation(fields: [id_interaccion], references: [id_interaccion], onDelete: NoAction)
-  riesgo          Riesgo      @relation(fields: [id_riesgo], references: [id_riesgo], onDelete: NoAction)
+  tarea           Tarea       @relation(fields: [id_tarea], references: [id_tarea], onDelete: Cascade)
+  origen          Origen      @relation(fields: [id_origen], references: [id_origen], onDelete: Cascade)
+  inversion       Inversion   @relation(fields: [id_inversion], references: [id_inversion], onDelete: Cascade)
+  tipo            Tipo        @relation(fields: [id_tipo], references: [id_tipo], onDelete: Cascade)
+  alcance         Alcance     @relation(fields: [id_alcance], references: [id_alcance], onDelete: Cascade)
+  interaccion     Interaccion @relation(fields: [id_interaccion], references: [id_interaccion], onDelete: Cascade)
+  riesgo          Riesgo      @relation(fields: [id_riesgo], references: [id_riesgo], onDelete: Cascade)
 }
 
 model Subtarea {
@@ -165,13 +163,13 @@ model Subtarea {
   id_beneficiario  String      @db.UniqueIdentifier
   id_estado        Int
   id_prioridad     Int
-  tarea            Tarea       @relation("TareaSubtareas", fields: [id_tarea], references: [id_tarea], onDelete: Cascade)
-  beneficiario     Beneficiario @relation(fields: [id_beneficiario], references: [id_beneficiario], onDelete: NoAction)
-  subtarea_estado  SubtareaEstado @relation(fields: [id_estado], references: [id_subtarea_estado], onDelete: NoAction)
-  prioridad        Prioridad      @relation(fields: [id_prioridad], references: [id_prioridad], onDelete: NoAction)
-  documentos       Documento[]    @relation("SubtareaDocumentos")
-  cumplimientos    Cumplimiento[] @relation("SubtareaCumplimientos")
-  registros        Registro[]     @relation("SubtareaRegistros")
+  tarea            Tarea       @relation(fields: [id_tarea], references: [id_tarea], onDelete: Cascade)
+  beneficiario     Beneficiario @relation(fields: [id_beneficiario], references: [id_beneficiario], onDelete: Cascade)
+  subtarea_estado  SubtareaEstado @relation(fields: [id_estado], references: [id_subtarea_estado], onDelete: Cascade)
+  prioridad        Prioridad      @relation(fields: [id_prioridad], references: [id_prioridad], onDelete: Cascade)
+  documentos       Documento[]
+  cumplimientos    Cumplimiento[]
+  registros        Registro[]
 }
 
 model TipoDocumento {
@@ -187,9 +185,9 @@ model Documento {
   tipo_documento   Int
   ruta             String      @db.NVarChar(500)
   fecha_carga      DateTime    @db.Date
-  tarea            Tarea?      @relation("TareaDocumentos", fields: [id_tarea], references: [id_tarea], onDelete: Cascade)
-  subtarea         Subtarea?   @relation("SubtareaDocumentos", fields: [id_subtarea], references: [id_subtarea], onDelete: Cascade)
-  tipo_documento_rel TipoDocumento @relation(fields: [tipo_documento], references: [id_tipo_documento], onDelete: NoAction)
+  tarea            Tarea?      @relation(fields: [id_tarea], references: [id_tarea], onDelete: NoAction, onUpdate: NoAction)
+  subtarea         Subtarea?   @relation(fields: [id_subtarea], references: [id_subtarea], onDelete: NoAction, onUpdate: NoAction)
+  tipo_documento_rel TipoDocumento @relation(fields: [tipo_documento], references: [id_tipo_documento], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model Cumplimiento {
@@ -197,9 +195,9 @@ model Cumplimiento {
   id_subtarea           String      @db.UniqueIdentifier
   id_cumplimiento_estado Int
   aplica                Boolean
-  subtarea              Subtarea    @relation("SubtareaCumplimientos", fields: [id_subtarea], references: [id_subtarea], onDelete: Cascade)
-  cumplimiento_estado   CumplimientoEstado @relation(fields: [id_cumplimiento_estado], references: [id_cumplimiento_estado], onDelete: NoAction)
-  registros             Registro[]  @relation("CumplimientoRegistros")
+  subtarea              Subtarea    @relation(fields: [id_subtarea], references: [id_subtarea], onDelete: Cascade)
+  cumplimiento_estado   CumplimientoEstado @relation(fields: [id_cumplimiento_estado], references: [id_cumplimiento_estado], onDelete: Cascade)
+  registros             Registro[]
 }
 
 model Registro {
@@ -211,17 +209,17 @@ model Registro {
   proveedor        String      @db.NVarChar(100)
   fecha_inicio     DateTime    @db.Date
   fecha_termino    DateTime    @db.Date
-  subtarea         Subtarea    @relation("SubtareaRegistros", fields: [id_subtarea], references: [id_subtarea], onDelete: Cascade)
-  cumplimiento     Cumplimiento @relation("CumplimientoRegistros", fields: [id_cumplimiento], references: [id_cumplimiento], onDelete: Cascade)
-  memos            Memo[]      @relation("RegistroMemos")
-  solpeds          Solped[]    @relation("RegistroSolpeds")
+  subtarea         Subtarea    @relation(fields: [id_subtarea], references: [id_subtarea], onDelete: NoAction, onUpdate: NoAction)
+  cumplimiento     Cumplimiento @relation(fields: [id_cumplimiento], references: [id_cumplimiento], onDelete: NoAction, onUpdate: NoAction)
+  memos            Memo[]
+  solpeds          Solped[]
 }
 
 model Memo {
   id_memo      String      @id @default(uuid()) @db.UniqueIdentifier
   id_registro  String      @db.UniqueIdentifier
   valor        Int
-  registro     Registro    @relation("RegistroMemos", fields: [id_registro], references: [id_registro], onDelete: Cascade)
+  registro     Registro    @relation(fields: [id_registro], references: [id_registro], onDelete: NoAction)
 }
 
 model Solped {
@@ -230,5 +228,5 @@ model Solped {
   ceco         Int
   cuenta       Int
   valor        Int
-  registro     Registro    @relation("RegistroSolpeds", fields: [id_registro], references: [id_registro], onDelete: Cascade)
+  registro     Registro    @relation(fields: [id_registro], references: [id_registro], onDelete: NoAction)
 } 

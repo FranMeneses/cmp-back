@@ -1,24 +1,32 @@
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
-import { DefaultAzureCredential } from '@azure/identity';
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
   constructor() {
     super({
-      datasources: {
-        db: {
-          url: process.env.DATABASE_URL,
-        },
-      },
+      log: ['query', 'info', 'warn', 'error'],
+      errorFormat: 'pretty',
     });
   }
 
   async onModuleInit() {
-    await this.$connect();
+    try {
+      await this.$connect();
+      console.log('Database connection established successfully');
+    } catch (error) {
+      console.error('Error connecting to the database:', error);
+      throw error;
+    }
   }
 
   async onModuleDestroy() {
-    await this.$disconnect();
+    try {
+      await this.$disconnect();
+      console.log('Database connection closed successfully');
+    } catch (error) {
+      console.error('Error disconnecting from the database:', error);
+      throw error;
+    }
   }
 } 
