@@ -393,4 +393,50 @@ export class TasksService {
       totalTasks: count
     };
   }
+
+  async getTaskInfo(id: string) {
+    const taskInfo = await this.prisma.info_tarea.findUnique({
+      where: { id_tarea: id },
+      include: {
+        origen: true,
+        inversion: true,
+        tipo: true,
+        alcance: true,
+        interaccion: true,
+        riesgo: true
+      }
+    });
+
+    if (!taskInfo) {
+      return null;
+    }
+
+    return {
+      taskId: id,
+      origin: taskInfo.origen ? {
+        id: taskInfo.origen.id_origen,
+        name: taskInfo.origen.origen_name
+      } : null,
+      investment: taskInfo.inversion ? {
+        id: taskInfo.inversion.id_inversion,
+        line: taskInfo.inversion.linea
+      } : null,
+      type: taskInfo.tipo ? {
+        id: taskInfo.tipo.id_tipo,
+        name: taskInfo.tipo.tipo_name
+      } : null,
+      scope: taskInfo.alcance ? {
+        id: taskInfo.alcance.id_alcance,
+        name: taskInfo.alcance.alcance_name
+      } : null,
+      interaction: taskInfo.interaccion ? {
+        id: taskInfo.interaccion.id_interaccion,
+        operation: taskInfo.interaccion.operacion
+      } : null,
+      risk: taskInfo.riesgo ? {
+        id: taskInfo.riesgo.id_riesgo,
+        type: taskInfo.riesgo.tipo_riesgo
+      } : null
+    };
+  }
 } 

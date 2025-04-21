@@ -72,4 +72,9 @@ export class TasksController {
       Number(investmentId)
     );
   }
+
+  @Get(':id/info')
+  getTaskInfo(@Param('id') id: string) {
+    return this.tasksService.getTaskInfo(id);
+  }
 } 
