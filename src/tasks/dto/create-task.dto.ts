@@ -1,23 +1,47 @@
-import { IsString, IsNotEmpty, IsUUID, IsInt } from 'class-validator';
+import { IsString, IsNotEmpty, IsNumber, IsOptional, IsDate } from 'class-validator';
 
 export class CreateTaskDto {
-  @IsInt()
-  @IsNotEmpty()
-  valleyId: number;
-
-  @IsInt()
-  @IsNotEmpty()
-  facilityId: number;
-
   @IsString()
   @IsNotEmpty()
   name: string;
 
   @IsString()
-  @IsNotEmpty()
-  description: string;
+  @IsOptional()
+  description?: string;
 
-  @IsInt()
+  @IsNumber()
+  @IsOptional()
+  budget?: number;
+
+  @IsNumber()
+  @IsOptional()
+  expense?: number;
+
+  @IsDate()
+  @IsOptional()
+  startDate?: Date;
+
+  @IsDate()
+  @IsOptional()
+  endDate?: Date;
+
+  @IsDate()
+  @IsOptional()
+  finalDate?: Date;
+
+  @IsNumber()
   @IsNotEmpty()
   status: number;
+
+  @IsNumber()
+  @IsOptional()
+  priority?: number;
+
+  @IsNumber()
+  @IsOptional()
+  valley?: number;
+
+  @IsNumber()
+  @IsOptional()
+  faena?: number;
 } 

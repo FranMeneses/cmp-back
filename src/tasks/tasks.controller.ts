@@ -41,4 +41,14 @@ export class TasksController {
   remove(@Param('id') id: string) {
     return this.tasksService.remove(id);
   }
+
+  @Get(':id/budget')
+  getTotalBudget(@Param('id') id: string) {
+    return this.tasksService.getTotalBudget(id);
+  }
+
+  @Get(':id/expense')
+  getTotalExpense(@Param('id') id: string) {
+    return this.tasksService.getTotalExpense(id);
+  }
 } 
