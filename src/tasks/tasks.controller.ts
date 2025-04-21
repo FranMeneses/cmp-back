@@ -22,6 +22,11 @@ export class TasksController {
     return this.tasksService.findOne(id);
   }
 
+  @Get(':id/progress')
+  getProgress(@Param('id') id: string) {
+    return this.tasksService.getTaskProgress(id);
+  }
+
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateTaskDto: UpdateTaskDto) {
     return this.tasksService.update(id, updateTaskDto);

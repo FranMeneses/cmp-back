@@ -34,6 +34,49 @@ export class TasksService {
     };
   }
 
+  async getTaskProgress(id: string) {
+    const task = await this.prisma.tarea.findUnique({
+      where: { id_tarea: id },
+      include: {
+        subtareas: {
+          include: {
+            subtarea_estado: true,
+          },
+        },
+      },
+    });
+
+    if (!task || !task.subtareas.length) {
+      return {
+        progress: 0,
+        totalSubtasks: 0,
+        completedSubtasks: 0,
+        subtasksProgress: [],
+      };
+    }
+
+    const totalSubtasks = task.subtareas.length;
+    const subtasksProgress = task.subtareas.map(subtask => ({
+      id: subtask.id_subtarea,
+      name: subtask.nombre,
+      status: subtask.subtarea_estado.estado,
+      percentage: subtask.subtarea_estado.porcentaje,
+    }));
+
+    const totalProgress = subtasksProgress.reduce(
+      (sum, subtask) => sum + subtask.percentage,
+      0
+    );
+    const averageProgress = totalProgress / totalSubtasks;
+
+    return {
+      progress: Math.round(averageProgress),
+      totalSubtasks,
+      completedSubtasks: subtasksProgress.filter(st => st.percentage === 100).length,
+      subtasksProgress,
+    };
+  }
+
   async create(createTaskDto: CreateTaskDto) {
     const task = await this.prisma.tarea.create({
       data: this.mapToDatabase(createTaskDto),
