@@ -25,9 +25,12 @@ export class TasksService {
       name: task.nombre,
       description: task.descripcion,
       status: task.estado,
+      statusInfo: task.tarea_estado ? {
+        id: task.tarea_estado.id_tarea_estado,
+        name: task.tarea_estado.estado
+      } : null,
       valley: task.valle,
       facility: task.faena,
-      statusInfo: task.tarea_estado,
       info: task.info_tarea,
       subtasks: task.subtareas,
       documents: task.documentos,
