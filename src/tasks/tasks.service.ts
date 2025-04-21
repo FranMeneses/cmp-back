@@ -344,4 +344,53 @@ export class TasksService {
       }))
     };
   }
+
+  async getValleyTasksCount(valleyId: number) {
+    const count = await this.prisma.tarea.count({
+      where: {
+        id_valle: valleyId
+      }
+    });
+
+    return {
+      valleyId,
+      totalTasks: count
+    };
+  }
+
+  async getInvestmentTasksCount(investmentId: number) {
+    const count = await this.prisma.tarea.count({
+      where: {
+        info_tarea: {
+          id_inversion: investmentId
+        }
+      }
+    });
+
+    return {
+      investmentId,
+      totalTasks: count
+    };
+  }
+
+  async getValleyInvestmentTasksCount(valleyId: number, investmentId: number) {
+    const count = await this.prisma.tarea.count({
+      where: {
+        AND: [
+          { id_valle: valleyId },
+          {
+            info_tarea: {
+              id_inversion: investmentId
+            }
+          }
+        ]
+      }
+    });
+
+    return {
+      valleyId,
+      investmentId,
+      totalTasks: count
+    };
+  }
 } 

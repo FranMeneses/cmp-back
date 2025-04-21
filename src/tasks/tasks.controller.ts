@@ -51,4 +51,25 @@ export class TasksController {
   getTotalExpense(@Param('id') id: string) {
     return this.tasksService.getTotalExpense(id);
   }
+
+  @Get('valley/:id/count')
+  getValleyTasksCount(@Param('id') id: string) {
+    return this.tasksService.getValleyTasksCount(Number(id));
+  }
+
+  @Get('investment/:id/count')
+  getInvestmentTasksCount(@Param('id') id: string) {
+    return this.tasksService.getInvestmentTasksCount(Number(id));
+  }
+
+  @Get('valley/:valleyId/investment/:investmentId/count')
+  getValleyInvestmentTasksCount(
+    @Param('valleyId') valleyId: string,
+    @Param('investmentId') investmentId: string
+  ) {
+    return this.tasksService.getValleyInvestmentTasksCount(
+      Number(valleyId),
+      Number(investmentId)
+    );
+  }
 } 
