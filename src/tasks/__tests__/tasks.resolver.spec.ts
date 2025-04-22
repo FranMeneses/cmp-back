@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { TasksResolver } from './tasks.resolver';
-import { TasksService } from './tasks.service';
-import { Task } from '../graphql/graphql.types';
+import { TasksResolver } from '../tasks.resolver';
+import { TasksService } from '../tasks.service';
+import { Task, CreateTaskInput, UpdateTaskInput } from '../../graphql/graphql.types';
 
 describe('TasksResolver', () => {
   let resolver: TasksResolver;
@@ -34,10 +34,36 @@ describe('TasksResolver', () => {
             create: jest.fn().mockResolvedValue(mockTask),
             update: jest.fn().mockResolvedValue(mockTask),
             remove: jest.fn().mockResolvedValue(mockTask),
-            getTaskProgress: jest.fn().mockResolvedValue(50),
+            getTaskProgress: jest.fn().mockResolvedValue({
+              progress: 50,
+              totalSubtasks: 2,
+              completedSubtasks: 1,
+              subtasksProgress: [
+                { id: '1', name: 'Subtask 1', status: 'In Progress', percentage: 50 },
+                { id: '2', name: 'Subtask 2', status: 'Completed', percentage: 100 }
+              ]
+            }),
             getTaskSubtasks: jest.fn().mockResolvedValue([]),
-            getTotalBudget: jest.fn().mockResolvedValue(1000),
-            getTotalExpense: jest.fn().mockResolvedValue(500),
+            getTotalBudget: jest.fn().mockResolvedValue({
+              taskId: '1',
+              taskName: 'Test Task',
+              totalBudget: 1000,
+              subtasksCount: 2,
+              subtasks: [
+                { id: '1', name: 'Subtask 1', budget: 500 },
+                { id: '2', name: 'Subtask 2', budget: 500 }
+              ]
+            }),
+            getTotalExpense: jest.fn().mockResolvedValue({
+              taskId: '1',
+              taskName: 'Test Task',
+              totalExpense: 500,
+              subtasksCount: 2,
+              subtasks: [
+                { id: '1', name: 'Subtask 1', expense: 250 },
+                { id: '2', name: 'Subtask 2', expense: 250 }
+              ]
+            }),
           },
         },
       ],
@@ -47,12 +73,12 @@ describe('TasksResolver', () => {
     service = module.get<TasksService>(TasksService);
   });
 
-  it('should be defined', () => {
+  it('debería estar definido', () => {
     expect(resolver).toBeDefined();
   });
 
   describe('tasks', () => {
-    it('should return an array of tasks', async () => {
+    it('debería retornar un array de tareas', async () => {
       const result = await resolver.tasks();
       expect(result).toEqual([mockTask]);
       expect(service.findAll).toHaveBeenCalled();
@@ -60,7 +86,7 @@ describe('TasksResolver', () => {
   });
 
   describe('task', () => {
-    it('should return a single task', async () => {
+    it('debería retornar una única tarea', async () => {
       const result = await resolver.task('1');
       expect(result).toEqual(mockTask);
       expect(service.findOne).toHaveBeenCalledWith('1');
@@ -68,8 +94,8 @@ describe('TasksResolver', () => {
   });
 
   describe('createTask', () => {
-    it('should create a new task', async () => {
-      const createInput = {
+    it('debería crear una nueva tarea', async () => {
+      const createInput: CreateTaskInput = {
         name: 'Test Task',
         description: 'Test Description',
         budget: 1000,
@@ -89,8 +115,8 @@ describe('TasksResolver', () => {
   });
 
   describe('updateTask', () => {
-    it('should update a task', async () => {
-      const updateInput = {
+    it('debería actualizar una tarea', async () => {
+      const updateInput: UpdateTaskInput = {
         name: 'Updated Task',
       };
       const result = await resolver.updateTask('1', updateInput);
@@ -100,7 +126,7 @@ describe('TasksResolver', () => {
   });
 
   describe('deleteTask', () => {
-    it('should delete a task', async () => {
+    it('debería eliminar una tarea', async () => {
       const result = await resolver.deleteTask('1');
       expect(result).toEqual(mockTask);
       expect(service.remove).toHaveBeenCalledWith('1');
@@ -108,15 +134,23 @@ describe('TasksResolver', () => {
   });
 
   describe('taskProgress', () => {
-    it('should return task progress', async () => {
+    it('debería retornar el progreso de la tarea', async () => {
       const result = await resolver.taskProgress('1');
-      expect(result).toEqual(50);
+      expect(result).toEqual({
+        progress: 50,
+        totalSubtasks: 2,
+        completedSubtasks: 1,
+        subtasksProgress: [
+          { id: '1', name: 'Subtask 1', status: 'In Progress', percentage: 50 },
+          { id: '2', name: 'Subtask 2', status: 'Completed', percentage: 100 }
+        ]
+      });
       expect(service.getTaskProgress).toHaveBeenCalledWith('1');
     });
   });
 
   describe('taskSubtasks', () => {
-    it('should return task subtasks', async () => {
+    it('debería retornar las subtareas de la tarea', async () => {
       const result = await resolver.taskSubtasks('1');
       expect(result).toEqual([]);
       expect(service.getTaskSubtasks).toHaveBeenCalledWith('1');
@@ -124,17 +158,35 @@ describe('TasksResolver', () => {
   });
 
   describe('taskTotalBudget', () => {
-    it('should return total budget', async () => {
+    it('debería retornar el presupuesto total de la tarea', async () => {
       const result = await resolver.taskTotalBudget('1');
-      expect(result).toEqual(1000);
+      expect(result).toEqual({
+        taskId: '1',
+        taskName: 'Test Task',
+        totalBudget: 1000,
+        subtasksCount: 2,
+        subtasks: [
+          { id: '1', name: 'Subtask 1', budget: 500 },
+          { id: '2', name: 'Subtask 2', budget: 500 }
+        ]
+      });
       expect(service.getTotalBudget).toHaveBeenCalledWith('1');
     });
   });
 
   describe('taskTotalExpense', () => {
-    it('should return total expense', async () => {
+    it('debería retornar el gasto total de la tarea', async () => {
       const result = await resolver.taskTotalExpense('1');
-      expect(result).toEqual(500);
+      expect(result).toEqual({
+        taskId: '1',
+        taskName: 'Test Task',
+        totalExpense: 500,
+        subtasksCount: 2,
+        subtasks: [
+          { id: '1', name: 'Subtask 1', expense: 250 },
+          { id: '2', name: 'Subtask 2', expense: 250 }
+        ]
+      });
       expect(service.getTotalExpense).toHaveBeenCalledWith('1');
     });
   });
