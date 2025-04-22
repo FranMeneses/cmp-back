@@ -226,7 +226,22 @@ export class TasksService {
     return this.mapFromDatabase(task);
   }
 
-  async findAll(query: any) {
+  async findAll() {
+    const tasks = await this.prisma.tarea.findMany({
+      select: {
+        id_tarea: true,
+        nombre: true,
+        descripcion: true
+      }
+    });
+    return tasks.map(task => ({
+      id: task.id_tarea,
+      name: task.nombre,
+      description: task.descripcion
+    }));
+  }
+
+  async findAllDetailed(query: any) {
     const tasks = await this.prisma.tarea.findMany({
       where: query,
       include: {

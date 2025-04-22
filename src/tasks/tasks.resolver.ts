@@ -7,8 +7,8 @@ export class TasksResolver {
   constructor(private readonly tasksService: TasksService) {}
 
   @Query(() => [Task])
-  async tasks(@Args('query', { type: () => String, nullable: true }) query?: string) {
-    return this.tasksService.findAll(query ? JSON.parse(query) : {});
+  async tasks() {
+    return this.tasksService.findAll();
   }
 
   @Query(() => Task)

@@ -95,7 +95,7 @@ type Query {
   taskSubtasks(id: ID!): [Task!]!
   taskTotalBudget(id: ID!): Float!
   taskTotalExpense(id: ID!): Float!
-  tasks(query: String): [Task!]!
+  tasks: [Task!]!
 }
 
 type Subtask {
