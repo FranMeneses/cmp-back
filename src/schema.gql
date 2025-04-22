@@ -1,0 +1,174 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Beneficiary {
+  address: String!
+  entityType: String!
+  hasLegalPersonality: Boolean!
+  id: ID!
+  legalName: String!
+  representative: String!
+  rut: String!
+}
+
+type Compliance {
+  applies: Boolean!
+  id: ID!
+  statusId: Int!
+  subtaskId: ID!
+}
+
+input CreateBeneficiaryInput {
+  address: String!
+  entityType: String!
+  hasLegalPersonality: Boolean!
+  legalName: String!
+  representative: String!
+  rut: String!
+}
+
+input CreateComplianceInput {
+  applies: Boolean!
+  statusId: Int!
+  subtaskId: ID!
+}
+
+input CreateSubtaskInput {
+  beneficiaryId: ID!
+  budget: Float!
+  description: String!
+  endDate: DateTime!
+  expense: Float!
+  finalDate: DateTime!
+  name: String!
+  number: Int!
+  priorityId: Int!
+  startDate: DateTime!
+  statusId: Int!
+  taskId: ID!
+}
+
+input CreateTaskInput {
+  budget: Float
+  description: String
+  endDate: DateTime
+  expense: Float
+  faena: Int
+  finalDate: DateTime
+  name: String!
+  priority: Int
+  startDate: DateTime
+  status: Int!
+  valley: Int
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Mutation {
+  createBeneficiary(input: CreateBeneficiaryInput!): Beneficiary!
+  createCompliance(input: CreateComplianceInput!): Compliance!
+  createSubtask(input: CreateSubtaskInput!): Subtask!
+  createTask(input: CreateTaskInput!): Task!
+  deleteBeneficiary(id: ID!): Beneficiary!
+  deleteCompliance(id: ID!): Compliance!
+  deleteSubtask(id: ID!): Subtask!
+  deleteTask(id: ID!): Task!
+  updateBeneficiary(id: ID!, input: UpdateBeneficiaryInput!): Beneficiary!
+  updateCompliance(id: ID!, input: UpdateComplianceInput!): Compliance!
+  updateSubtask(id: ID!, input: UpdateSubtaskInput!): Subtask!
+  updateTask(id: ID!, input: UpdateTaskInput!): Task!
+}
+
+type Query {
+  beneficiaries(query: String): [Beneficiary!]!
+  beneficiary(id: ID!): Beneficiary!
+  compliance(id: ID!): Compliance!
+  compliances(query: String): [Compliance!]!
+  subtask(id: ID!): Subtask!
+  subtasks(query: String): [Subtask!]!
+  task(id: ID!): Task!
+  taskProgress(id: ID!): Float!
+  taskSubtasks(id: ID!): [Task!]!
+  taskTotalBudget(id: ID!): Float!
+  taskTotalExpense(id: ID!): Float!
+  tasks(query: String): [Task!]!
+}
+
+type Subtask {
+  beneficiaryId: ID!
+  budget: Float!
+  description: String!
+  endDate: DateTime!
+  expense: Float!
+  finalDate: DateTime!
+  id: ID!
+  name: String!
+  number: Int!
+  priorityId: Int!
+  startDate: DateTime!
+  statusId: Int!
+  taskId: ID!
+}
+
+type Task {
+  budget: Float
+  description: String
+  endDate: DateTime
+  expense: Float
+  faena: Int
+  finalDate: DateTime
+  id: ID!
+  name: String!
+  priority: Int
+  startDate: DateTime
+  status: Int!
+  valley: Int
+}
+
+input UpdateBeneficiaryInput {
+  address: String
+  entityType: String
+  hasLegalPersonality: Boolean
+  legalName: String
+  representative: String
+  rut: String
+}
+
+input UpdateComplianceInput {
+  applies: Boolean
+  statusId: Int
+  subtaskId: ID
+}
+
+input UpdateSubtaskInput {
+  beneficiaryId: ID
+  budget: Float
+  description: String
+  endDate: DateTime
+  expense: Float
+  finalDate: DateTime
+  name: String
+  number: Int
+  priorityId: Int
+  startDate: DateTime
+  statusId: Int
+  taskId: ID
+}
+
+input UpdateTaskInput {
+  budget: Float
+  description: String
+  endDate: DateTime
+  expense: Float
+  faena: Int
+  finalDate: DateTime
+  name: String
+  priority: Int
+  startDate: DateTime
+  status: Int
+  valley: Int
+}
