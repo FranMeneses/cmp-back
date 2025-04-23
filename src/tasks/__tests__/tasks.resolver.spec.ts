@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { TasksResolver } from '../tasks.resolver';
 import { TasksService } from '../tasks.service';
 import { Task, CreateTaskInput, UpdateTaskInput } from '../../graphql/graphql.types';
-import { NotFoundException } from '@nestjs/common';
+import { NotFoundException, BadRequestException } from '@nestjs/common';
 
 describe('TasksResolver', () => {
   let resolver: TasksResolver;
@@ -45,11 +45,22 @@ describe('TasksResolver', () => {
         {
           provide: TasksService,
           useValue: {
-            findAll: jest.fn().mockResolvedValue([mockTask, mockTask2]),
+            findAll: jest.fn().mockImplementation((query) => {
+              if (!query || Object.keys(query).length === 0) {
+                return [mockTask, mockTask2];
+              }
+              if (query.status === 1) {
+                return [mockTask];
+              }
+              if (query.status === 2) {
+                return [mockTask2];
+              }
+              return [];
+            }),
             findOne: jest.fn().mockImplementation((id) => {
               if (id === '1') return mockTask;
               if (id === '2') return mockTask2;
-              return null;
+              throw new NotFoundException(`Tarea con ID ${id} no encontrada`);
             }),
             create: jest.fn().mockResolvedValue(mockTask),
             update: jest.fn().mockResolvedValue(mockTask),
@@ -93,6 +104,10 @@ describe('TasksResolver', () => {
     service = module.get<TasksService>(TasksService);
   });
 
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('debería estar definido', () => {
     expect(resolver).toBeDefined();
   });
@@ -101,19 +116,20 @@ describe('TasksResolver', () => {
     it('debería retornar un array de tareas', async () => {
       const result = await resolver.tasks();
       expect(result).toEqual([mockTask, mockTask2]);
-      expect(service.findAll).toHaveBeenCalled();
+      expect(service.findAll).toHaveBeenCalledWith({});
     });
 
-    it('debería retornar tareas filtradas por query', async () => {
+    it('debería retornar tareas filtradas por status', async () => {
       const query = JSON.stringify({ status: 1 });
       const result = await resolver.tasks(query);
-      expect(result).toEqual([mockTask, mockTask2]);
+      expect(result).toEqual([mockTask]);
       expect(service.findAll).toHaveBeenCalledWith({ status: 1 });
     });
 
     it('debería manejar query inválida', async () => {
       const query = 'invalid-json';
-      await expect(resolver.tasks(query)).rejects.toThrow();
+      await expect(resolver.tasks(query))
+        .rejects.toThrow('Unexpected token \'i\', "invalid-json" is not valid JSON');
     });
   });
 
@@ -124,9 +140,8 @@ describe('TasksResolver', () => {
       expect(service.findOne).toHaveBeenCalledWith('1');
     });
 
-    it('debería retornar null cuando la tarea no existe', async () => {
-      const result = await resolver.task('999');
-      expect(result).toBeNull();
+    it('debería lanzar NotFoundException cuando la tarea no existe', async () => {
+      await expect(resolver.task('999')).rejects.toThrow(NotFoundException);
       expect(service.findOne).toHaveBeenCalledWith('999');
     });
   });
@@ -166,10 +181,35 @@ describe('TasksResolver', () => {
         faena: 1,
       };
       
-      // Mock del servicio para rechazar cuando faltan campos requeridos
-      jest.spyOn(service, 'create').mockRejectedValueOnce(new Error('Campos requeridos faltantes'));
+      jest.spyOn(service, 'create').mockRejectedValueOnce(
+        new BadRequestException('Campos requeridos faltantes')
+      );
       
-      await expect(resolver.createTask(createInput as any)).rejects.toThrow('Campos requeridos faltantes');
+      await expect(resolver.createTask(createInput as any))
+        .rejects.toThrow(BadRequestException);
+    });
+
+    it('debería validar tipos de datos', async () => {
+      const createInput = {
+        name: 'Test Task',
+        description: 'Test Description',
+        budget: '1000', // Debería ser número
+        expense: '500', // Debería ser número
+        startDate: new Date(),
+        endDate: new Date(),
+        finalDate: new Date(),
+        status: '1', // Debería ser número
+        priority: '1', // Debería ser número
+        valley: '1', // Debería ser número
+        faena: '1', // Debería ser número
+      };
+      
+      jest.spyOn(service, 'create').mockRejectedValueOnce(
+        new BadRequestException('Tipos de datos inválidos')
+      );
+      
+      await expect(resolver.createTask(createInput as any))
+        .rejects.toThrow(BadRequestException);
     });
   });
 
@@ -188,7 +228,27 @@ describe('TasksResolver', () => {
         name: 'Updated Task',
       };
       jest.spyOn(service, 'update').mockRejectedValueOnce(new NotFoundException());
-      await expect(resolver.updateTask('999', updateInput)).rejects.toThrow(NotFoundException);
+      await expect(resolver.updateTask('999', updateInput))
+        .rejects.toThrow(NotFoundException);
+    });
+
+    it('debería validar tipos de datos en la actualización', async () => {
+      const updateInput = {
+        name: 'Updated Task',
+        budget: '1000', // Debería ser número
+        expense: '500', // Debería ser número
+        status: '1', // Debería ser número
+        priority: '1', // Debería ser número
+        valley: '1', // Debería ser número
+        faena: '1', // Debería ser número
+      };
+      
+      jest.spyOn(service, 'update').mockRejectedValueOnce(
+        new BadRequestException('Tipos de datos inválidos')
+      );
+      
+      await expect(resolver.updateTask('1', updateInput as any))
+        .rejects.toThrow(BadRequestException);
     });
   });
 
@@ -201,7 +261,8 @@ describe('TasksResolver', () => {
 
     it('debería manejar eliminación de tarea inexistente', async () => {
       jest.spyOn(service, 'remove').mockRejectedValueOnce(new NotFoundException());
-      await expect(resolver.deleteTask('999')).rejects.toThrow(NotFoundException);
+      await expect(resolver.deleteTask('999'))
+        .rejects.toThrow(NotFoundException);
     });
   });
 
@@ -241,9 +302,9 @@ describe('TasksResolver', () => {
     });
 
     it('debería manejar tarea sin subtareas', async () => {
-      jest.spyOn(service, 'getTaskSubtasks').mockResolvedValueOnce(null);
-      const result = await resolver.taskSubtasks('1');
-      expect(result).toBeNull();
+      jest.spyOn(service, 'getTaskSubtasks').mockRejectedValueOnce(new NotFoundException());
+      await expect(resolver.taskSubtasks('1'))
+        .rejects.toThrow(NotFoundException);
     });
   });
 
@@ -264,9 +325,9 @@ describe('TasksResolver', () => {
     });
 
     it('debería manejar tarea sin presupuesto', async () => {
-      jest.spyOn(service, 'getTotalBudget').mockResolvedValueOnce(null);
-      const result = await resolver.taskTotalBudget('1');
-      expect(result).toBeNull();
+      jest.spyOn(service, 'getTotalBudget').mockRejectedValueOnce(new NotFoundException());
+      await expect(resolver.taskTotalBudget('1'))
+        .rejects.toThrow(NotFoundException);
     });
   });
 
@@ -287,9 +348,9 @@ describe('TasksResolver', () => {
     });
 
     it('debería manejar tarea sin gastos', async () => {
-      jest.spyOn(service, 'getTotalExpense').mockResolvedValueOnce(null);
-      const result = await resolver.taskTotalExpense('1');
-      expect(result).toBeNull();
+      jest.spyOn(service, 'getTotalExpense').mockRejectedValueOnce(new NotFoundException());
+      await expect(resolver.taskTotalExpense('1'))
+        .rejects.toThrow(NotFoundException);
     });
   });
 }); 
