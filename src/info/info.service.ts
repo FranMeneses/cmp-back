@@ -54,25 +54,10 @@ export class InfoService {
   }
 
   async updateOrigin(id: number, updateOriginDto: UpdateOriginDto) {
-    const origin = await this.prisma.origen.update({
+    return this.prisma.origen.update({
       where: { id_origen: id },
-      data: { origen_name: updateOriginDto.name },
-      include: {
-        info_tareas: {
-          include: {
-            tarea: true
-          }
-        }
-      }
+      data: { origen_name: updateOriginDto.origen_name }
     });
-    return {
-      id: origin.id_origen,
-      name: origin.origen_name,
-      tasks: origin.info_tareas.map(info => ({
-        id: info.tarea.id_tarea,
-        name: info.tarea.nombre
-      }))
-    };
   }
 
   // Inversión
@@ -118,25 +103,10 @@ export class InfoService {
   }
 
   async updateInvestment(id: number, updateInvestmentDto: UpdateInvestmentDto) {
-    const investment = await this.prisma.inversion.update({
+    return this.prisma.inversion.update({
       where: { id_inversion: id },
-      data: { linea: updateInvestmentDto.line },
-      include: {
-        info_tareas: {
-          include: {
-            tarea: true
-          }
-        }
-      }
+      data: { linea: updateInvestmentDto.linea }
     });
-    return {
-      id: investment.id_inversion,
-      line: investment.linea,
-      tasks: investment.info_tareas.map(info => ({
-        id: info.tarea.id_tarea,
-        name: info.tarea.nombre
-      }))
-    };
   }
 
   // Tipo
@@ -182,25 +152,10 @@ export class InfoService {
   }
 
   async updateType(id: number, updateTypeDto: UpdateTypeDto) {
-    const type = await this.prisma.tipo.update({
+    return this.prisma.tipo.update({
       where: { id_tipo: id },
-      data: { tipo_name: updateTypeDto.name },
-      include: {
-        info_tareas: {
-          include: {
-            tarea: true
-          }
-        }
-      }
+      data: { tipo_name: updateTypeDto.tipo_name }
     });
-    return {
-      id: type.id_tipo,
-      name: type.tipo_name,
-      tasks: type.info_tareas.map(info => ({
-        id: info.tarea.id_tarea,
-        name: info.tarea.nombre
-      }))
-    };
   }
 
   // Alcance
@@ -246,25 +201,10 @@ export class InfoService {
   }
 
   async updateScope(id: number, updateScopeDto: UpdateScopeDto) {
-    const scope = await this.prisma.alcance.update({
+    return this.prisma.alcance.update({
       where: { id_alcance: id },
-      data: { alcance_name: updateScopeDto.name },
-      include: {
-        info_tareas: {
-          include: {
-            tarea: true
-          }
-        }
-      }
+      data: { alcance_name: updateScopeDto.alcance_name }
     });
-    return {
-      id: scope.id_alcance,
-      name: scope.alcance_name,
-      tasks: scope.info_tareas.map(info => ({
-        id: info.tarea.id_tarea,
-        name: info.tarea.nombre
-      }))
-    };
   }
 
   // Interacción
@@ -310,25 +250,10 @@ export class InfoService {
   }
 
   async updateInteraction(id: number, updateInteractionDto: UpdateInteractionDto) {
-    const interaction = await this.prisma.interaccion.update({
+    return this.prisma.interaccion.update({
       where: { id_interaccion: id },
-      data: { operacion: updateInteractionDto.operation },
-      include: {
-        info_tareas: {
-          include: {
-            tarea: true
-          }
-        }
-      }
+      data: { operacion: updateInteractionDto.operacion }
     });
-    return {
-      id: interaction.id_interaccion,
-      operation: interaction.operacion,
-      tasks: interaction.info_tareas.map(info => ({
-        id: info.tarea.id_tarea,
-        name: info.tarea.nombre
-      }))
-    };
   }
 
   // Riesgo
@@ -374,24 +299,9 @@ export class InfoService {
   }
 
   async updateRisk(id: number, updateRiskDto: UpdateRiskDto) {
-    const risk = await this.prisma.riesgo.update({
+    return this.prisma.riesgo.update({
       where: { id_riesgo: id },
-      data: { tipo_riesgo: updateRiskDto.type },
-      include: {
-        info_tareas: {
-          include: {
-            tarea: true
-          }
-        }
-      }
+      data: { tipo_riesgo: updateRiskDto.tipo_riesgo }
     });
-    return {
-      id: risk.id_riesgo,
-      type: risk.tipo_riesgo,
-      tasks: risk.info_tareas.map(info => ({
-        id: info.tarea.id_tarea,
-        name: info.tarea.nombre
-      }))
-    };
   }
 } 

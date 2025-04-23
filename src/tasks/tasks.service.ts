@@ -9,28 +9,21 @@ export class TasksService {
 
   private mapToDatabase(taskDto: CreateTaskDto | UpdateTaskDto) {
     return {
-      nombre: taskDto.name,
-      descripcion: taskDto.description,
-      presupuesto: taskDto.budget,
-      gasto: taskDto.expense,
-      fecha_inicio: taskDto.startDate,
-      fecha_termino: taskDto.endDate,
-      fecha_final: taskDto.finalDate,
-      id_estado: taskDto.status,
-      id_prioridad: taskDto.priority,
-      valle: taskDto.valley ? {
+      nombre: taskDto.nombre,
+      descripcion: taskDto.descripcion,
+      valle: taskDto.id_valle ? {
         connect: {
-          id_valle: taskDto.valley
+          id_valle: taskDto.id_valle
         }
       } : undefined,
-      faena: taskDto.faena ? {
+      faena: taskDto.id_faena ? {
         connect: {
-          id_faena: taskDto.faena
+          id_faena: taskDto.id_faena
         }
       } : undefined,
-      tarea_estado: taskDto.status ? {
+      tarea_estado: taskDto.id_estado ? {
         connect: {
-          id_tarea_estado: taskDto.status
+          id_tarea_estado: taskDto.id_estado
         }
       } : undefined
     };
@@ -39,32 +32,31 @@ export class TasksService {
   private mapFromDatabase(task: any) {
     return {
       id: task.id_tarea,
-      name: task.nombre,
-      description: task.descripcion,
-      budget: task.presupuesto,
-      expense: task.gasto,
-      startDate: task.fecha_inicio,
-      endDate: task.fecha_termino,
-      finalDate: task.fecha_final,
-      status: task.id_estado,
-      priority: task.id_prioridad,
-      valley: task.valle?.id_valle,
-      faena: task.faena?.id_faena,
-      statusDetails: task.tarea_estado ? {
-        id: task.tarea_estado.id_tarea_estado,
-        name: task.tarea_estado.estado,
-        percentage: task.tarea_estado.porcentaje
+      nombre: task.nombre,
+      descripcion: task.descripcion,
+      id_valle: task.id_valle,
+      id_faena: task.id_faena,
+      id_estado: task.id_estado,
+      valle: task.valle ? {
+        id: task.valle.id_valle,
+        nombre: task.valle.valle_name
       } : null,
-      subtasks: task.subtareas?.map(subtask => ({
+      faena: task.faena ? {
+        id: task.faena.id_faena,
+        nombre: task.faena.faena_name
+      } : null,
+      estado: task.tarea_estado ? {
+        id: task.tarea_estado.id_tarea_estado,
+        nombre: task.tarea_estado.estado
+      } : null,
+      subtareas: task.subtareas?.map(subtask => ({
         id: subtask.id_subtarea,
-        name: subtask.nombre,
-        description: subtask.descripcion,
-        budget: subtask.presupuesto,
-        expense: subtask.gasto,
-        status: subtask.subtarea_estado ? {
+        nombre: subtask.nombre,
+        descripcion: subtask.descripcion,
+        estado: subtask.subtarea_estado ? {
           id: subtask.subtarea_estado.id_subtarea_estado,
-          name: subtask.subtarea_estado.estado,
-          percentage: subtask.subtarea_estado.porcentaje
+          nombre: subtask.subtarea_estado.estado,
+          porcentaje: subtask.subtarea_estado.porcentaje
         } : null
       })) || []
     };

@@ -9,38 +9,63 @@ export class ComplianceService {
 
   private mapToDatabase(complianceDto: CreateComplianceDto | UpdateComplianceDto) {
     return {
-      id_subtarea: complianceDto.subtaskId,
-      id_cumplimiento_estado: complianceDto.statusId,
-      aplica: complianceDto.applies,
+      subtarea: complianceDto.id_subtarea ? {
+        connect: {
+          id_subtarea: String(complianceDto.id_subtarea)
+        }
+      } : undefined,
+      cumplimiento_estado: complianceDto.id_cumplimiento_estado ? {
+        connect: {
+          id_cumplimiento_estado: complianceDto.id_cumplimiento_estado
+        }
+      } : undefined,
+      aplica: Boolean(complianceDto.aplica)
     };
   }
 
   private mapFromDatabase(compliance: any) {
     return {
       id: compliance.id_cumplimiento,
-      subtaskId: compliance.id_subtarea,
-      statusId: compliance.id_cumplimiento_estado,
-      applies: compliance.aplica,
-      subtask: compliance.subtarea,
-      status: compliance.cumplimiento_estado,
-      records: compliance.registros?.map(record => ({
+      id_subtarea: compliance.id_subtarea,
+      id_cumplimiento_estado: compliance.id_cumplimiento_estado,
+      aplica: compliance.aplica ? 1 : 0,
+      estado: compliance.cumplimiento_estado ? {
+        id: compliance.cumplimiento_estado.id_cumplimiento_estado,
+        nombre: compliance.cumplimiento_estado.estado
+      } : null,
+      registros: compliance.registros?.map(record => ({
         id: record.id_registro,
-        subtaskId: record.id_subtarea,
-        complianceId: record.id_cumplimiento,
         hes: record.hes,
         hem: record.hem,
-        provider: record.proveedor,
-        startDate: record.fecha_inicio,
-        endDate: record.fecha_termino,
-        memos: record.memos,
-        solpeds: record.solpeds,
-      })),
+        proveedor: record.proveedor,
+        fecha_inicio: record.fecha_inicio,
+        fecha_termino: record.fecha_termino,
+        memos: record.memos?.map(memo => ({
+          id: memo.id_memo,
+          valor: memo.valor
+        })) || [],
+        solpeds: record.solpeds?.map(solped => ({
+          id: solped.id_solped,
+          ceco: solped.ceco,
+          cuenta: solped.cuenta,
+          valor: solped.valor
+        })) || []
+      })) || []
     };
   }
 
   async create(createComplianceDto: CreateComplianceDto) {
     const compliance = await this.prisma.cumplimiento.create({
       data: this.mapToDatabase(createComplianceDto),
+      include: {
+        cumplimiento_estado: true,
+        registros: {
+          include: {
+            memos: true,
+            solpeds: true
+          }
+        }
+      }
     });
     return this.mapFromDatabase(compliance);
   }
@@ -49,15 +74,14 @@ export class ComplianceService {
     const compliances = await this.prisma.cumplimiento.findMany({
       where: query,
       include: {
-        subtarea: true,
         cumplimiento_estado: true,
         registros: {
           include: {
             memos: true,
-            solpeds: true,
-          },
-        },
-      },
+            solpeds: true
+          }
+        }
+      }
     });
     return compliances.map(compliance => this.mapFromDatabase(compliance));
   }
@@ -66,15 +90,14 @@ export class ComplianceService {
     const compliance = await this.prisma.cumplimiento.findUnique({
       where: { id_cumplimiento: id },
       include: {
-        subtarea: true,
         cumplimiento_estado: true,
         registros: {
           include: {
             memos: true,
-            solpeds: true,
-          },
-        },
-      },
+            solpeds: true
+          }
+        }
+      }
     });
     return compliance ? this.mapFromDatabase(compliance) : null;
   }
@@ -83,6 +106,15 @@ export class ComplianceService {
     const compliance = await this.prisma.cumplimiento.update({
       where: { id_cumplimiento: id },
       data: this.mapToDatabase(updateComplianceDto),
+      include: {
+        cumplimiento_estado: true,
+        registros: {
+          include: {
+            memos: true,
+            solpeds: true
+          }
+        }
+      }
     });
     return this.mapFromDatabase(compliance);
   }
@@ -90,6 +122,15 @@ export class ComplianceService {
   async remove(id: string) {
     const compliance = await this.prisma.cumplimiento.delete({
       where: { id_cumplimiento: id },
+      include: {
+        cumplimiento_estado: true,
+        registros: {
+          include: {
+            memos: true,
+            solpeds: true
+          }
+        }
+      }
     });
     return this.mapFromDatabase(compliance);
   }

@@ -1,4 +1,20 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateComplianceDto } from './create-compliance.dto';
+import { IsString, IsNotEmpty, IsNumber, IsOptional, IsUUID } from 'class-validator';
+import { InputType, Field, Int } from '@nestjs/graphql';
 
-export class UpdateComplianceDto extends PartialType(CreateComplianceDto) {} 
+@InputType()
+export class UpdateComplianceDto {
+  @Field(() => Int, { nullable: true })
+  @IsNumber()
+  @IsOptional()
+  id_subtarea?: number;
+
+  @Field(() => Int, { nullable: true })
+  @IsNumber()
+  @IsOptional()
+  id_cumplimiento_estado?: number;
+
+  @Field(() => Int, { nullable: true })
+  @IsNumber()
+  @IsOptional()
+  aplica?: number;
+} 

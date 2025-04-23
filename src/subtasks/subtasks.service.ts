@@ -9,87 +9,69 @@ export class SubtasksService {
 
   private mapToDatabase(subtaskDto: CreateSubtaskDto | UpdateSubtaskDto) {
     return {
-      id_tarea: subtaskDto.taskId,
-      numero: subtaskDto.number,
-      nombre: subtaskDto.name,
-      descripcion: subtaskDto.description,
-      presupuesto: subtaskDto.budget,
-      gasto: subtaskDto.expense,
-      fecha_inicio: subtaskDto.startDate,
-      fecha_termino: subtaskDto.endDate,
-      fecha_final: subtaskDto.finalDate,
-      id_beneficiario: subtaskDto.beneficiaryId,
-      id_estado: subtaskDto.statusId,
-      id_prioridad: subtaskDto.priorityId,
+      nombre: subtaskDto.nombre,
+      descripcion: subtaskDto.descripcion,
+      numero: 0, // Valor por defecto para el campo requerido
+      tarea: subtaskDto.id_tarea ? {
+        connect: {
+          id_tarea: String(subtaskDto.id_tarea)
+        }
+      } : undefined,
+      subtarea_estado: subtaskDto.id_estado ? {
+        connect: {
+          id_subtarea_estado: subtaskDto.id_estado
+        }
+      } : undefined,
+      prioridad: subtaskDto.id_prioridad ? {
+        connect: {
+          id_prioridad: subtaskDto.id_prioridad
+        }
+      } : undefined,
+      beneficiario: subtaskDto.id_beneficiario ? {
+        connect: {
+          id_beneficiario: String(subtaskDto.id_beneficiario)
+        }
+      } : undefined,
+      presupuesto: subtaskDto.presupuesto,
+      gasto: subtaskDto.gasto,
+      fecha_inicio: subtaskDto.fecha_inicio,
+      fecha_termino: subtaskDto.fecha_termino,
+      fecha_final: subtaskDto.fecha_final
     };
   }
 
   private mapFromDatabase(subtask: any) {
     return {
       id: subtask.id_subtarea,
-      taskId: subtask.id_tarea,
-      number: subtask.numero,
-      name: subtask.nombre,
-      description: subtask.descripcion,
-      budget: subtask.presupuesto,
-      expense: subtask.gasto,
-      startDate: subtask.fecha_inicio,
-      endDate: subtask.fecha_termino,
-      finalDate: subtask.fecha_final,
-      beneficiaryId: subtask.id_beneficiario,
-      statusId: subtask.id_estado,
-      priorityId: subtask.id_prioridad,
-      status: subtask.subtarea_estado ? {
+      nombre: subtask.nombre,
+      descripcion: subtask.descripcion,
+      id_tarea: subtask.id_tarea,
+      id_estado: subtask.id_estado,
+      id_prioridad: subtask.id_prioridad,
+      id_beneficiario: subtask.id_beneficiario,
+      presupuesto: subtask.presupuesto,
+      gasto: subtask.gasto,
+      fecha_inicio: subtask.fecha_inicio,
+      fecha_termino: subtask.fecha_termino,
+      fecha_final: subtask.fecha_final,
+      estado: subtask.subtarea_estado ? {
         id: subtask.subtarea_estado.id_subtarea_estado,
-        name: subtask.subtarea_estado.estado,
-        percentage: subtask.subtarea_estado.porcentaje
+        nombre: subtask.subtarea_estado.estado,
+        porcentaje: subtask.subtarea_estado.porcentaje
       } : null,
-      priority: subtask.prioridad ? {
+      prioridad: subtask.prioridad ? {
         id: subtask.prioridad.id_prioridad,
-        name: subtask.prioridad.prioridad_name
+        nombre: subtask.prioridad.prioridad_name
       } : null,
-      beneficiary: subtask.beneficiario ? {
+      beneficiario: subtask.beneficiario ? {
         id: subtask.beneficiario.id_beneficiario,
-        legalName: subtask.beneficiario.nombre_legal,
+        nombre_legal: subtask.beneficiario.nombre_legal,
         rut: subtask.beneficiario.rut,
-        address: subtask.beneficiario.direccion,
-        entityType: subtask.beneficiario.tipo_entidad,
-        representative: subtask.beneficiario.representante,
-        hasLegalPersonality: subtask.beneficiario.personalidad_juridica
-      } : null,
-      documents: subtask.documentos?.map(doc => ({
-        id: doc.id_documento,
-        type: doc.tipo_documento,
-        path: doc.ruta,
-        uploadDate: doc.fecha_carga
-      })) || [],
-      compliances: subtask.cumplimientos?.map(comp => ({
-        id: comp.id_cumplimiento,
-        statusId: comp.id_cumplimiento_estado,
-        applies: comp.aplica,
-        status: comp.cumplimiento_estado ? {
-          id: comp.cumplimiento_estado.id_cumplimiento_estado,
-          name: comp.cumplimiento_estado.estado
-        } : null,
-        records: comp.registros?.map(record => ({
-          id: record.id_registro,
-          hes: record.hes,
-          hem: record.hem,
-          provider: record.proveedor,
-          startDate: record.fecha_inicio,
-          endDate: record.fecha_termino,
-          memos: record.memos?.map(memo => ({
-            id: memo.id_memo,
-            value: memo.valor
-          })) || [],
-          solpeds: record.solpeds?.map(solped => ({
-            id: solped.id_solped,
-            ceco: solped.ceco,
-            account: solped.cuenta,
-            value: solped.valor
-          })) || []
-        })) || []
-      })) || []
+        direccion: subtask.beneficiario.direccion,
+        tipo_entidad: subtask.beneficiario.tipo_entidad,
+        representante: subtask.beneficiario.representante,
+        personalidad_juridica: subtask.beneficiario.personalidad_juridica
+      } : null
     };
   }
 
@@ -99,20 +81,8 @@ export class SubtasksService {
       include: {
         subtarea_estado: true,
         prioridad: true,
-        beneficiario: true,
-        documentos: true,
-        cumplimientos: {
-          include: {
-            cumplimiento_estado: true,
-            registros: {
-              include: {
-                memos: true,
-                solpeds: true,
-              },
-            },
-          },
-        },
-      },
+        beneficiario: true
+      }
     });
     return this.mapFromDatabase(subtask);
   }
@@ -123,20 +93,8 @@ export class SubtasksService {
       include: {
         subtarea_estado: true,
         prioridad: true,
-        beneficiario: true,
-        documentos: true,
-        cumplimientos: {
-          include: {
-            cumplimiento_estado: true,
-            registros: {
-              include: {
-                memos: true,
-                solpeds: true,
-              },
-            },
-          },
-        },
-      },
+        beneficiario: true
+      }
     });
     return subtasks.map(subtask => this.mapFromDatabase(subtask));
   }
@@ -147,20 +105,8 @@ export class SubtasksService {
       include: {
         subtarea_estado: true,
         prioridad: true,
-        beneficiario: true,
-        documentos: true,
-        cumplimientos: {
-          include: {
-            cumplimiento_estado: true,
-            registros: {
-              include: {
-                memos: true,
-                solpeds: true,
-              },
-            },
-          },
-        },
-      },
+        beneficiario: true
+      }
     });
     return subtask ? this.mapFromDatabase(subtask) : null;
   }
@@ -172,20 +118,8 @@ export class SubtasksService {
       include: {
         subtarea_estado: true,
         prioridad: true,
-        beneficiario: true,
-        documentos: true,
-        cumplimientos: {
-          include: {
-            cumplimiento_estado: true,
-            registros: {
-              include: {
-                memos: true,
-                solpeds: true,
-              },
-            },
-          },
-        },
-      },
+        beneficiario: true
+      }
     });
     return this.mapFromDatabase(subtask);
   }
@@ -196,20 +130,8 @@ export class SubtasksService {
       include: {
         subtarea_estado: true,
         prioridad: true,
-        beneficiario: true,
-        documentos: true,
-        cumplimientos: {
-          include: {
-            cumplimiento_estado: true,
-            registros: {
-              include: {
-                memos: true,
-                solpeds: true,
-              },
-            },
-          },
-        },
-      },
+        beneficiario: true
+      }
     });
     return this.mapFromDatabase(subtask);
   }

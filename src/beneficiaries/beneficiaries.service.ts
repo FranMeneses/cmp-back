@@ -9,51 +9,51 @@ import { UpdateContactDto } from './dto/update-contact.dto';
 export class BeneficiariesService {
   constructor(private prisma: PrismaService) {}
 
-  private mapBeneficiaryToDatabase(beneficiaryDto: CreateBeneficiaryDto | UpdateBeneficiaryDto) {
+  private mapToDatabase(beneficiaryDto: CreateBeneficiaryDto | UpdateBeneficiaryDto) {
     return {
-      nombre_legal: beneficiaryDto.legalName,
+      nombre_legal: beneficiaryDto.nombre_legal,
       rut: beneficiaryDto.rut,
-      direccion: beneficiaryDto.address,
-      tipo_entidad: beneficiaryDto.entityType,
-      representante: beneficiaryDto.representative,
-      personalidad_juridica: beneficiaryDto.hasLegalPersonality,
+      direccion: beneficiaryDto.direccion,
+      tipo_entidad: beneficiaryDto.tipo_entidad,
+      representante: beneficiaryDto.representante,
+      personalidad_juridica: Boolean(beneficiaryDto.personalidad_juridica)
     };
   }
 
   private mapContactToDatabase(contactDto: CreateContactDto | UpdateContactDto) {
     return {
-      id_beneficiario: contactDto.beneficiaryId,
-      nombre: contactDto.name,
-      cargo: contactDto.position,
-      mail: contactDto.email,
-      phone: contactDto.phone,
+      id_beneficiario: contactDto.id_beneficiario,
+      nombre: contactDto.nombre,
+      cargo: contactDto.cargo,
+      mail: contactDto.mail,
+      phone: contactDto.phone
     };
   }
 
-  private mapBeneficiaryFromDatabase(beneficiary: any) {
+  private mapFromDatabase(beneficiary: any) {
     return {
       id: beneficiary.id_beneficiario,
-      legalName: beneficiary.nombre_legal,
+      nombre_legal: beneficiary.nombre_legal,
       rut: beneficiary.rut,
-      address: beneficiary.direccion,
-      entityType: beneficiary.tipo_entidad,
-      representative: beneficiary.representante,
-      hasLegalPersonality: beneficiary.personalidad_juridica,
-      contacts: beneficiary.contactos?.map(contact => ({
+      direccion: beneficiary.direccion,
+      tipo_entidad: beneficiary.tipo_entidad,
+      representante: beneficiary.representante,
+      personalidad_juridica: beneficiary.personalidad_juridica ? 1 : 0,
+      contactos: beneficiary.contactos?.map(contact => ({
         id: contact.id_contacto,
-        name: contact.nombre,
-        position: contact.cargo,
-        email: contact.mail,
+        nombre: contact.nombre,
+        cargo: contact.cargo,
+        mail: contact.mail,
         phone: contact.phone
       })) || [],
-      subtasks: beneficiary.subtareas?.map(subtask => ({
+      subtareas: beneficiary.subtareas?.map(subtask => ({
         id: subtask.id_subtarea,
-        name: subtask.nombre,
-        description: subtask.descripcion,
-        status: subtask.subtarea_estado ? {
+        nombre: subtask.nombre,
+        descripcion: subtask.descripcion,
+        estado: subtask.subtarea_estado ? {
           id: subtask.subtarea_estado.id_subtarea_estado,
-          name: subtask.subtarea_estado.estado,
-          percentage: subtask.subtarea_estado.porcentaje
+          nombre: subtask.subtarea_estado.estado,
+          porcentaje: subtask.subtarea_estado.porcentaje
         } : null
       })) || []
     };
@@ -82,7 +82,7 @@ export class BeneficiariesService {
   // Beneficiary CRUD
   async createBeneficiary(createBeneficiaryDto: CreateBeneficiaryDto) {
     const beneficiary = await this.prisma.beneficiario.create({
-      data: this.mapBeneficiaryToDatabase(createBeneficiaryDto),
+      data: this.mapToDatabase(createBeneficiaryDto),
       include: {
         contactos: true,
         subtareas: {
@@ -90,9 +90,9 @@ export class BeneficiariesService {
             subtarea_estado: true
           }
         }
-      },
+      }
     });
-    return this.mapBeneficiaryFromDatabase(beneficiary);
+    return this.mapFromDatabase(beneficiary);
   }
 
   async findAllBeneficiaries(query: any) {
@@ -105,9 +105,9 @@ export class BeneficiariesService {
             subtarea_estado: true
           }
         }
-      },
+      }
     });
-    return beneficiaries.map(beneficiary => this.mapBeneficiaryFromDatabase(beneficiary));
+    return beneficiaries.map(beneficiary => this.mapFromDatabase(beneficiary));
   }
 
   async findOneBeneficiary(id: string) {
@@ -120,15 +120,15 @@ export class BeneficiariesService {
             subtarea_estado: true
           }
         }
-      },
+      }
     });
-    return beneficiary ? this.mapBeneficiaryFromDatabase(beneficiary) : null;
+    return beneficiary ? this.mapFromDatabase(beneficiary) : null;
   }
 
   async updateBeneficiary(id: string, updateBeneficiaryDto: UpdateBeneficiaryDto) {
     const beneficiary = await this.prisma.beneficiario.update({
       where: { id_beneficiario: id },
-      data: this.mapBeneficiaryToDatabase(updateBeneficiaryDto),
+      data: this.mapToDatabase(updateBeneficiaryDto),
       include: {
         contactos: true,
         subtareas: {
@@ -136,9 +136,9 @@ export class BeneficiariesService {
             subtarea_estado: true
           }
         }
-      },
+      }
     });
-    return this.mapBeneficiaryFromDatabase(beneficiary);
+    return this.mapFromDatabase(beneficiary);
   }
 
   async removeBeneficiary(id: string) {
@@ -151,9 +151,9 @@ export class BeneficiariesService {
             subtarea_estado: true
           }
         }
-      },
+      }
     });
-    return this.mapBeneficiaryFromDatabase(beneficiary);
+    return this.mapFromDatabase(beneficiary);
   }
 
   // Contact CRUD
