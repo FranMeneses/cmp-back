@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ComplianceResolver } from '../compliance.resolver';
 import { ComplianceService } from '../compliance.service';
 import { Compliance, CreateComplianceInput, UpdateComplianceInput } from '../../graphql/graphql.types';
-import { NotFoundException } from '@nestjs/common';
+import { NotFoundException, BadRequestException } from '@nestjs/common';
 
 describe('ComplianceResolver', () => {
   let resolver: ComplianceResolver;
@@ -29,11 +29,25 @@ describe('ComplianceResolver', () => {
         {
           provide: ComplianceService,
           useValue: {
-            findAll: jest.fn().mockResolvedValue([mockCompliance, mockCompliance2]),
+            findAll: jest.fn().mockImplementation((query) => {
+              if (!query || Object.keys(query).length === 0) {
+                return [mockCompliance, mockCompliance2];
+              }
+              if (query.subtaskId === '1') {
+                return [mockCompliance];
+              }
+              if (query.statusId === 1) {
+                return [mockCompliance];
+              }
+              if (query.applies === true) {
+                return [mockCompliance];
+              }
+              return [];
+            }),
             findOne: jest.fn().mockImplementation((id) => {
               if (id === '1') return mockCompliance;
               if (id === '2') return mockCompliance2;
-              return null;
+              throw new NotFoundException(`Cumplimiento con ID ${id} no encontrado`);
             }),
             create: jest.fn().mockResolvedValue(mockCompliance),
             update: jest.fn().mockResolvedValue(mockCompliance),
@@ -47,6 +61,10 @@ describe('ComplianceResolver', () => {
     service = module.get<ComplianceService>(ComplianceService);
   });
 
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('debería estar definido', () => {
     expect(resolver).toBeDefined();
   });
@@ -55,33 +73,34 @@ describe('ComplianceResolver', () => {
     it('debería retornar un array de cumplimientos', async () => {
       const result = await resolver.compliances();
       expect(result).toEqual([mockCompliance, mockCompliance2]);
-      expect(service.findAll).toHaveBeenCalled();
+      expect(service.findAll).toHaveBeenCalledWith({});
     });
 
     it('debería retornar cumplimientos filtrados por subtarea', async () => {
       const query = JSON.stringify({ subtaskId: '1' });
       const result = await resolver.compliances(query);
-      expect(result).toEqual([mockCompliance, mockCompliance2]);
+      expect(result).toEqual([mockCompliance]);
       expect(service.findAll).toHaveBeenCalledWith({ subtaskId: '1' });
     });
 
     it('debería retornar cumplimientos filtrados por estado', async () => {
       const query = JSON.stringify({ statusId: 1 });
       const result = await resolver.compliances(query);
-      expect(result).toEqual([mockCompliance, mockCompliance2]);
+      expect(result).toEqual([mockCompliance]);
       expect(service.findAll).toHaveBeenCalledWith({ statusId: 1 });
     });
 
     it('debería retornar cumplimientos filtrados por aplica', async () => {
       const query = JSON.stringify({ applies: true });
       const result = await resolver.compliances(query);
-      expect(result).toEqual([mockCompliance, mockCompliance2]);
+      expect(result).toEqual([mockCompliance]);
       expect(service.findAll).toHaveBeenCalledWith({ applies: true });
     });
 
     it('debería manejar query inválida', async () => {
       const query = 'invalid-json';
-      await expect(resolver.compliances(query)).rejects.toThrow();
+      await expect(resolver.compliances(query))
+        .rejects.toThrow('Unexpected token \'i\', "invalid-json" is not valid JSON');
     });
   });
 
@@ -92,9 +111,8 @@ describe('ComplianceResolver', () => {
       expect(service.findOne).toHaveBeenCalledWith('1');
     });
 
-    it('debería retornar null cuando el cumplimiento no existe', async () => {
-      const result = await resolver.compliance('999');
-      expect(result).toBeNull();
+    it('debería lanzar NotFoundException cuando el cumplimiento no existe', async () => {
+      await expect(resolver.compliance('999')).rejects.toThrow(NotFoundException);
       expect(service.findOne).toHaveBeenCalledWith('999');
     });
   });
@@ -118,10 +136,12 @@ describe('ComplianceResolver', () => {
         applies: true,
       };
       
-      // Mock del servicio para rechazar cuando faltan campos requeridos
-      jest.spyOn(service, 'create').mockRejectedValueOnce(new Error('Campos requeridos faltantes'));
+      jest.spyOn(service, 'create').mockRejectedValueOnce(
+        new BadRequestException('Campos requeridos faltantes')
+      );
       
-      await expect(resolver.createCompliance(createInput as any)).rejects.toThrow('Campos requeridos faltantes');
+      await expect(resolver.createCompliance(createInput as any))
+        .rejects.toThrow(BadRequestException);
     });
 
     it('debería validar tipos de datos', async () => {
@@ -131,9 +151,12 @@ describe('ComplianceResolver', () => {
         applies: 'true', // Debería ser boolean
       };
       
-      jest.spyOn(service, 'create').mockRejectedValueOnce(new Error('Tipos de datos inválidos'));
+      jest.spyOn(service, 'create').mockRejectedValueOnce(
+        new BadRequestException('Tipos de datos inválidos')
+      );
       
-      await expect(resolver.createCompliance(createInput as any)).rejects.toThrow('Tipos de datos inválidos');
+      await expect(resolver.createCompliance(createInput as any))
+        .rejects.toThrow(BadRequestException);
     });
   });
 
@@ -152,7 +175,8 @@ describe('ComplianceResolver', () => {
         applies: false,
       };
       jest.spyOn(service, 'update').mockRejectedValueOnce(new NotFoundException());
-      await expect(resolver.updateCompliance('999', updateInput)).rejects.toThrow(NotFoundException);
+      await expect(resolver.updateCompliance('999', updateInput))
+        .rejects.toThrow(NotFoundException);
     });
 
     it('debería validar tipos de datos en la actualización', async () => {
@@ -161,9 +185,12 @@ describe('ComplianceResolver', () => {
         applies: 'false', // Debería ser boolean
       };
       
-      jest.spyOn(service, 'update').mockRejectedValueOnce(new Error('Tipos de datos inválidos'));
+      jest.spyOn(service, 'update').mockRejectedValueOnce(
+        new BadRequestException('Tipos de datos inválidos')
+      );
       
-      await expect(resolver.updateCompliance('1', updateInput as any)).rejects.toThrow('Tipos de datos inválidos');
+      await expect(resolver.updateCompliance('1', updateInput as any))
+        .rejects.toThrow(BadRequestException);
     });
   });
 
@@ -176,7 +203,8 @@ describe('ComplianceResolver', () => {
 
     it('debería manejar eliminación de cumplimiento inexistente', async () => {
       jest.spyOn(service, 'remove').mockRejectedValueOnce(new NotFoundException());
-      await expect(resolver.deleteCompliance('999')).rejects.toThrow(NotFoundException);
+      await expect(resolver.deleteCompliance('999'))
+        .rejects.toThrow(NotFoundException);
     });
   });
 }); 
