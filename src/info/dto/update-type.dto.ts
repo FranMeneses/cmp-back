@@ -1,7 +1,7 @@
-import { IsString, IsNotEmpty } from 'class-validator';
+import { IsString, IsOptional } from 'class-validator';
 
 export class UpdateTypeDto {
   @IsString()
-  @IsNotEmpty()
-  name: string;
+  @IsOptional()
+  tipo_name?: string;
 } 

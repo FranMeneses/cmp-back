@@ -1,7 +1,7 @@
-import { IsString, IsNotEmpty, IsInt } from 'class-validator';
+import { IsString, IsOptional } from 'class-validator';
 
 export class UpdateOriginDto {
   @IsString()
-  @IsNotEmpty()
-  name: string;
+  @IsOptional()
+  origen_name?: string;
 } 

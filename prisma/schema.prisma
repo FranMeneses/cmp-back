@@ -9,85 +9,85 @@ datasource db {
 
 model origen {
   id_origen    Int      @id @default(autoincrement())
-  origen_name  String   @db.NVarChar(65)
+  origen_name  String?  @db.NVarChar(65)
   info_tareas  info_tarea[]
 }
 
 model inversion {
   id_inversion Int      @id @default(autoincrement())
-  linea        String   @db.NVarChar(50)
+  linea        String?  @db.NVarChar(50)
   info_tareas  info_tarea[]
 }
 
 model tipo {
   id_tipo     Int      @id @default(autoincrement())
-  tipo_name   String   @db.NVarChar(50)
+  tipo_name   String?  @db.NVarChar(50)
   info_tareas info_tarea[]
 }
 
 model alcance {
   id_alcance    Int      @id @default(autoincrement())
-  alcance_name  String   @db.NVarChar(50)
+  alcance_name  String?  @db.NVarChar(50)
   info_tareas   info_tarea[]
 }
 
 model interaccion {
   id_interaccion Int      @id @default(autoincrement())
-  operacion      String   @db.NVarChar(50)
+  operacion      String?  @db.NVarChar(50)
   info_tareas    info_tarea[]
 }
 
 model riesgo {
   id_riesgo   Int      @id @default(autoincrement())
-  tipo_riesgo String   @db.NVarChar(50)
+  tipo_riesgo String?  @db.NVarChar(50)
   info_tareas info_tarea[]
 }
 
 model valle {
   id_valle    Int      @id @default(autoincrement())
-  valle_name  String   @db.NVarChar(50)
+  valle_name  String?  @db.NVarChar(50)
   tareas      tarea[]
 }
 
 model faena {
   id_faena    Int      @id @default(autoincrement())
-  faena_name  String   @db.NVarChar(50)
+  faena_name  String?  @db.NVarChar(50)
   tareas      tarea[]
 }
 
 model prioridad {
   id_prioridad     Int      @id @default(autoincrement())
-  prioridad_name   String   @db.NVarChar(30)
+  prioridad_name   String?  @db.NVarChar(30)
   subtareas        subtarea[]
 }
 
 model cumplimiento_estado {
   id_cumplimiento_estado Int      @id @default(autoincrement())
-  estado                 String   @db.NVarChar(50)
+  estado                 String?  @db.NVarChar(50)
   cumplimientos          cumplimiento[]
 }
 
 model subtarea_estado {
   id_subtarea_estado Int      @id @default(autoincrement())
-  estado             String   @db.NVarChar(50)
+  estado             String?  @db.NVarChar(50)
   porcentaje         Int
   subtareas          subtarea[]
 }
 
 model tarea_estado {
   id_tarea_estado Int      @id @default(autoincrement())
-  estado          String   @db.NVarChar(50)
+  estado          String?  @db.NVarChar(50)
   tareas          tarea[]
 }
 
 model beneficiario {
   id_beneficiario      String      @id @default(uuid()) @db.UniqueIdentifier
-  nombre_legal         String      @db.NVarChar(50)
-  rut                  String      @db.NVarChar(50)
-  direccion            String      @db.NVarChar(50)
-  tipo_entidad         String      @db.NVarChar(50)
-  representante        String      @db.NVarChar(50)
-  personalidad_juridica Boolean
+  nombre_legal         String?     @db.NVarChar(50)
+  rut                  String?     @db.NVarChar(50)
+  direccion            String?     @db.NVarChar(50)
+  tipo_entidad         String?     @db.NVarChar(50)
+  representante        String?     @db.NVarChar(50)
+  personalidad_juridica Boolean?
   contactos            contacto[]
   subtareas            subtarea[]
 }
@@ -95,23 +95,23 @@ model beneficiario {
 model contacto {
   id_contacto      String      @id @default(uuid()) @db.UniqueIdentifier
   id_beneficiario  String      @db.UniqueIdentifier
-  nombre           String      @db.NVarChar(50)
-  cargo            String      @db.NVarChar(50)
-  mail             String      @db.NVarChar(50)
-  phone            String      @db.NVarChar(50)
+  nombre           String?     @db.NVarChar(50)
+  cargo            String?     @db.NVarChar(50)
+  mail             String?     @db.NVarChar(50)
+  phone            String?     @db.NVarChar(50)
   beneficiario     beneficiario @relation(fields: [id_beneficiario], references: [id_beneficiario], onDelete: Cascade)
 }
 
 model rol {
   id_rol     Int      @id @default(autoincrement())
-  rol_name   String   @db.NVarChar(50)
+  rol_name   String?  @db.NVarChar(50)
   usuarios   usuario[]
 }
 
 model usuario {
   AzureId    String   @id @db.UniqueIdentifier
-  nombre     String   @db.NVarChar(50)
-  mail       String   @db.NVarChar(50)
+  nombre     String?  @db.NVarChar(50)
+  mail       String?  @db.NVarChar(50)
   id_rol     Int
   rol        rol      @relation(fields: [id_rol], references: [id_rol], onDelete: Cascade)
 }
@@ -120,12 +120,12 @@ model tarea {
   id_tarea     String      @id @default(uuid()) @db.UniqueIdentifier
   id_valle     Int
   id_faena     Int
-  nombre       String      @db.NVarChar(100)
-  descripcion  String      @db.NVarChar(500)
-  estado       Int
+  nombre       String?     @db.NVarChar(100)
+  descripcion  String?     @db.NVarChar(500)
+  id_estado    Int         @map("estado") @default(1)
   valle        valle       @relation(fields: [id_valle], references: [id_valle], onDelete: Cascade)
   faena        faena       @relation(fields: [id_faena], references: [id_faena], onDelete: Cascade)
-  tarea_estado tarea_estado @relation(fields: [estado], references: [id_tarea_estado], onDelete: Cascade)
+  tarea_estado tarea_estado @relation(fields: [id_estado], references: [id_tarea_estado], onDelete: Cascade)
   info_tarea   info_tarea?
   subtareas    subtarea[]
   documentos   documento[]
@@ -152,16 +152,16 @@ model info_tarea {
 model subtarea {
   id_subtarea      String      @id @default(uuid()) @db.UniqueIdentifier
   id_tarea         String      @db.UniqueIdentifier
-  numero           Int
-  nombre           String      @db.NVarChar(100)
-  descripcion      String      @db.NVarChar(500)
-  presupuesto      Int
-  gasto            Int
-  fecha_inicio     DateTime    @db.Date
-  fecha_termino    DateTime    @db.Date
-  fecha_final      DateTime    @db.Date
+  numero           Int?
+  nombre           String?     @db.NVarChar(100)
+  descripcion      String?     @db.NVarChar(500)
+  presupuesto      Int?
+  gasto            Int?
+  fecha_inicio     DateTime?   @db.Date
+  fecha_termino    DateTime?   @db.Date
+  fecha_final      DateTime?   @db.Date
   id_beneficiario  String      @db.UniqueIdentifier
-  id_estado        Int
+  id_estado        Int         @default(1)
   id_prioridad     Int
   tarea            tarea       @relation(fields: [id_tarea], references: [id_tarea], onDelete: Cascade)
   beneficiario     beneficiario @relation(fields: [id_beneficiario], references: [id_beneficiario], onDelete: Cascade)
@@ -174,7 +174,7 @@ model subtarea {
 
 model tipo_documento {
   id_tipo_documento Int      @id @default(autoincrement())
-  tipo_documento    String   @db.NVarChar(50)
+  tipo_documento    String?  @db.NVarChar(50)
   documentos        documento[]
 }
 
@@ -183,18 +183,18 @@ model documento {
   id_tarea         String?     @db.UniqueIdentifier
   id_subtarea      String?     @db.UniqueIdentifier
   tipo_documento   Int
-  ruta             String      @db.NVarChar(500)
-  fecha_carga      DateTime    @db.Date
+  ruta             String?     @db.NVarChar(500)
+  fecha_carga      DateTime?   @db.Date
   tarea            tarea?      @relation(fields: [id_tarea], references: [id_tarea], onDelete: NoAction, onUpdate: NoAction)
   subtarea         subtarea?   @relation(fields: [id_subtarea], references: [id_subtarea], onDelete: NoAction, onUpdate: NoAction)
-  tipo_documento_rel tipo_documento @relation(fields: [tipo_documento], references: [id_tipo_documento], onDelete: NoAction, onUpdate: NoAction)
+  tipo_doc         tipo_documento @relation(fields: [tipo_documento], references: [id_tipo_documento], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model cumplimiento {
-  id_cumplimiento        String      @id @default(uuid()) @db.UniqueIdentifier
+  id_cumplimiento       String      @id @default(uuid()) @db.UniqueIdentifier
   id_subtarea           String      @db.UniqueIdentifier
   id_cumplimiento_estado Int
-  aplica                Boolean
+  aplica                Boolean?
   subtarea              subtarea    @relation(fields: [id_subtarea], references: [id_subtarea], onDelete: Cascade)
   cumplimiento_estado   cumplimiento_estado @relation(fields: [id_cumplimiento_estado], references: [id_cumplimiento_estado], onDelete: Cascade)
   registros             registro[]
@@ -204,11 +204,11 @@ model registro {
   id_registro      String      @id @default(uuid()) @db.UniqueIdentifier
   id_subtarea      String      @db.UniqueIdentifier
   id_cumplimiento  String      @db.UniqueIdentifier
-  hes              Boolean
-  hem              Boolean
-  proveedor        String      @db.NVarChar(100)
-  fecha_inicio     DateTime    @db.Date
-  fecha_termino    DateTime    @db.Date
+  hes              Boolean?
+  hem              Boolean?
+  proveedor        String?     @db.NVarChar(100)
+  fecha_inicio     DateTime?   @db.Date
+  fecha_termino    DateTime?   @db.Date
   subtarea         subtarea    @relation(fields: [id_subtarea], references: [id_subtarea], onDelete: NoAction, onUpdate: NoAction)
   cumplimiento     cumplimiento @relation(fields: [id_cumplimiento], references: [id_cumplimiento], onDelete: NoAction, onUpdate: NoAction)
   memos            memo[]
@@ -218,15 +218,15 @@ model registro {
 model memo {
   id_memo      String      @id @default(uuid()) @db.UniqueIdentifier
   id_registro  String      @db.UniqueIdentifier
-  valor        Int
+  valor        Int?
   registro     registro    @relation(fields: [id_registro], references: [id_registro], onDelete: NoAction)
 }
 
 model solped {
   id_solped    String      @id @default(uuid()) @db.UniqueIdentifier
   id_registro  String      @db.UniqueIdentifier
-  ceco         Int
-  cuenta       Int
-  valor        Int
+  ceco         Int?
+  cuenta       Int?
+  valor        Int?
   registro     registro    @relation(fields: [id_registro], references: [id_registro], onDelete: NoAction)
 } 

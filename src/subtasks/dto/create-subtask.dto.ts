@@ -1,51 +1,51 @@
-import { IsString, IsNotEmpty, IsUUID, IsInt, IsDate, IsBoolean, IsOptional } from 'class-validator';
+import { IsString, IsNotEmpty, IsUUID, IsInt, IsDate, IsOptional } from 'class-validator';
 
 export class CreateSubtaskDto {
   @IsUUID()
   @IsNotEmpty()
-  taskId: string;
+  id_tarea: string;
 
   @IsInt()
-  @IsNotEmpty()
-  number: number;
+  @IsOptional()
+  numero?: number;
 
   @IsString()
-  @IsNotEmpty()
-  name: string;
+  @IsOptional()
+  nombre?: string;
 
   @IsString()
-  @IsNotEmpty()
-  description: string;
+  @IsOptional()
+  descripcion?: string;
 
   @IsInt()
-  @IsNotEmpty()
-  budget: number;
+  @IsOptional()
+  presupuesto?: number;
 
   @IsInt()
-  @IsNotEmpty()
-  expense: number;
+  @IsOptional()
+  gasto?: number;
 
   @IsDate()
-  @IsNotEmpty()
-  startDate: Date;
+  @IsOptional()
+  fecha_inicio?: Date;
 
   @IsDate()
-  @IsNotEmpty()
-  endDate: Date;
+  @IsOptional()
+  fecha_termino?: Date;
 
   @IsDate()
-  @IsNotEmpty()
-  finalDate: Date;
+  @IsOptional()
+  fecha_final?: Date;
 
   @IsUUID()
   @IsNotEmpty()
-  beneficiaryId: string;
+  id_beneficiario: string;
+
+  @IsInt()
+  @IsOptional()
+  id_estado?: number;
 
   @IsInt()
   @IsNotEmpty()
-  statusId: number;
-
-  @IsInt()
-  @IsNotEmpty()
-  priorityId: number;
+  id_prioridad: number;
 } 

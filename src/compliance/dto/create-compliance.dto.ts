@@ -1,15 +1,15 @@
-import { IsString, IsNotEmpty, IsUUID, IsInt, IsBoolean } from 'class-validator';
+import { IsString, IsNotEmpty, IsUUID, IsInt, IsBoolean, IsOptional } from 'class-validator';
 
 export class CreateComplianceDto {
-  @IsString()
+  @IsUUID()
   @IsNotEmpty()
-  subtaskId: string;
+  id_subtarea: string;
 
   @IsInt()
   @IsNotEmpty()
-  statusId: number;
+  id_cumplimiento_estado: number;
 
   @IsBoolean()
-  @IsNotEmpty()
-  applies: boolean;
+  @IsOptional()
+  aplica?: boolean;
 } 

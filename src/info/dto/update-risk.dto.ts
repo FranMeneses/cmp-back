@@ -1,7 +1,7 @@
-import { IsString, IsNotEmpty } from 'class-validator';
+import { IsString, IsOptional } from 'class-validator';
 
 export class UpdateRiskDto {
   @IsString()
-  @IsNotEmpty()
-  type: string;
+  @IsOptional()
+  tipo_riesgo?: string;
 } 

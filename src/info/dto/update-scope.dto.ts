@@ -1,7 +1,7 @@
-import { IsString, IsNotEmpty } from 'class-validator';
+import { IsString, IsOptional } from 'class-validator';
 
 export class UpdateScopeDto {
   @IsString()
-  @IsNotEmpty()
-  name: string;
+  @IsOptional()
+  alcance_name?: string;
 } 

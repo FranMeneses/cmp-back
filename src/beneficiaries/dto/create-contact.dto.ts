@@ -1,23 +1,23 @@
-import { IsString, IsNotEmpty, IsUUID } from 'class-validator';
+import { IsString, IsUUID, IsNotEmpty, IsOptional } from 'class-validator';
 
 export class CreateContactDto {
   @IsUUID()
   @IsNotEmpty()
-  beneficiaryId: string;
+  id_beneficiario: string;
 
   @IsString()
-  @IsNotEmpty()
-  name: string;
+  @IsOptional()
+  nombre?: string;
 
   @IsString()
-  @IsNotEmpty()
-  position: string;
+  @IsOptional()
+  cargo?: string;
 
   @IsString()
-  @IsNotEmpty()
-  email: string;
+  @IsOptional()
+  mail?: string;
 
   @IsString()
-  @IsNotEmpty()
-  phone: string;
+  @IsOptional()
+  phone?: string;
 } 

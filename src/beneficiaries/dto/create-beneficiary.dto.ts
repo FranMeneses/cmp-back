@@ -1,27 +1,27 @@
-import { IsString, IsNotEmpty, IsBoolean, IsOptional } from 'class-validator';
+import { IsString, IsBoolean, IsOptional } from 'class-validator';
 
 export class CreateBeneficiaryDto {
   @IsString()
-  @IsNotEmpty()
-  legalName: string;
+  @IsOptional()
+  nombre_legal?: string;
 
   @IsString()
-  @IsNotEmpty()
-  rut: string;
+  @IsOptional()
+  rut?: string;
 
   @IsString()
-  @IsNotEmpty()
-  address: string;
+  @IsOptional()
+  direccion?: string;
 
   @IsString()
-  @IsNotEmpty()
-  entityType: string;
+  @IsOptional()
+  tipo_entidad?: string;
 
   @IsString()
-  @IsNotEmpty()
-  representative: string;
+  @IsOptional()
+  representante?: string;
 
   @IsBoolean()
-  @IsNotEmpty()
-  hasLegalPersonality: boolean;
+  @IsOptional()
+  personalidad_juridica?: boolean;
 } 

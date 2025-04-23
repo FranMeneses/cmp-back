@@ -1,7 +1,7 @@
-import { IsString, IsNotEmpty } from 'class-validator';
+import { IsString, IsOptional } from 'class-validator';
 
 export class UpdateInteractionDto {
   @IsString()
-  @IsNotEmpty()
-  operation: string;
+  @IsOptional()
+  operacion?: string;
 } 

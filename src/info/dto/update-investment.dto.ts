@@ -1,7 +1,7 @@
-import { IsString, IsNotEmpty } from 'class-validator';
+import { IsString, IsOptional } from 'class-validator';
 
 export class UpdateInvestmentDto {
   @IsString()
-  @IsNotEmpty()
-  line: string;
+  @IsOptional()
+  linea?: string;
 } 

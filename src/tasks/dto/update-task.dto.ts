@@ -1,47 +1,23 @@
-import { IsString, IsNotEmpty, IsNumber, IsOptional, IsDate } from 'class-validator';
+import { IsString, IsNumber, IsOptional } from 'class-validator';
 
 export class UpdateTaskDto {
   @IsString()
   @IsOptional()
-  name?: string;
+  nombre?: string;
 
   @IsString()
   @IsOptional()
-  description?: string;
+  descripcion?: string;
 
   @IsNumber()
   @IsOptional()
-  budget?: number;
+  id_valle?: number;
 
   @IsNumber()
   @IsOptional()
-  expense?: number;
-
-  @IsDate()
-  @IsOptional()
-  startDate?: Date;
-
-  @IsDate()
-  @IsOptional()
-  endDate?: Date;
-
-  @IsDate()
-  @IsOptional()
-  finalDate?: Date;
+  id_faena?: number;
 
   @IsNumber()
   @IsOptional()
-  status?: number;
-
-  @IsNumber()
-  @IsOptional()
-  priority?: number;
-
-  @IsNumber()
-  @IsOptional()
-  valley?: number;
-
-  @IsNumber()
-  @IsOptional()
-  faena?: number;
+  id_estado?: number;
 } 
