@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { SubtasksResolver } from '../subtasks.resolver';
 import { SubtasksService } from '../subtasks.service';
 import { Subtask, CreateSubtaskInput, UpdateSubtaskInput } from '../../graphql/graphql.types';
-import { NotFoundException } from '@nestjs/common';
+import { NotFoundException, BadRequestException } from '@nestjs/common';
 
 describe('SubtasksResolver', () => {
   let resolver: SubtasksResolver;
@@ -47,11 +47,25 @@ describe('SubtasksResolver', () => {
         {
           provide: SubtasksService,
           useValue: {
-            findAll: jest.fn().mockResolvedValue([mockSubtask, mockSubtask2]),
+            findAll: jest.fn().mockImplementation((query) => {
+              if (!query || Object.keys(query).length === 0) {
+                return [mockSubtask, mockSubtask2];
+              }
+              if (query.taskId === '1') {
+                return [mockSubtask, mockSubtask2];
+              }
+              if (query.statusId === 1) {
+                return [mockSubtask];
+              }
+              if (query.statusId === 2) {
+                return [mockSubtask2];
+              }
+              return [];
+            }),
             findOne: jest.fn().mockImplementation((id) => {
               if (id === '1') return mockSubtask;
               if (id === '2') return mockSubtask2;
-              return null;
+              throw new NotFoundException(`Subtarea con ID ${id} no encontrada`);
             }),
             create: jest.fn().mockResolvedValue(mockSubtask),
             update: jest.fn().mockResolvedValue(mockSubtask),
@@ -65,6 +79,10 @@ describe('SubtasksResolver', () => {
     service = module.get<SubtasksService>(SubtasksService);
   });
 
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('debería estar definido', () => {
     expect(resolver).toBeDefined();
   });
@@ -73,26 +91,27 @@ describe('SubtasksResolver', () => {
     it('debería retornar un array de subtareas', async () => {
       const result = await resolver.subtasks();
       expect(result).toEqual([mockSubtask, mockSubtask2]);
-      expect(service.findAll).toHaveBeenCalled();
+      expect(service.findAll).toHaveBeenCalledWith({});
     });
 
-    it('debería retornar subtareas filtradas por query', async () => {
+    it('debería retornar subtareas filtradas por taskId', async () => {
       const query = JSON.stringify({ taskId: '1' });
       const result = await resolver.subtasks(query);
       expect(result).toEqual([mockSubtask, mockSubtask2]);
       expect(service.findAll).toHaveBeenCalledWith({ taskId: '1' });
     });
 
-    it('debería manejar query inválida', async () => {
-      const query = 'invalid-json';
-      await expect(resolver.subtasks(query)).rejects.toThrow();
-    });
-
-    it('debería retornar subtareas filtradas por estado', async () => {
+    it('debería retornar subtareas filtradas por statusId', async () => {
       const query = JSON.stringify({ statusId: 1 });
       const result = await resolver.subtasks(query);
-      expect(result).toEqual([mockSubtask, mockSubtask2]);
+      expect(result).toEqual([mockSubtask]);
       expect(service.findAll).toHaveBeenCalledWith({ statusId: 1 });
+    });
+
+    it('debería manejar query inválida', async () => {
+      const query = 'invalid-json';
+      await expect(resolver.subtasks(query))
+        .rejects.toThrow('Unexpected token \'i\', "invalid-json" is not valid JSON');
     });
   });
 
@@ -103,9 +122,8 @@ describe('SubtasksResolver', () => {
       expect(service.findOne).toHaveBeenCalledWith('1');
     });
 
-    it('debería retornar null cuando la subtarea no existe', async () => {
-      const result = await resolver.subtask('999');
-      expect(result).toBeNull();
+    it('debería lanzar NotFoundException cuando la subtarea no existe', async () => {
+      await expect(resolver.subtask('999')).rejects.toThrow(NotFoundException);
       expect(service.findOne).toHaveBeenCalledWith('999');
     });
   });
@@ -147,10 +165,12 @@ describe('SubtasksResolver', () => {
         priorityId: 1,
       };
       
-      // Mock del servicio para rechazar cuando faltan campos requeridos
-      jest.spyOn(service, 'create').mockRejectedValueOnce(new Error('Campos requeridos faltantes'));
+      jest.spyOn(service, 'create').mockRejectedValueOnce(
+        new BadRequestException('Campos requeridos faltantes')
+      );
       
-      await expect(resolver.createSubtask(createInput as any)).rejects.toThrow('Campos requeridos faltantes');
+      await expect(resolver.createSubtask(createInput as any))
+        .rejects.toThrow(BadRequestException);
     });
 
     it('debería validar tipos de datos', async () => {
@@ -169,9 +189,12 @@ describe('SubtasksResolver', () => {
         priorityId: 1,
       };
       
-      jest.spyOn(service, 'create').mockRejectedValueOnce(new Error('Tipos de datos inválidos'));
+      jest.spyOn(service, 'create').mockRejectedValueOnce(
+        new BadRequestException('Tipos de datos inválidos')
+      );
       
-      await expect(resolver.createSubtask(createInput as any)).rejects.toThrow('Tipos de datos inválidos');
+      await expect(resolver.createSubtask(createInput as any))
+        .rejects.toThrow(BadRequestException);
     });
   });
 
@@ -190,7 +213,8 @@ describe('SubtasksResolver', () => {
         name: 'Updated Subtask',
       };
       jest.spyOn(service, 'update').mockRejectedValueOnce(new NotFoundException());
-      await expect(resolver.updateSubtask('999', updateInput)).rejects.toThrow(NotFoundException);
+      await expect(resolver.updateSubtask('999', updateInput))
+        .rejects.toThrow(NotFoundException);
     });
 
     it('debería validar tipos de datos en la actualización', async () => {
@@ -199,9 +223,12 @@ describe('SubtasksResolver', () => {
         expense: '500', // Debería ser número
       };
       
-      jest.spyOn(service, 'update').mockRejectedValueOnce(new Error('Tipos de datos inválidos'));
+      jest.spyOn(service, 'update').mockRejectedValueOnce(
+        new BadRequestException('Tipos de datos inválidos')
+      );
       
-      await expect(resolver.updateSubtask('1', updateInput as any)).rejects.toThrow('Tipos de datos inválidos');
+      await expect(resolver.updateSubtask('1', updateInput as any))
+        .rejects.toThrow(BadRequestException);
     });
   });
 
@@ -214,7 +241,8 @@ describe('SubtasksResolver', () => {
 
     it('debería manejar eliminación de subtarea inexistente', async () => {
       jest.spyOn(service, 'remove').mockRejectedValueOnce(new NotFoundException());
-      await expect(resolver.deleteSubtask('999')).rejects.toThrow(NotFoundException);
+      await expect(resolver.deleteSubtask('999'))
+        .rejects.toThrow(NotFoundException);
     });
   });
 }); 
