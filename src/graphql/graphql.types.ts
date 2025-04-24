@@ -1,78 +1,81 @@
 import { Field, ID, ObjectType, InputType, Int, Float } from '@nestjs/graphql';
 
 @ObjectType()
+export class Valley {
+  @Field(() => Int)
+  id: number;
+
+  @Field({ nullable: true })
+  name?: string;
+}
+
+@ObjectType()
+export class Faena {
+  @Field(() => Int)
+  id: number;
+
+  @Field({ nullable: true })
+  name?: string;
+}
+
+@ObjectType()
+export class TaskStatus {
+  @Field(() => Int)
+  id: number;
+
+  @Field({ nullable: true })
+  name?: string;
+}
+
+@ObjectType()
 export class Task {
   @Field(() => ID)
   id: string;
 
-  @Field()
-  name: string;
+  @Field({ nullable: true })
+  name?: string;
 
   @Field({ nullable: true })
   description?: string;
 
-  @Field(() => Float, { nullable: true })
-  budget?: number;
-
-  @Field(() => Float, { nullable: true })
-  expense?: number;
-
-  @Field({ nullable: true })
-  startDate?: Date;
-
-  @Field({ nullable: true })
-  endDate?: Date;
-
-  @Field({ nullable: true })
-  finalDate?: Date;
-
-  @Field(() => Int)
-  status: number;
+  @Field(() => Int, { nullable: true })
+  valleyId?: number;
 
   @Field(() => Int, { nullable: true })
-  priority?: number;
+  faenaId?: number;
 
   @Field(() => Int, { nullable: true })
-  valley?: number;
+  statusId?: number;
 
-  @Field(() => Int, { nullable: true })
-  faena?: number;
+  @Field(() => Valley, { nullable: true })
+  valley?: Valley;
+
+  @Field(() => Faena, { nullable: true })
+  faena?: Faena;
+
+  @Field(() => TaskStatus, { nullable: true })
+  status?: TaskStatus;
+
+  @Field(() => [Subtask], { nullable: true })
+  subtasks?: Subtask[];
 }
 
 @InputType()
 export class CreateTaskInput {
-  @Field()
-  name: string;
+  @Field({ nullable: true })
+  name?: string;
 
   @Field({ nullable: true })
   description?: string;
 
-  @Field(() => Float, { nullable: true })
-  budget?: number;
-
-  @Field(() => Float, { nullable: true })
-  expense?: number;
-
-  @Field({ nullable: true })
-  startDate?: Date;
-
-  @Field({ nullable: true })
-  endDate?: Date;
-
-  @Field({ nullable: true })
-  finalDate?: Date;
+  @Field(() => Int)
+  valleyId: number;
 
   @Field(() => Int)
-  status: number;
+  faenaId: number;
 
   @Field(() => Int, { nullable: true })
-  priority?: number;
-
-  @Field(() => Int, { nullable: true })
-  valley?: number;
-
-  @Field(() => Int, { nullable: true })
-  faena?: number;
+  statusId?: number;
 }
 
 @InputType()
@@ -83,32 +86,14 @@ export class UpdateTaskInput {
   @Field({ nullable: true })
   description?: string;
 
-  @Field(() => Float, { nullable: true })
-  budget?: number;
-
-  @Field(() => Float, { nullable: true })
-  expense?: number;
-
-  @Field({ nullable: true })
-  startDate?: Date;
-
-  @Field({ nullable: true })
-  endDate?: Date;
-
-  @Field({ nullable: true })
-  finalDate?: Date;
+  @Field(() => Int, { nullable: true })
+  valleyId?: number;
 
   @Field(() => Int, { nullable: true })
-  status?: number;
+  faenaId?: number;
 
   @Field(() => Int, { nullable: true })
-  priority?: number;
-
-  @Field(() => Int, { nullable: true })
-  valley?: number;
-
-  @Field(() => Int, { nullable: true })
-  faena?: number;
+  statusId?: number;
 }
 
 @ObjectType()

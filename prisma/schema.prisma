@@ -118,14 +118,14 @@ model usuario {
 
 model tarea {
   id_tarea     String      @id @default(uuid()) @db.UniqueIdentifier
-  id_valle     Int
-  id_faena     Int
+  id_valle     Int?
+  id_faena     Int?
   nombre       String?     @db.NVarChar(100)
   descripcion  String?     @db.NVarChar(500)
-  id_estado    Int         @map("estado") @default(1)
-  valle        valle       @relation(fields: [id_valle], references: [id_valle], onDelete: Cascade)
-  faena        faena       @relation(fields: [id_faena], references: [id_faena], onDelete: Cascade)
-  tarea_estado tarea_estado @relation(fields: [id_estado], references: [id_tarea_estado], onDelete: Cascade)
+  id_estado    Int?        @map("estado") @default(1)
+  valle        valle?      @relation(fields: [id_valle], references: [id_valle], onDelete: Cascade)
+  faena        faena?      @relation(fields: [id_faena], references: [id_faena], onDelete: Cascade)
+  tarea_estado tarea_estado? @relation(fields: [id_estado], references: [id_tarea_estado], onDelete: Cascade)
   info_tarea   info_tarea?
   subtareas    subtarea[]
   documentos   documento[]

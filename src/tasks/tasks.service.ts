@@ -11,57 +11,155 @@ export class TasksService {
     return {
       nombre: taskDto.nombre,
       descripcion: taskDto.descripcion,
-      valle: taskDto.id_valle ? {
-        connect: {
-          id_valle: taskDto.id_valle
-        }
-      } : undefined,
-      faena: taskDto.id_faena ? {
-        connect: {
-          id_faena: taskDto.id_faena
-        }
-      } : undefined,
-      tarea_estado: taskDto.id_estado ? {
-        connect: {
-          id_tarea_estado: taskDto.id_estado
-        }
-      } : undefined
+      id_valle: taskDto.id_valle,
+      id_faena: taskDto.id_faena,
+      id_estado: taskDto.id_estado
     };
   }
 
   private mapFromDatabase(task: any) {
     return {
       id: task.id_tarea,
-      nombre: task.nombre,
-      descripcion: task.descripcion,
-      id_valle: task.id_valle,
-      id_faena: task.id_faena,
-      id_estado: task.id_estado,
-      valle: task.valle ? {
+      name: task.nombre,
+      description: task.descripcion,
+      valleyId: task.id_valle,
+      faenaId: task.id_faena,
+      statusId: task.id_estado,
+      valley: task.valle ? {
         id: task.valle.id_valle,
-        nombre: task.valle.valle_name
+        name: task.valle.valle_name
       } : null,
       faena: task.faena ? {
         id: task.faena.id_faena,
-        nombre: task.faena.faena_name
+        name: task.faena.faena_name
       } : null,
-      estado: task.tarea_estado ? {
+      status: task.tarea_estado ? {
         id: task.tarea_estado.id_tarea_estado,
-        nombre: task.tarea_estado.estado
-      } : null,
-      subtareas: task.subtareas?.map(subtask => ({
-        id: subtask.id_subtarea,
-        nombre: subtask.nombre,
-        descripcion: subtask.descripcion,
-        estado: subtask.subtarea_estado ? {
-          id: subtask.subtarea_estado.id_subtarea_estado,
-          nombre: subtask.subtarea_estado.estado,
-          porcentaje: subtask.subtarea_estado.porcentaje
-        } : null
-      })) || []
+        name: task.tarea_estado.estado
+      } : null
     };
   }
 
+  async create(createTaskDto: CreateTaskDto) {
+    const task = await this.prisma.tarea.create({
+      data: this.mapToDatabase(createTaskDto),
+      include: {
+        tarea_estado: true,
+        subtareas: {
+          include: {
+            subtarea_estado: true
+          }
+        }
+      }
+    });
+    return this.mapFromDatabase(task);
+  }
+
+  async findAll() {
+    const tasks = await this.prisma.tarea.findMany({
+      select: {
+        id_tarea: true,
+        nombre: true,
+        descripcion: true,
+        id_valle: true,
+        id_faena: true,
+        id_estado: true,
+        valle: {
+          select: {
+            id_valle: true,
+            valle_name: true
+          }
+        },
+        faena: {
+          select: {
+            id_faena: true,
+            faena_name: true
+          }
+        }
+      }
+    });
+    return tasks.map(task => ({
+      id: task.id_tarea,
+      name: task.nombre,
+      description: task.descripcion,
+      valleyId: task.id_valle,
+      faenaId: task.id_faena,
+      statusId: task.id_estado,
+      valley: task.valle ? {
+        id: task.valle.id_valle,
+        name: task.valle.valle_name
+      } : null,
+      faena: task.faena ? {
+        id: task.faena.id_faena,
+        name: task.faena.faena_name
+      } : null
+    }));
+  }
+
+  /* Comentando temporalmente findAllDetailed
+  async findAllDetailed(query: any) {
+    const tasks = await this.prisma.tarea.findMany({
+      where: query,
+      include: {
+        tarea_estado: true,
+        subtareas: {
+          include: {
+            subtarea_estado: true
+          }
+        }
+      }
+    });
+    return tasks.map(task => this.mapFromDatabase(task));
+  }
+  */
+
+  async findOne(id: string) {
+    const task = await this.prisma.tarea.findUnique({
+      where: { id_tarea: id },
+      include: {
+        tarea_estado: true,
+        subtareas: {
+          include: {
+            subtarea_estado: true
+          }
+        }
+      }
+    });
+    return task ? this.mapFromDatabase(task) : null;
+  }
+
+  async update(id: string, updateTaskDto: UpdateTaskDto) {
+    const task = await this.prisma.tarea.update({
+      where: { id_tarea: id },
+      data: this.mapToDatabase(updateTaskDto),
+      include: {
+        tarea_estado: true,
+        subtareas: {
+          include: {
+            subtarea_estado: true
+          }
+        }
+      }
+    });
+    return this.mapFromDatabase(task);
+  }
+
+  async remove(id: string) {
+    const task = await this.prisma.tarea.delete({
+      where: { id_tarea: id },
+      include: {
+        tarea_estado: true,
+        subtareas: {
+          include: {
+            subtarea_estado: true
+          }
+        }
+      }
+    });
+    return this.mapFromDatabase(task);
+  }
+
+  /* Comentando temporalmente los métodos que no son parte del CRUD básico
   async getTaskProgress(id: string) {
     const task = await this.prisma.tarea.findUnique({
       where: { id_tarea: id },
@@ -201,97 +299,6 @@ export class TasksService {
         }))
       }))
     }));
-  }
-
-  async create(createTaskDto: CreateTaskDto) {
-    const task = await this.prisma.tarea.create({
-      data: this.mapToDatabase(createTaskDto),
-      include: {
-        tarea_estado: true,
-        subtareas: {
-          include: {
-            subtarea_estado: true
-          }
-        }
-      }
-    });
-    return this.mapFromDatabase(task);
-  }
-
-  async findAll() {
-    const tasks = await this.prisma.tarea.findMany({
-      select: {
-        id_tarea: true,
-        nombre: true,
-        descripcion: true
-      }
-    });
-    return tasks.map(task => ({
-      id: task.id_tarea,
-      name: task.nombre,
-      description: task.descripcion
-    }));
-  }
-
-  async findAllDetailed(query: any) {
-    const tasks = await this.prisma.tarea.findMany({
-      where: query,
-      include: {
-        tarea_estado: true,
-        subtareas: {
-          include: {
-            subtarea_estado: true
-          }
-        }
-      }
-    });
-    return tasks.map(task => this.mapFromDatabase(task));
-  }
-
-  async findOne(id: string) {
-    const task = await this.prisma.tarea.findUnique({
-      where: { id_tarea: id },
-      include: {
-        tarea_estado: true,
-        subtareas: {
-          include: {
-            subtarea_estado: true
-          }
-        }
-      }
-    });
-    return task ? this.mapFromDatabase(task) : null;
-  }
-
-  async update(id: string, updateTaskDto: UpdateTaskDto) {
-    const task = await this.prisma.tarea.update({
-      where: { id_tarea: id },
-      data: this.mapToDatabase(updateTaskDto),
-      include: {
-        tarea_estado: true,
-        subtareas: {
-          include: {
-            subtarea_estado: true
-          }
-        }
-      }
-    });
-    return this.mapFromDatabase(task);
-  }
-
-  async remove(id: string) {
-    const task = await this.prisma.tarea.delete({
-      where: { id_tarea: id },
-      include: {
-        tarea_estado: true,
-        subtareas: {
-          include: {
-            subtarea_estado: true
-          }
-        }
-      }
-    });
-    return this.mapFromDatabase(task);
   }
 
   async getTotalBudget(id: string) {
@@ -446,4 +453,5 @@ export class TasksService {
       } : null
     };
   }
+  */
 } 

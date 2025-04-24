@@ -13,15 +13,15 @@ export class CreateTaskDto {
   @IsOptional()
   descripcion?: string;
 
-  @Field(() => Int)
+  @Field(() => Int, { nullable: true })
   @IsNumber()
   @IsNotEmpty()
-  id_valle: number;
+  id_valle?: number;
 
-  @Field(() => Int)
+  @Field(() => Int, { nullable: true })
   @IsNumber()
   @IsNotEmpty()
-  id_faena: number;
+  id_faena?: number;
 
   @Field(() => Int, { nullable: true })
   @IsNumber()

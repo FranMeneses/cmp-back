@@ -9,8 +9,8 @@ export class TasksResolver {
   constructor(private readonly tasksService: TasksService) {}
 
   @Query(() => [Task])
-  tasks(@Args('query', { nullable: true }) query?: string) {
-    return this.tasksService.findAllDetailed(query ? JSON.parse(query) : {});
+  tasks() {
+    return this.tasksService.findAll();
   }
 
   @Query(() => Task)
@@ -36,6 +36,7 @@ export class TasksResolver {
     return this.tasksService.remove(id);
   }
 
+  /* Comentando temporalmente los resolvers que no son parte del CRUD básico
   @Query(() => Float)
   async taskProgress(@Args('id', { type: () => ID }) id: string) {
     return this.tasksService.getTaskProgress(id);
@@ -55,4 +56,5 @@ export class TasksResolver {
   async taskTotalExpense(@Args('id', { type: () => ID }) id: string) {
     return this.tasksService.getTotalExpense(id);
   }
+  */
 } 
