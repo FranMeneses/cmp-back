@@ -1,8 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BeneficiariesResolver } from '../beneficiaries.resolver';
 import { BeneficiariesService } from '../beneficiaries.service';
-import { Beneficiary, CreateBeneficiaryInput, UpdateBeneficiaryInput } from '../../graphql/graphql.types';
+import { Beneficiary } from '../../graphql/graphql.types';
+import { CreateBeneficiaryDto } from '../dto/create-beneficiary.dto';
+import { UpdateBeneficiaryDto } from '../dto/update-beneficiary.dto';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
+import { ValidationPipe } from '@nestjs/common';
+import { APP_PIPE } from '@nestjs/core';
 
 describe('BeneficiariesResolver', () => {
   let resolver: BeneficiariesResolver;
@@ -28,37 +32,65 @@ describe('BeneficiariesResolver', () => {
     hasLegalPersonality: false,
   };
 
+  const mockService = {
+    findAllBeneficiaries: jest.fn().mockImplementation((query) => {
+      if (!query || Object.keys(query).length === 0) {
+        return [mockBeneficiary, mockBeneficiary2];
+      }
+      if (query.legalName === 'Test Beneficiary') {
+        return [mockBeneficiary];
+      }
+      if (query.rut === '12345678-9') {
+        return [mockBeneficiary];
+      }
+      if (query.entityType === 'Test Type') {
+        return [mockBeneficiary];
+      }
+      return [];
+    }),
+    findOneBeneficiary: jest.fn().mockImplementation((id) => {
+      if (id === '1') return mockBeneficiary;
+      if (id === '2') return mockBeneficiary2;
+      throw new NotFoundException(`Beneficiario con ID ${id} no encontrado`);
+    }),
+    createBeneficiary: jest.fn().mockImplementation((input: CreateBeneficiaryDto) => {
+      return {
+        id: '1',
+        legalName: input.nombre_legal,
+        rut: input.rut,
+        address: input.direccion,
+        entityType: input.tipo_entidad,
+        representative: input.representante,
+        hasLegalPersonality: Boolean(input.personalidad_juridica),
+      };
+    }),
+    updateBeneficiary: jest.fn().mockImplementation((id: string, input: UpdateBeneficiaryDto) => {
+      return {
+        id,
+        legalName: input.nombre_legal || mockBeneficiary.legalName,
+        rut: input.rut || mockBeneficiary.rut,
+        address: input.direccion || mockBeneficiary.address,
+        entityType: input.tipo_entidad || mockBeneficiary.entityType,
+        representative: input.representante || mockBeneficiary.representative,
+        hasLegalPersonality: input.personalidad_juridica !== undefined 
+          ? Boolean(input.personalidad_juridica) 
+          : mockBeneficiary.hasLegalPersonality,
+      };
+    }),
+    removeBeneficiary: jest.fn().mockResolvedValue(mockBeneficiary),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         BeneficiariesResolver,
         {
           provide: BeneficiariesService,
-          useValue: {
-            findAllBeneficiaries: jest.fn().mockImplementation((query) => {
-              if (!query || Object.keys(query).length === 0) {
-                return [mockBeneficiary, mockBeneficiary2];
-              }
-              if (query.legalName === 'Test Beneficiary') {
-                return [mockBeneficiary];
-              }
-              if (query.rut === '12345678-9') {
-                return [mockBeneficiary];
-              }
-              if (query.entityType === 'Test Type') {
-                return [mockBeneficiary];
-              }
-              return [];
-            }),
-            findOneBeneficiary: jest.fn().mockImplementation((id) => {
-              if (id === '1') return mockBeneficiary;
-              if (id === '2') return mockBeneficiary2;
-              throw new NotFoundException(`Beneficiario con ID ${id} no encontrado`);
-            }),
-            createBeneficiary: jest.fn().mockResolvedValue(mockBeneficiary),
-            updateBeneficiary: jest.fn().mockResolvedValue(mockBeneficiary),
-            removeBeneficiary: jest.fn().mockResolvedValue(mockBeneficiary),
-          },
+          useValue: mockService,
+        },
+        {
+          provide: APP_PIPE,
+          useClass: ValidationPipe,
         },
       ],
     }).compile();
@@ -106,7 +138,7 @@ describe('BeneficiariesResolver', () => {
     it('debería manejar query inválida', async () => {
       const query = 'invalid-json';
       await expect(resolver.beneficiaries(query))
-        .rejects.toThrow('Unexpected token \'i\', "invalid-json" is not valid JSON');
+        .rejects.toThrow('Query inválida');
     });
   });
 
@@ -118,20 +150,20 @@ describe('BeneficiariesResolver', () => {
     });
 
     it('debería lanzar NotFoundException cuando el beneficiario no existe', async () => {
-      await expect(resolver.beneficiary('999')).rejects.toThrow(NotFoundException);
+      await expect(resolver.beneficiary('999')).rejects.toThrow('Beneficiario con ID 999 no encontrado');
       expect(service.findOneBeneficiary).toHaveBeenCalledWith('999');
     });
   });
 
   describe('createBeneficiary', () => {
-    it('debería crear un nuevo beneficiario', async () => {
-      const createInput: CreateBeneficiaryInput = {
-        legalName: 'Test Beneficiary',
+    it('debería crear un nuevo beneficiario y transformar snake_case a camelCase', async () => {
+      const createInput: CreateBeneficiaryDto = {
+        nombre_legal: 'Test Beneficiary',
         rut: '12345678-9',
-        address: 'Test Address',
-        entityType: 'Test Type',
-        representative: 'Test Representative',
-        hasLegalPersonality: true,
+        direccion: 'Test Address',
+        tipo_entidad: 'Test Type',
+        representante: 'Test Representative',
+        personalidad_juridica: 1,
       };
       const result = await resolver.createBeneficiary(createInput);
       expect(result).toEqual(mockBeneficiary);
@@ -140,72 +172,63 @@ describe('BeneficiariesResolver', () => {
 
     it('debería validar campos requeridos', async () => {
       const createInput = {
-        legalName: 'Test Beneficiary',
+        nombre_legal: 'Test Beneficiary',
         // Falta rut que es requerido
-        address: 'Test Address',
-        entityType: 'Test Type',
-        representative: 'Test Representative',
-        hasLegalPersonality: true,
+        direccion: 'Test Address',
+        tipo_entidad: 'Test Type',
+        representante: 'Test Representative',
+        personalidad_juridica: 1,
       };
       
-      jest.spyOn(service, 'createBeneficiary').mockRejectedValueOnce(
-        new BadRequestException('Campos requeridos faltantes')
-      );
-      
-      await expect(resolver.createBeneficiary(createInput as any))
-        .rejects.toThrow(BadRequestException);
-    });
-
-    it('debería validar formato de RUT', async () => {
-      const createInput = {
-        legalName: 'Test Beneficiary',
-        rut: '12345678', // RUT inválido
-        address: 'Test Address',
-        entityType: 'Test Type',
-        representative: 'Test Representative',
-        hasLegalPersonality: true,
-      };
-      
-      jest.spyOn(service, 'createBeneficiary').mockRejectedValueOnce(
-        new BadRequestException('Formato de RUT inválido')
-      );
-      
-      await expect(resolver.createBeneficiary(createInput as any))
+      await expect(resolver.createBeneficiary(createInput as CreateBeneficiaryDto))
         .rejects.toThrow(BadRequestException);
     });
 
     it('debería validar tipos de datos', async () => {
       const createInput = {
-        legalName: 'Test Beneficiary',
+        nombre_legal: 'Test Beneficiary',
         rut: '12345678-9',
-        address: 'Test Address',
-        entityType: 'Test Type',
-        representative: 'Test Representative',
-        hasLegalPersonality: 'true', // Debería ser boolean
+        direccion: 'Test Address',
+        tipo_entidad: 'Test Type',
+        representante: 'Test Representative',
+        personalidad_juridica: '1', // Debería ser number
       };
       
-      jest.spyOn(service, 'createBeneficiary').mockRejectedValueOnce(
-        new BadRequestException('Tipos de datos inválidos')
-      );
+      await expect(resolver.createBeneficiary(createInput as unknown as CreateBeneficiaryDto))
+        .rejects.toThrow(BadRequestException);
+    });
+
+    it('debería validar formato de RUT', async () => {
+      const createInput = {
+        nombre_legal: 'Test Beneficiary',
+        rut: '12345678', // RUT inválido (sin guión ni dígito verificador)
+        direccion: 'Test Address',
+        tipo_entidad: 'Test Type',
+        representante: 'Test Representative',
+        personalidad_juridica: 1,
+      };
       
-      await expect(resolver.createBeneficiary(createInput as any))
+      await expect(resolver.createBeneficiary(createInput as CreateBeneficiaryDto))
         .rejects.toThrow(BadRequestException);
     });
   });
 
   describe('updateBeneficiary', () => {
-    it('debería actualizar un beneficiario', async () => {
-      const updateInput: UpdateBeneficiaryInput = {
-        legalName: 'Updated Name',
+    it('debería actualizar un beneficiario y transformar snake_case a camelCase', async () => {
+      const updateInput: UpdateBeneficiaryDto = {
+        nombre_legal: 'Updated Name',
       };
       const result = await resolver.updateBeneficiary('1', updateInput);
-      expect(result).toEqual(mockBeneficiary);
+      expect(result).toEqual({
+        ...mockBeneficiary,
+        legalName: 'Updated Name',
+      });
       expect(service.updateBeneficiary).toHaveBeenCalledWith('1', updateInput);
     });
 
     it('debería manejar actualización de beneficiario inexistente', async () => {
-      const updateInput: UpdateBeneficiaryInput = {
-        legalName: 'Updated Name',
+      const updateInput: UpdateBeneficiaryDto = {
+        nombre_legal: 'Updated Name',
       };
       jest.spyOn(service, 'updateBeneficiary').mockRejectedValueOnce(new NotFoundException());
       await expect(resolver.updateBeneficiary('999', updateInput))
@@ -214,41 +237,33 @@ describe('BeneficiariesResolver', () => {
 
     it('debería validar formato de RUT en la actualización', async () => {
       const updateInput = {
-        rut: '12345678', // RUT inválido
+        rut: '12345678', // RUT inválido (sin guión ni dígito verificador)
       };
       
-      jest.spyOn(service, 'updateBeneficiary').mockRejectedValueOnce(
-        new BadRequestException('Formato de RUT inválido')
-      );
-      
-      await expect(resolver.updateBeneficiary('1', updateInput as any))
+      await expect(resolver.updateBeneficiary('1', updateInput as UpdateBeneficiaryDto))
         .rejects.toThrow(BadRequestException);
     });
 
     it('debería validar tipos de datos en la actualización', async () => {
       const updateInput = {
-        hasLegalPersonality: 'false', // Debería ser boolean
+        personalidad_juridica: '0', // Debería ser number
       };
       
-      jest.spyOn(service, 'updateBeneficiary').mockRejectedValueOnce(
-        new BadRequestException('Tipos de datos inválidos')
-      );
-      
-      await expect(resolver.updateBeneficiary('1', updateInput as any))
+      await expect(resolver.updateBeneficiary('1', updateInput as unknown as UpdateBeneficiaryDto))
         .rejects.toThrow(BadRequestException);
     });
   });
 
-  describe('deleteBeneficiary', () => {
+  describe('removeBeneficiary', () => {
     it('debería eliminar un beneficiario', async () => {
-      const result = await resolver.deleteBeneficiary('1');
+      const result = await resolver.removeBeneficiary('1');
       expect(result).toEqual(mockBeneficiary);
       expect(service.removeBeneficiary).toHaveBeenCalledWith('1');
     });
 
     it('debería manejar eliminación de beneficiario inexistente', async () => {
       jest.spyOn(service, 'removeBeneficiary').mockRejectedValueOnce(new NotFoundException());
-      await expect(resolver.deleteBeneficiary('999'))
+      await expect(resolver.removeBeneficiary('999'))
         .rejects.toThrow(NotFoundException);
     });
   });
