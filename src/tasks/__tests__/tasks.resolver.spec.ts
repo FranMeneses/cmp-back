@@ -62,14 +62,13 @@ describe('TasksResolver', () => {
         throw new NotFoundException(`Tarea con ID ${id} no encontrada`);
       }),
       create: jest.fn().mockImplementation((dto: CreateTaskDto) => {
-        // Simular transformación de snake_case a camelCase
         return {
           id: mockGeneratedId,
-          name: dto.nombre,
-          description: dto.descripcion,
-          valleyId: dto.id_valle,
-          faenaId: dto.id_faena,
-          statusId: dto.id_estado,
+          name: dto.name,
+          description: dto.description,
+          valleyId: dto.valleyId,
+          faenaId: dto.faenaId,
+          statusId: dto.statusId,
           valley: mockValley,
           faena: mockFaena,
           status: mockStatus
@@ -80,14 +79,13 @@ describe('TasksResolver', () => {
           throw new NotFoundException(`Tarea con ID ${id} no encontrada`);
         }
         const task = id === '1' ? mockTask : mockTask2;
-        // Simular transformación de snake_case a camelCase
         return {
           ...task,
-          name: dto.nombre || task.name,
-          description: dto.descripcion || task.description,
-          valleyId: dto.id_valle || task.valleyId,
-          faenaId: dto.id_faena || task.faenaId,
-          statusId: dto.id_estado || task.statusId
+          name: dto.name || task.name,
+          description: dto.description || task.description,
+          valleyId: dto.valleyId || task.valleyId,
+          faenaId: dto.faenaId || task.faenaId,
+          statusId: dto.statusId || task.statusId
         };
       }),
       remove: jest.fn().mockImplementation((id: string) => {
@@ -146,13 +144,13 @@ describe('TasksResolver', () => {
   });
 
   describe('createTask', () => {
-    it('debería crear una nueva tarea y transformar snake_case a camelCase', async () => {
+    it('debería crear una nueva tarea', async () => {
       const createInput: CreateTaskDto = {
-        nombre: 'Test Task',
-        descripcion: 'Test Description',
-        id_valle: 1,
-        id_faena: 1,
-        id_estado: 1
+        name: 'Test Task',
+        description: 'Test Description',
+        valleyId: 1,
+        faenaId: 1,
+        statusId: 1
       };
       const result = await resolver.createTask(createInput);
       expect(result).toEqual({
@@ -169,26 +167,26 @@ describe('TasksResolver', () => {
       expect(service.create).toHaveBeenCalledWith(createInput);
     });
 
-    it('debería validar campos requeridos usando ValidationPipe', async () => {
+    it('debería validar campos requeridos', async () => {
       const createInput = {
-        // Falta nombre que es requerido
-        descripcion: 'Test Description',
-        id_valle: 1,
-        id_faena: 1,
-        id_estado: 1
+        name: 'Test Task',
+        // Falta description que es requerido
+        valleyId: 1,
+        faenaId: 1,
+        statusId: 1
       };
       
       await expect(resolver.createTask(createInput as any))
         .rejects.toThrow(BadRequestException);
     });
 
-    it('debería validar tipos de datos usando ValidationPipe', async () => {
+    it('debería validar tipos de datos', async () => {
       const createInput = {
-        nombre: 'Test Task',
-        descripcion: 'Test Description',
-        id_valle: '1', // Debería ser número
-        id_faena: '1', // Debería ser número
-        id_estado: '1' // Debería ser número
+        name: 'Test Task',
+        description: 'Test Description',
+        valleyId: '1', // Debería ser número
+        faenaId: '1', // Debería ser número
+        statusId: '1' // Debería ser número
       };
       
       await expect(resolver.createTask(createInput as any))
@@ -197,9 +195,9 @@ describe('TasksResolver', () => {
   });
 
   describe('updateTask', () => {
-    it('debería actualizar una tarea y transformar snake_case a camelCase', async () => {
+    it('debería actualizar una tarea', async () => {
       const updateInput: UpdateTaskDto = {
-        nombre: 'Updated Task'
+        name: 'Updated Task'
       };
       const result = await resolver.updateTask('1', updateInput);
       expect(result).toEqual({
@@ -211,18 +209,18 @@ describe('TasksResolver', () => {
 
     it('debería manejar actualización de tarea inexistente', async () => {
       const updateInput: UpdateTaskDto = {
-        nombre: 'Updated Task'
+        name: 'Updated Task'
       };
       await expect(resolver.updateTask('999', updateInput))
         .rejects.toThrow(NotFoundException);
     });
 
-    it('debería validar tipos de datos usando ValidationPipe', async () => {
+    it('debería validar tipos de datos en la actualización', async () => {
       const updateInput = {
-        nombre: 'Updated Task',
-        id_valle: '1', // Debería ser número
-        id_faena: '1', // Debería ser número
-        id_estado: '1' // Debería ser número
+        name: 'Updated Task',
+        valleyId: '1', // Debería ser número
+        faenaId: '1', // Debería ser número
+        statusId: '1' // Debería ser número
       };
       
       await expect(resolver.updateTask('1', updateInput as any))
