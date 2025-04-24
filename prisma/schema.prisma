@@ -160,13 +160,13 @@ model subtarea {
   fecha_inicio     DateTime?   @db.Date
   fecha_termino    DateTime?   @db.Date
   fecha_final      DateTime?   @db.Date
-  id_beneficiario  String      @db.UniqueIdentifier
-  id_estado        Int         @default(1)
-  id_prioridad     Int
+  id_beneficiario  String?     @db.UniqueIdentifier
+  id_estado        Int?        @default(1)
+  id_prioridad     Int?
   tarea            tarea       @relation(fields: [id_tarea], references: [id_tarea], onDelete: Cascade)
-  beneficiario     beneficiario @relation(fields: [id_beneficiario], references: [id_beneficiario], onDelete: Cascade)
-  subtarea_estado  subtarea_estado @relation(fields: [id_estado], references: [id_subtarea_estado], onDelete: Cascade)
-  prioridad        prioridad      @relation(fields: [id_prioridad], references: [id_prioridad], onDelete: Cascade)
+  beneficiario     beneficiario? @relation(fields: [id_beneficiario], references: [id_beneficiario], onDelete: Cascade)
+  subtarea_estado  subtarea_estado? @relation(fields: [id_estado], references: [id_subtarea_estado], onDelete: Cascade)
+  prioridad        prioridad?      @relation(fields: [id_prioridad], references: [id_prioridad], onDelete: Cascade)
   documentos       documento[]
   cumplimientos    cumplimiento[]
   registros        registro[]

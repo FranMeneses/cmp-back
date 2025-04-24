@@ -1,22 +1,28 @@
-import { IsString, IsUUID, IsNotEmpty, IsOptional } from 'class-validator';
+import { IsString, IsOptional, IsUUID } from 'class-validator';
+import { InputType, Field, ID } from '@nestjs/graphql';
 
+@InputType()
 export class CreateContactDto {
+  @Field(() => ID)
   @IsUUID()
-  @IsNotEmpty()
-  id_beneficiario: string;
+  beneficiaryId: string;
 
+  @Field({ nullable: true })
   @IsString()
   @IsOptional()
-  nombre?: string;
+  name?: string;
 
+  @Field({ nullable: true })
   @IsString()
   @IsOptional()
-  cargo?: string;
+  position?: string;
 
+  @Field({ nullable: true })
   @IsString()
   @IsOptional()
-  mail?: string;
+  email?: string;
 
+  @Field({ nullable: true })
   @IsString()
   @IsOptional()
   phone?: string;

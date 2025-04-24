@@ -1,65 +1,64 @@
-import { IsString, IsNotEmpty, IsUUID, IsInt, IsDate, IsOptional } from 'class-validator';
-import { InputType, Field, Int } from '@nestjs/graphql';
+import { Field, InputType, Int, Float, ID } from '@nestjs/graphql';
+import { IsString, IsNumber, IsOptional, IsDate } from 'class-validator';
 
 @InputType()
 export class CreateSubtaskDto {
-  @Field({ nullable: true })
-  @IsUUID()
-  @IsNotEmpty()
-  id_tarea: string;
+  @Field(() => ID)
+  @IsString()
+  taskId: string;
 
-  @Field(() => Int)
-  @IsInt()
+  @Field(() => Int, { nullable: true })
+  @IsNumber()
   @IsOptional()
-  numero?: number;
+  number?: number;
 
   @Field({ nullable: true })
   @IsString()
   @IsOptional()
-  nombre?: string;
+  name?: string;
 
   @Field({ nullable: true })
   @IsString()
   @IsOptional()
-  descripcion?: string;
+  description?: string;
 
-  @Field(() => Int, { nullable: true })
-  @IsInt()
+  @Field(() => Float, { nullable: true })
+  @IsNumber()
   @IsOptional()
-  presupuesto?: number;
+  budget?: number;
 
-  @Field(() => Int, { nullable: true })
-  @IsInt()
+  @Field(() => Float, { nullable: true })
+  @IsNumber()
   @IsOptional()
-  gasto?: number;
+  expense?: number;
 
   @Field({ nullable: true })
   @IsDate()
   @IsOptional()
-  fecha_inicio?: Date;
+  startDate?: Date;
 
   @Field({ nullable: true })
   @IsDate()
   @IsOptional()
-  fecha_termino?: Date;
+  endDate?: Date;
 
   @Field({ nullable: true })
   @IsDate()
   @IsOptional()
-  fecha_final?: Date;
+  finalDate?: Date;
 
-  @Field(() => Int, { nullable: true })
-  @IsUUID()
-  @IsNotEmpty()
-  id_beneficiario: number;
-
-  @Field(() => Int, { nullable: true })
-  @IsInt()
+  @Field(() => ID, { nullable: true })
+  @IsString()
   @IsOptional()
-  id_estado?: number;
+  beneficiaryId?: string;
 
   @Field(() => Int, { nullable: true })
-  @IsInt()
-  @IsNotEmpty()
-  id_prioridad: number;
+  @IsNumber()
+  @IsOptional()
+  statusId?: number;
+
+  @Field(() => Int, { nullable: true })
+  @IsNumber()
+  @IsOptional()
+  priorityId?: number;
 } 

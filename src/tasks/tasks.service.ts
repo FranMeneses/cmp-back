@@ -9,11 +9,11 @@ export class TasksService {
 
   private mapToDatabase(taskDto: CreateTaskDto | UpdateTaskDto) {
     return {
-      nombre: taskDto.nombre,
-      descripcion: taskDto.descripcion,
-      id_valle: taskDto.id_valle,
-      id_faena: taskDto.id_faena,
-      id_estado: taskDto.id_estado
+      nombre: taskDto.name,
+      descripcion: taskDto.description,
+      id_valle: taskDto.valleyId,
+      id_faena: taskDto.faenaId,
+      id_estado: taskDto.statusId
     };
   }
 
@@ -57,49 +57,6 @@ export class TasksService {
 
   async findAll() {
     const tasks = await this.prisma.tarea.findMany({
-      select: {
-        id_tarea: true,
-        nombre: true,
-        descripcion: true,
-        id_valle: true,
-        id_faena: true,
-        id_estado: true,
-        valle: {
-          select: {
-            id_valle: true,
-            valle_name: true
-          }
-        },
-        faena: {
-          select: {
-            id_faena: true,
-            faena_name: true
-          }
-        }
-      }
-    });
-    return tasks.map(task => ({
-      id: task.id_tarea,
-      name: task.nombre,
-      description: task.descripcion,
-      valleyId: task.id_valle,
-      faenaId: task.id_faena,
-      statusId: task.id_estado,
-      valley: task.valle ? {
-        id: task.valle.id_valle,
-        name: task.valle.valle_name
-      } : null,
-      faena: task.faena ? {
-        id: task.faena.id_faena,
-        name: task.faena.faena_name
-      } : null
-    }));
-  }
-
-  /* Comentando temporalmente findAllDetailed
-  async findAllDetailed(query: any) {
-    const tasks = await this.prisma.tarea.findMany({
-      where: query,
       include: {
         tarea_estado: true,
         subtareas: {
@@ -111,7 +68,6 @@ export class TasksService {
     });
     return tasks.map(task => this.mapFromDatabase(task));
   }
-  */
 
   async findOne(id: string) {
     const task = await this.prisma.tarea.findUnique({
@@ -158,6 +114,23 @@ export class TasksService {
     });
     return this.mapFromDatabase(task);
   }
+
+  /* Comentando temporalmente findAllDetailed
+  async findAllDetailed(query: any) {
+    const tasks = await this.prisma.tarea.findMany({
+      where: query,
+      include: {
+        tarea_estado: true,
+        subtareas: {
+          include: {
+            subtarea_estado: true
+          }
+        }
+      }
+    });
+    return tasks.map(task => this.mapFromDatabase(task));
+  }
+  */
 
   /* Comentando temporalmente los métodos que no son parte del CRUD básico
   async getTaskProgress(id: string) {

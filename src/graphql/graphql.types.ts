@@ -28,7 +28,37 @@ export class TaskStatus {
 }
 
 @ObjectType()
-export class Task {
+export class Beneficiary {
+  @Field(() => ID)
+  id: string;
+
+  @Field({ nullable: true })
+  legalName?: string;
+
+  @Field({ nullable: true })
+  rut?: string;
+
+  @Field({ nullable: true })
+  address?: string;
+
+  @Field({ nullable: true })
+  entityType?: string;
+
+  @Field({ nullable: true })
+  representative?: string;
+
+  @Field({ nullable: true })
+  hasLegalPersonality?: boolean;
+
+  @Field(() => [Contact], { nullable: true })
+  contacts?: Contact[];
+
+  @Field(() => [Subtask], { nullable: true })
+  subtasks?: Subtask[];
+}
+
+@ObjectType()
+export class Contact {
   @Field(() => ID)
   id: string;
 
@@ -36,64 +66,115 @@ export class Task {
   name?: string;
 
   @Field({ nullable: true })
-  description?: string;
+  position?: string;
 
-  @Field(() => Int, { nullable: true })
-  valleyId?: number;
+  @Field({ nullable: true })
+  email?: string;
 
-  @Field(() => Int, { nullable: true })
-  faenaId?: number;
+  @Field({ nullable: true })
+  phone?: string;
 
-  @Field(() => Int, { nullable: true })
-  statusId?: number;
-
-  @Field(() => Valley, { nullable: true })
-  valley?: Valley;
-
-  @Field(() => Faena, { nullable: true })
-  faena?: Faena;
-
-  @Field(() => TaskStatus, { nullable: true })
-  status?: TaskStatus;
-
-  @Field(() => [Subtask], { nullable: true })
-  subtasks?: Subtask[];
+  @Field(() => Beneficiary, { nullable: true })
+  beneficiary?: Beneficiary;
 }
 
 @InputType()
-export class CreateTaskInput {
+export class CreateBeneficiaryInput {
+  @Field({ nullable: true })
+  legalName?: string;
+
+  @Field({ nullable: true })
+  rut?: string;
+
+  @Field({ nullable: true })
+  address?: string;
+
+  @Field({ nullable: true })
+  entityType?: string;
+
+  @Field({ nullable: true })
+  representative?: string;
+
+  @Field({ nullable: true })
+  hasLegalPersonality?: boolean;
+}
+
+@InputType()
+export class UpdateBeneficiaryInput {
+  @Field({ nullable: true })
+  legalName?: string;
+
+  @Field({ nullable: true })
+  rut?: string;
+
+  @Field({ nullable: true })
+  address?: string;
+
+  @Field({ nullable: true })
+  entityType?: string;
+
+  @Field({ nullable: true })
+  representative?: string;
+
+  @Field({ nullable: true })
+  hasLegalPersonality?: boolean;
+}
+
+@InputType()
+export class CreateContactInput {
+  @Field(() => ID)
+  beneficiaryId: string;
+
   @Field({ nullable: true })
   name?: string;
 
   @Field({ nullable: true })
-  description?: string;
+  position?: string;
 
-  @Field(() => Int)
-  valleyId: number;
+  @Field({ nullable: true })
+  email?: string;
 
-  @Field(() => Int)
-  faenaId: number;
-
-  @Field(() => Int, { nullable: true })
-  statusId?: number;
+  @Field({ nullable: true })
+  phone?: string;
 }
 
 @InputType()
-export class UpdateTaskInput {
+export class UpdateContactInput {
+  @Field(() => ID, { nullable: true })
+  beneficiaryId?: string;
+
   @Field({ nullable: true })
   name?: string;
 
   @Field({ nullable: true })
-  description?: string;
+  position?: string;
 
-  @Field(() => Int, { nullable: true })
-  valleyId?: number;
+  @Field({ nullable: true })
+  email?: string;
 
-  @Field(() => Int, { nullable: true })
-  faenaId?: number;
+  @Field({ nullable: true })
+  phone?: string;
+}
 
-  @Field(() => Int, { nullable: true })
-  statusId?: number;
+@ObjectType()
+export class SubtaskStatus {
+  @Field(() => Int)
+  id: number;
+
+  @Field({ nullable: true })
+  name?: string;
+
+  @Field(() => Int)
+  percentage: number;
+}
+
+@ObjectType()
+export class Priority {
+  @Field(() => Int)
+  id: number;
+
+  @Field({ nullable: true })
+  name?: string;
 }
 
 @ObjectType()
@@ -104,38 +185,47 @@ export class Subtask {
   @Field(() => ID)
   taskId: string;
 
-  @Field(() => Int)
-  number: number;
+  @Field(() => Int, { nullable: true })
+  number?: number;
 
-  @Field()
-  name: string;
+  @Field({ nullable: true })
+  name?: string;
 
-  @Field()
-  description: string;
+  @Field({ nullable: true })
+  description?: string;
 
-  @Field(() => Float)
-  budget: number;
+  @Field(() => Float, { nullable: true })
+  budget?: number;
 
-  @Field(() => Float)
-  expense: number;
+  @Field(() => Float, { nullable: true })
+  expense?: number;
 
-  @Field()
-  startDate: Date;
+  @Field({ nullable: true })
+  startDate?: Date;
 
-  @Field()
-  endDate: Date;
+  @Field({ nullable: true })
+  endDate?: Date;
 
-  @Field()
-  finalDate: Date;
+  @Field({ nullable: true })
+  finalDate?: Date;
 
-  @Field(() => ID)
-  beneficiaryId: string;
+  @Field(() => ID, { nullable: true })
+  beneficiaryId?: string;
 
-  @Field(() => Int)
-  statusId: number;
+  @Field(() => Int, { nullable: true })
+  statusId?: number;
 
-  @Field(() => Int)
-  priorityId: number;
+  @Field(() => Int, { nullable: true })
+  priorityId?: number;
+
+  @Field(() => Beneficiary, { nullable: true })
+  beneficiary?: Beneficiary;
+
+  @Field(() => SubtaskStatus, { nullable: true })
+  status?: SubtaskStatus;
+
+  @Field(() => Priority, { nullable: true })
+  priority?: Priority;
 }
 
 @InputType()
@@ -217,69 +307,72 @@ export class UpdateSubtaskInput {
 }
 
 @ObjectType()
-export class Beneficiary {
+export class Task {
   @Field(() => ID)
   id: string;
 
-  @Field()
-  legalName: string;
+  @Field({ nullable: true })
+  name?: string;
 
-  @Field()
-  rut: string;
+  @Field({ nullable: true })
+  description?: string;
 
-  @Field()
-  address: string;
+  @Field(() => Int, { nullable: true })
+  valleyId?: number;
 
-  @Field()
-  entityType: string;
+  @Field(() => Int, { nullable: true })
+  faenaId?: number;
 
-  @Field()
-  representative: string;
+  @Field(() => Int, { nullable: true })
+  statusId?: number;
 
-  @Field()
-  hasLegalPersonality: boolean;
+  @Field(() => Valley, { nullable: true })
+  valley?: Valley;
+
+  @Field(() => Faena, { nullable: true })
+  faena?: Faena;
+
+  @Field(() => TaskStatus, { nullable: true })
+  status?: TaskStatus;
+
+  @Field(() => [Subtask], { nullable: true })
+  subtasks?: Subtask[];
 }
 
 @InputType()
-export class CreateBeneficiaryInput {
-  @Field()
-  legalName: string;
+export class CreateTaskInput {
+  @Field({ nullable: true })
+  name?: string;
 
-  @Field()
-  rut: string;
+  @Field({ nullable: true })
+  description?: string;
 
-  @Field()
-  address: string;
+  @Field(() => Int)
+  valleyId: number;
 
-  @Field()
-  entityType: string;
+  @Field(() => Int)
+  faenaId: number;
 
-  @Field()
-  representative: string;
-
-  @Field()
-  hasLegalPersonality: boolean;
+  @Field(() => Int, { nullable: true })
+  statusId?: number;
 }
 
 @InputType()
-export class UpdateBeneficiaryInput {
+export class UpdateTaskInput {
   @Field({ nullable: true })
-  legalName?: string;
+  name?: string;
 
   @Field({ nullable: true })
-  rut?: string;
+  description?: string;
 
-  @Field({ nullable: true })
-  address?: string;
+  @Field(() => Int, { nullable: true })
+  valleyId?: number;
 
-  @Field({ nullable: true })
-  entityType?: string;
+  @Field(() => Int, { nullable: true })
+  faenaId?: number;
 
-  @Field({ nullable: true })
-  representative?: string;
-
-  @Field({ nullable: true })
-  hasLegalPersonality?: boolean;
+  @Field(() => Int, { nullable: true })
+  statusId?: number;
 }
 
 @ObjectType()

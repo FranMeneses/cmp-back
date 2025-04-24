@@ -1,12 +1,12 @@
-import { IsString, IsNotEmpty, IsNumber, IsOptional, IsUUID } from 'class-validator';
-import { InputType, Field, Int } from '@nestjs/graphql';
+import { IsString, IsBoolean, IsOptional } from 'class-validator';
+import { InputType, Field } from '@nestjs/graphql';
 
 @InputType()
 export class UpdateBeneficiaryDto {
   @Field({ nullable: true })
   @IsString()
   @IsOptional()
-  nombre_legal?: string;
+  legalName?: string;
 
   @Field({ nullable: true })
   @IsString()
@@ -16,20 +16,20 @@ export class UpdateBeneficiaryDto {
   @Field({ nullable: true })
   @IsString()
   @IsOptional()
-  direccion?: string;
+  address?: string;
 
   @Field({ nullable: true })
   @IsString()
   @IsOptional()
-  tipo_entidad?: string;
+  entityType?: string;
 
   @Field({ nullable: true })
   @IsString()
   @IsOptional()
-  representante?: string;
+  representative?: string;
 
-  @Field(() => Int, { nullable: true })
-  @IsNumber()
+  @Field({ nullable: true })
+  @IsBoolean()
   @IsOptional()
-  personalidad_juridica?: number;
+  hasLegalPersonality?: boolean;
 } 

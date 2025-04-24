@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsNumber, IsOptional, IsUUID } from 'class-validator';
+import { IsString, IsNotEmpty, IsNumber, IsOptional } from 'class-validator';
 import { InputType, Field, Int } from '@nestjs/graphql';
 
 @InputType()
@@ -6,25 +6,25 @@ export class CreateTaskDto {
   @Field({ nullable: true })
   @IsString()
   @IsOptional()
-  nombre?: string;
+  name?: string;
 
   @Field({ nullable: true })
   @IsString()
   @IsOptional()
-  descripcion?: string;
+  description?: string;
 
   @Field(() => Int, { nullable: true })
   @IsNumber()
   @IsNotEmpty()
-  id_valle?: number;
+  valleyId?: number;
 
   @Field(() => Int, { nullable: true })
   @IsNumber()
   @IsNotEmpty()
-  id_faena?: number;
+  faenaId?: number;
 
   @Field(() => Int, { nullable: true })
   @IsNumber()
   @IsOptional()
-  id_estado?: number;
+  statusId?: number;
 } 

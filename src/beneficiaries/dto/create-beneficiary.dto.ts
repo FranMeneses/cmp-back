@@ -1,35 +1,35 @@
-import { IsString, IsNotEmpty, IsNumber, IsOptional, IsUUID } from 'class-validator';
-import { InputType, Field, Int } from '@nestjs/graphql';
+import { IsString, IsBoolean, IsOptional } from 'class-validator';
+import { InputType, Field } from '@nestjs/graphql';
 
 @InputType()
 export class CreateBeneficiaryDto {
-  @Field()
+  @Field({ nullable: true })
   @IsString()
-  @IsNotEmpty()
-  nombre_legal: string;
+  @IsOptional()
+  legalName?: string;
 
-  @Field()
+  @Field({ nullable: true })
   @IsString()
-  @IsNotEmpty()
-  rut: string;
+  @IsOptional()
+  rut?: string;
 
-  @Field()
+  @Field({ nullable: true })
   @IsString()
-  @IsNotEmpty()
-  direccion: string;
+  @IsOptional()
+  address?: string;
 
-  @Field()
+  @Field({ nullable: true })
   @IsString()
-  @IsNotEmpty()
-  tipo_entidad: string;
+  @IsOptional()
+  entityType?: string;
 
-  @Field()
+  @Field({ nullable: true })
   @IsString()
-  @IsNotEmpty()
-  representante: string;
+  @IsOptional()
+  representative?: string;
 
-  @Field()
-  @IsNumber()
-  @IsNotEmpty()
-  personalidad_juridica: number;
+  @Field({ nullable: true })
+  @IsBoolean()
+  @IsOptional()
+  hasLegalPersonality?: boolean;
 } 

@@ -7,70 +7,70 @@ import { UpdateSubtaskDto } from './dto/update-subtask.dto';
 export class SubtasksService {
   constructor(private prisma: PrismaService) {}
 
-  private mapToDatabase(subtaskDto: CreateSubtaskDto | UpdateSubtaskDto) {
+  private mapToDatabase(dto: CreateSubtaskDto | UpdateSubtaskDto) {
     return {
-      nombre: subtaskDto.nombre,
-      descripcion: subtaskDto.descripcion,
-      numero: 0, // Valor por defecto para el campo requerido
-      tarea: subtaskDto.id_tarea ? {
+      nombre: dto.name,
+      descripcion: dto.description,
+      tarea: dto.taskId ? {
         connect: {
-          id_tarea: String(subtaskDto.id_tarea)
+          id_tarea: dto.taskId
         }
       } : undefined,
-      subtarea_estado: subtaskDto.id_estado ? {
+      subtarea_estado: dto.statusId ? {
         connect: {
-          id_subtarea_estado: subtaskDto.id_estado
+          id_subtarea_estado: dto.statusId
         }
       } : undefined,
-      prioridad: subtaskDto.id_prioridad ? {
+      prioridad: dto.priorityId ? {
         connect: {
-          id_prioridad: subtaskDto.id_prioridad
+          id_prioridad: dto.priorityId
         }
       } : undefined,
-      beneficiario: subtaskDto.id_beneficiario ? {
+      beneficiario: dto.beneficiaryId ? {
         connect: {
-          id_beneficiario: String(subtaskDto.id_beneficiario)
+          id_beneficiario: dto.beneficiaryId
         }
       } : undefined,
-      presupuesto: subtaskDto.presupuesto,
-      gasto: subtaskDto.gasto,
-      fecha_inicio: subtaskDto.fecha_inicio,
-      fecha_termino: subtaskDto.fecha_termino,
-      fecha_final: subtaskDto.fecha_final
+      presupuesto: dto.budget,
+      gasto: dto.expense,
+      fecha_inicio: dto.startDate,
+      fecha_termino: dto.endDate,
+      fecha_final: dto.finalDate,
     };
   }
 
   private mapFromDatabase(subtask: any) {
     return {
       id: subtask.id_subtarea,
-      nombre: subtask.nombre,
-      descripcion: subtask.descripcion,
-      id_tarea: subtask.id_tarea,
-      id_estado: subtask.id_estado,
-      id_prioridad: subtask.id_prioridad,
-      id_beneficiario: subtask.id_beneficiario,
-      presupuesto: subtask.presupuesto,
-      gasto: subtask.gasto,
-      fecha_inicio: subtask.fecha_inicio,
-      fecha_termino: subtask.fecha_termino,
-      fecha_final: subtask.fecha_final,
-      estado: subtask.subtarea_estado ? {
-        id: subtask.subtarea_estado.id_subtarea_estado,
-        nombre: subtask.subtarea_estado.estado,
-        porcentaje: subtask.subtarea_estado.porcentaje
-      } : null,
-      prioridad: subtask.prioridad ? {
-        id: subtask.prioridad.id_prioridad,
-        nombre: subtask.prioridad.prioridad_name
-      } : null,
-      beneficiario: subtask.beneficiario ? {
+      taskId: subtask.id_tarea,
+      number: subtask.numero,
+      name: subtask.nombre,
+      description: subtask.descripcion,
+      budget: subtask.presupuesto,
+      expense: subtask.gasto,
+      startDate: subtask.fecha_inicio,
+      endDate: subtask.fecha_termino,
+      finalDate: subtask.fecha_final,
+      beneficiaryId: subtask.id_beneficiario,
+      statusId: subtask.id_estado,
+      priorityId: subtask.id_prioridad,
+      beneficiary: subtask.beneficiario ? {
         id: subtask.beneficiario.id_beneficiario,
-        nombre_legal: subtask.beneficiario.nombre_legal,
+        legalName: subtask.beneficiario.nombre_legal,
         rut: subtask.beneficiario.rut,
-        direccion: subtask.beneficiario.direccion,
-        tipo_entidad: subtask.beneficiario.tipo_entidad,
-        representante: subtask.beneficiario.representante,
-        personalidad_juridica: subtask.beneficiario.personalidad_juridica
+        address: subtask.beneficiario.direccion,
+        entityType: subtask.beneficiario.tipo_entidad,
+        representative: subtask.beneficiario.representante,
+        hasLegalPersonality: subtask.beneficiario.personalidad_juridica
+      } : null,
+      status: subtask.subtarea_estado ? {
+        id: subtask.subtarea_estado.id_subtarea_estado,
+        name: subtask.subtarea_estado.estado,
+        percentage: subtask.subtarea_estado.porcentaje
+      } : null,
+      priority: subtask.prioridad ? {
+        id: subtask.prioridad.id_prioridad,
+        name: subtask.prioridad.prioridad_name
       } : null
     };
   }

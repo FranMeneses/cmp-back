@@ -3,13 +3,15 @@
 # ------------------------------------------------------
 
 type Beneficiary {
-  address: String!
-  entityType: String!
-  hasLegalPersonality: Boolean!
+  address: String
+  contacts: [Contact!]
+  entityType: String
+  hasLegalPersonality: Boolean
   id: ID!
-  legalName: String!
-  representative: String!
-  rut: String!
+  legalName: String
+  representative: String
+  rut: String
+  subtasks: [Subtask!]
 }
 
 type Compliance {
@@ -19,13 +21,22 @@ type Compliance {
   subtaskId: ID!
 }
 
+type Contact {
+  beneficiary: Beneficiary
+  email: String
+  id: ID!
+  name: String
+  phone: String
+  position: String
+}
+
 input CreateBeneficiaryDto {
-  direccion: String!
-  nombre_legal: String!
-  personalidad_juridica: Float!
-  representante: String!
-  rut: String!
-  tipo_entidad: String!
+  address: String
+  entityType: String
+  hasLegalPersonality: Boolean
+  legalName: String
+  representative: String
+  rut: String
 }
 
 input CreateComplianceDto {
@@ -34,27 +45,35 @@ input CreateComplianceDto {
   id_subtarea: Int!
 }
 
+input CreateContactDto {
+  beneficiaryId: ID!
+  email: String
+  name: String
+  phone: String
+  position: String
+}
+
 input CreateSubtaskDto {
-  descripcion: String
-  fecha_final: DateTime
-  fecha_inicio: DateTime
-  fecha_termino: DateTime
-  gasto: Int
-  id_beneficiario: Int
-  id_estado: Int
-  id_prioridad: Int
-  id_tarea: String
-  nombre: String
-  numero: Int!
-  presupuesto: Int
+  beneficiaryId: ID
+  budget: Float
+  description: String
+  endDate: DateTime
+  expense: Float
+  finalDate: DateTime
+  name: String
+  number: Int
+  priorityId: Int
+  startDate: DateTime
+  statusId: Int
+  taskId: ID!
 }
 
 input CreateTaskDto {
-  descripcion: String
-  id_estado: Int
-  id_faena: Int
-  id_valle: Int
-  nombre: String
+  description: String
+  faenaId: Int
+  name: String
+  statusId: Int
+  valleyId: Int
 }
 
 """
@@ -70,23 +89,33 @@ type Faena {
 type Mutation {
   createBeneficiary(input: CreateBeneficiaryDto!): Beneficiary!
   createCompliance(input: CreateComplianceDto!): Compliance!
+  createContact(input: CreateContactDto!): Contact!
   createSubtask(input: CreateSubtaskDto!): Subtask!
   createTask(input: CreateTaskDto!): Task!
   removeBeneficiary(id: ID!): Beneficiary!
   removeCompliance(id: ID!): Compliance!
+  removeContact(id: ID!): Contact!
   removeSubtask(id: ID!): Subtask!
   removeTask(id: ID!): Task!
   updateBeneficiary(id: ID!, input: UpdateBeneficiaryDto!): Beneficiary!
   updateCompliance(id: ID!, input: UpdateComplianceDto!): Compliance!
+  updateContact(id: ID!, input: UpdateContactDto!): Contact!
   updateSubtask(id: ID!, input: UpdateSubtaskDto!): Subtask!
   updateTask(id: ID!, input: UpdateTaskDto!): Task!
 }
 
+type Priority {
+  id: Int!
+  name: String
+}
+
 type Query {
-  beneficiaries(query: String): [Beneficiary!]!
+  beneficiaries: [Beneficiary!]!
   beneficiary(id: ID!): Beneficiary!
   compliance(id: ID!): Compliance!
   compliances(query: String): [Compliance!]!
+  contact(id: ID!): Contact!
+  contacts: [Contact!]!
   subtask(id: ID!): Subtask!
   subtasks(query: String): [Subtask!]!
   task(id: ID!): Task!
@@ -94,19 +123,28 @@ type Query {
 }
 
 type Subtask {
-  beneficiaryId: ID!
-  budget: Float!
-  description: String!
-  endDate: DateTime!
-  expense: Float!
-  finalDate: DateTime!
+  beneficiary: Beneficiary
+  beneficiaryId: ID
+  budget: Float
+  description: String
+  endDate: DateTime
+  expense: Float
+  finalDate: DateTime
   id: ID!
-  name: String!
-  number: Int!
-  priorityId: Int!
-  startDate: DateTime!
-  statusId: Int!
+  name: String
+  number: Int
+  priority: Priority
+  priorityId: Int
+  startDate: DateTime
+  status: SubtaskStatus
+  statusId: Int
   taskId: ID!
+}
+
+type SubtaskStatus {
+  id: Int!
+  name: String
+  percentage: Int!
 }
 
 type Task {
@@ -128,12 +166,12 @@ type TaskStatus {
 }
 
 input UpdateBeneficiaryDto {
-  direccion: String
-  nombre_legal: String
-  personalidad_juridica: Int
-  representante: String
+  address: String
+  entityType: String
+  hasLegalPersonality: Boolean
+  legalName: String
+  representative: String
   rut: String
-  tipo_entidad: String
 }
 
 input UpdateComplianceDto {
@@ -142,26 +180,34 @@ input UpdateComplianceDto {
   id_subtarea: Int
 }
 
+input UpdateContactDto {
+  beneficiaryId: ID
+  email: String
+  name: String
+  phone: String
+  position: String
+}
+
 input UpdateSubtaskDto {
-  descripcion: String
-  fecha_final: String
-  fecha_inicio: String
-  fecha_termino: String
-  gasto: Int
-  id_beneficiario: Int
-  id_estado: Int
-  id_prioridad: Int
-  id_tarea: Int
-  nombre: String
-  presupuesto: Int
+  beneficiaryId: ID
+  budget: Float
+  description: String
+  endDate: DateTime
+  expense: Float
+  finalDate: DateTime
+  name: String
+  priorityId: Int
+  startDate: DateTime
+  statusId: Int
+  taskId: ID
 }
 
 input UpdateTaskDto {
-  descripcion: String
-  id_estado: Int
-  id_faena: Int
-  id_valle: Int
-  nombre: String
+  description: String
+  faenaId: Int
+  name: String
+  statusId: Int
+  valleyId: Int
 }
 
 type Valley {

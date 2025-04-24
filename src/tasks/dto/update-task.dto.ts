@@ -6,25 +6,25 @@ export class UpdateTaskDto {
   @Field({ nullable: true })
   @IsString()
   @IsOptional()
-  nombre?: string;
+  name?: string;
 
   @Field({ nullable: true })
   @IsString()
   @IsOptional()
-  descripcion?: string;
+  description?: string;
 
   @Field(() => Int, { nullable: true })
   @IsNumber()
   @IsOptional()
-  id_valle?: number;
+  valleyId?: number;
 
   @Field(() => Int, { nullable: true })
   @IsNumber()
   @IsOptional()
-  id_faena?: number;
+  faenaId?: number;
 
   @Field(() => Int, { nullable: true })
   @IsNumber()
   @IsOptional()
-  id_estado?: number;
+  statusId?: number;
 } 

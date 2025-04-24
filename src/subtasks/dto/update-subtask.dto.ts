@@ -1,60 +1,60 @@
-import { IsString, IsNotEmpty, IsNumber, IsOptional, IsUUID } from 'class-validator';
-import { InputType, Field, Int } from '@nestjs/graphql';
+import { Field, InputType, Int, Float, ID } from '@nestjs/graphql';
+import { IsString, IsNumber, IsOptional, IsDate } from 'class-validator';
 
 @InputType()
 export class UpdateSubtaskDto {
   @Field({ nullable: true })
   @IsString()
   @IsOptional()
-  nombre?: string;
+  name?: string;
 
   @Field({ nullable: true })
   @IsString()
   @IsOptional()
-  descripcion?: string;
+  description?: string;
 
-  @Field(() => Int, { nullable: true })
-  @IsNumber()
-  @IsOptional()
-  id_tarea?: number;
-
-  @Field(() => Int, { nullable: true })
-  @IsNumber()
-  @IsOptional()
-  id_estado?: number;
-
-  @Field(() => Int, { nullable: true })
-  @IsNumber()
-  @IsOptional()
-  id_prioridad?: number;
-
-  @Field(() => Int, { nullable: true })
-  @IsNumber()
-  @IsOptional()
-  id_beneficiario?: number;
-
-  @Field(() => Int, { nullable: true })
-  @IsNumber()
-  @IsOptional()
-  presupuesto?: number;
-
-  @Field(() => Int, { nullable: true })
-  @IsNumber()
-  @IsOptional()
-  gasto?: number;
-
-  @Field({ nullable: true })
+  @Field(() => ID, { nullable: true })
   @IsString()
   @IsOptional()
-  fecha_inicio?: string;
+  taskId?: string;
 
-  @Field({ nullable: true })
+  @Field(() => Int, { nullable: true })
+  @IsNumber()
+  @IsOptional()
+  statusId?: number;
+
+  @Field(() => Int, { nullable: true })
+  @IsNumber()
+  @IsOptional()
+  priorityId?: number;
+
+  @Field(() => ID, { nullable: true })
   @IsString()
   @IsOptional()
-  fecha_termino?: string;
+  beneficiaryId?: string;
+
+  @Field(() => Float, { nullable: true })
+  @IsNumber()
+  @IsOptional()
+  budget?: number;
+
+  @Field(() => Float, { nullable: true })
+  @IsNumber()
+  @IsOptional()
+  expense?: number;
 
   @Field({ nullable: true })
-  @IsString()
+  @IsDate()
   @IsOptional()
-  fecha_final?: string;
+  startDate?: Date;
+
+  @Field({ nullable: true })
+  @IsDate()
+  @IsOptional()
+  endDate?: Date;
+
+  @Field({ nullable: true })
+  @IsDate()
+  @IsOptional()
+  finalDate?: Date;
 } 
