@@ -194,10 +194,10 @@ export class Subtask {
   @Field({ nullable: true })
   description?: string;
 
-  @Field(() => Float, { nullable: true })
+  @Field(() => Int, { nullable: true })
   budget?: number;
 
-  @Field(() => Float, { nullable: true })
+  @Field(() => Int, { nullable: true })
   expense?: number;
 
   @Field({ nullable: true })
@@ -233,44 +233,44 @@ export class CreateSubtaskInput {
   @Field(() => ID)
   taskId: string;
 
-  @Field(() => Int)
-  number: number;
+  @Field(() => Int, { nullable: true })
+  number?: number;
 
-  @Field()
-  name: string;
+  @Field({ nullable: true })
+  name?: string;
 
-  @Field()
-  description: string;
+  @Field({ nullable: true })
+  description?: string;
 
-  @Field(() => Float)
-  budget: number;
+  @Field(() => Int, { nullable: true })
+  budget?: number;
 
-  @Field(() => Float)
-  expense: number;
+  @Field(() => Int, { nullable: true })
+  expense?: number;
 
-  @Field()
-  startDate: Date;
+  @Field({ nullable: true })
+  startDate?: Date;
 
-  @Field()
-  endDate: Date;
+  @Field({ nullable: true })
+  endDate?: Date;
 
-  @Field()
-  finalDate: Date;
+  @Field({ nullable: true })
+  finalDate?: Date;
 
-  @Field(() => ID)
-  beneficiaryId: string;
+  @Field(() => ID, { nullable: true })
+  beneficiaryId?: string;
 
-  @Field(() => Int)
-  statusId: number;
+  @Field(() => Int, { nullable: true })
+  statusId?: number;
 
-  @Field(() => Int)
-  priorityId: number;
+  @Field(() => Int, { nullable: true })
+  priorityId?: number;
 }
 
 @InputType()
 export class UpdateSubtaskInput {
-  @Field(() => ID, { nullable: true })
-  taskId?: string;
+  @Field(() => ID)
+  taskId: string;
 
   @Field(() => Int, { nullable: true })
   number?: number;
@@ -281,10 +281,10 @@ export class UpdateSubtaskInput {
   @Field({ nullable: true })
   description?: string;
 
-  @Field(() => Float, { nullable: true })
+  @Field(() => Int, { nullable: true })
   budget?: number;
 
-  @Field(() => Float, { nullable: true })
+  @Field(() => Int, { nullable: true })
   expense?: number;
 
   @Field({ nullable: true })

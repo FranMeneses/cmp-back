@@ -1,8 +1,12 @@
-import { Field, InputType, Int, Float, ID } from '@nestjs/graphql';
+import { Field, InputType, Int, ID } from '@nestjs/graphql';
 import { IsString, IsNumber, IsOptional, IsDate } from 'class-validator';
 
 @InputType()
 export class UpdateSubtaskDto {
+  @Field(() => ID)
+  @IsString()
+  id: string;
+
   @Field({ nullable: true })
   @IsString()
   @IsOptional()
@@ -21,6 +25,11 @@ export class UpdateSubtaskDto {
   @Field(() => Int, { nullable: true })
   @IsNumber()
   @IsOptional()
+  number?: number;
+
+  @Field(() => Int, { nullable: true })
+  @IsNumber()
+  @IsOptional()
   statusId?: number;
 
   @Field(() => Int, { nullable: true })
@@ -33,12 +42,12 @@ export class UpdateSubtaskDto {
   @IsOptional()
   beneficiaryId?: string;
 
-  @Field(() => Float, { nullable: true })
+  @Field(() => Int, { nullable: true })
   @IsNumber()
   @IsOptional()
   budget?: number;
 
-  @Field(() => Float, { nullable: true })
+  @Field(() => Int, { nullable: true })
   @IsNumber()
   @IsOptional()
   expense?: number;
