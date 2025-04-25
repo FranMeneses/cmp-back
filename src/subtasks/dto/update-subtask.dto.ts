@@ -3,10 +3,6 @@ import { IsString, IsNumber, IsOptional, IsDate } from 'class-validator';
 
 @InputType()
 export class UpdateSubtaskDto {
-  @Field(() => ID)
-  @IsString()
-  id: string;
-
   @Field({ nullable: true })
   @IsString()
   @IsOptional()

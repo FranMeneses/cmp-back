@@ -55,10 +55,10 @@ input CreateContactDto {
 
 input CreateSubtaskDto {
   beneficiaryId: ID
-  budget: Float
+  budget: Int
   description: String
   endDate: DateTime
-  expense: Float
+  expense: Int
   finalDate: DateTime
   name: String
   number: Int
@@ -117,7 +117,7 @@ type Query {
   contact(id: ID!): Contact!
   contacts: [Contact!]!
   subtask(id: ID!): Subtask!
-  subtasks(query: String): [Subtask!]!
+  subtasks: [Subtask!]!
   task(id: ID!): Task!
   tasks: [Task!]!
 }
@@ -125,10 +125,10 @@ type Query {
 type Subtask {
   beneficiary: Beneficiary
   beneficiaryId: ID
-  budget: Float
+  budget: Int
   description: String
   endDate: DateTime
-  expense: Float
+  expense: Int
   finalDate: DateTime
   id: ID!
   name: String
@@ -190,12 +190,13 @@ input UpdateContactDto {
 
 input UpdateSubtaskDto {
   beneficiaryId: ID
-  budget: Float
+  budget: Int
   description: String
   endDate: DateTime
-  expense: Float
+  expense: Int
   finalDate: DateTime
   name: String
+  number: Int
   priorityId: Int
   startDate: DateTime
   statusId: Int

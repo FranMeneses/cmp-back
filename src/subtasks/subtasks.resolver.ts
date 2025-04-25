@@ -3,6 +3,7 @@ import { SubtasksService } from './subtasks.service';
 import { CreateSubtaskDto } from './dto/create-subtask.dto';
 import { UpdateSubtaskDto } from './dto/update-subtask.dto';
 import { Subtask } from '../graphql/graphql.types';
+import { Int } from '@nestjs/graphql';
 
 @Resolver(() => Subtask)
 export class SubtasksResolver {
@@ -14,8 +15,8 @@ export class SubtasksResolver {
   }
 
   @Query(() => [Subtask])
-  subtasks(@Args('query', { nullable: true }) query?: string) {
-    return this.subtasksService.findAll(query ? JSON.parse(query) : {});
+  subtasks() {
+    return this.subtasksService.findAll();
   }
 
   @Query(() => Subtask)

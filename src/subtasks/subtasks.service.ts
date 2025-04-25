@@ -9,33 +9,18 @@ export class SubtasksService {
 
   private mapToDatabase(dto: CreateSubtaskDto | UpdateSubtaskDto) {
     return {
+      numero: dto.number,
       nombre: dto.name,
       descripcion: dto.description,
-      tarea: dto.taskId ? {
-        connect: {
-          id_tarea: dto.taskId
-        }
-      } : undefined,
-      subtarea_estado: dto.statusId ? {
-        connect: {
-          id_subtarea_estado: dto.statusId
-        }
-      } : undefined,
-      prioridad: dto.priorityId ? {
-        connect: {
-          id_prioridad: dto.priorityId
-        }
-      } : undefined,
-      beneficiario: dto.beneficiaryId ? {
-        connect: {
-          id_beneficiario: dto.beneficiaryId
-        }
-      } : undefined,
       presupuesto: dto.budget,
       gasto: dto.expense,
       fecha_inicio: dto.startDate,
       fecha_termino: dto.endDate,
       fecha_final: dto.finalDate,
+      id_beneficiario: dto.beneficiaryId,
+      id_estado: dto.statusId,
+      id_prioridad: dto.priorityId,
+      id_tarea: dto.taskId
     };
   }
 
@@ -54,15 +39,6 @@ export class SubtasksService {
       beneficiaryId: subtask.id_beneficiario,
       statusId: subtask.id_estado,
       priorityId: subtask.id_prioridad,
-      beneficiary: subtask.beneficiario ? {
-        id: subtask.beneficiario.id_beneficiario,
-        legalName: subtask.beneficiario.nombre_legal,
-        rut: subtask.beneficiario.rut,
-        address: subtask.beneficiario.direccion,
-        entityType: subtask.beneficiario.tipo_entidad,
-        representative: subtask.beneficiario.representante,
-        hasLegalPersonality: subtask.beneficiario.personalidad_juridica
-      } : null,
       status: subtask.subtarea_estado ? {
         id: subtask.subtarea_estado.id_subtarea_estado,
         name: subtask.subtarea_estado.estado,
@@ -80,20 +56,17 @@ export class SubtasksService {
       data: this.mapToDatabase(createSubtaskDto),
       include: {
         subtarea_estado: true,
-        prioridad: true,
-        beneficiario: true
+        prioridad: true
       }
     });
     return this.mapFromDatabase(subtask);
   }
 
-  async findAll(query: any) {
+  async findAll() {
     const subtasks = await this.prisma.subtarea.findMany({
-      where: query,
       include: {
         subtarea_estado: true,
-        prioridad: true,
-        beneficiario: true
+        prioridad: true
       }
     });
     return subtasks.map(subtask => this.mapFromDatabase(subtask));
@@ -104,8 +77,7 @@ export class SubtasksService {
       where: { id_subtarea: id },
       include: {
         subtarea_estado: true,
-        prioridad: true,
-        beneficiario: true
+        prioridad: true
       }
     });
     return subtask ? this.mapFromDatabase(subtask) : null;
@@ -117,8 +89,7 @@ export class SubtasksService {
       data: this.mapToDatabase(updateSubtaskDto),
       include: {
         subtarea_estado: true,
-        prioridad: true,
-        beneficiario: true
+        prioridad: true
       }
     });
     return this.mapFromDatabase(subtask);
@@ -129,8 +100,7 @@ export class SubtasksService {
       where: { id_subtarea: id },
       include: {
         subtarea_estado: true,
-        prioridad: true,
-        beneficiario: true
+        prioridad: true
       }
     });
     return this.mapFromDatabase(subtask);
