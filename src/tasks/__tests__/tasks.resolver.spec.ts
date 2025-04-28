@@ -56,13 +56,21 @@ describe('TasksResolver', () => {
   beforeEach(async () => {
     const mockService = {
       findAll: jest.fn().mockResolvedValue([mockTask, mockTask2]),
-      findOne: jest.fn().mockImplementation((id) => {
-        if (id === '1') return mockTask;
-        if (id === '2') return mockTask2;
-        throw new NotFoundException(`Tarea con ID ${id} no encontrada`);
+
+      findOne: jest.fn((id) => {
+        if (id === '1') return Promise.resolve(mockTask);
+        if (id === '2') return Promise.resolve(mockTask2);
+        return Promise.reject(new NotFoundException(`Tarea con ID ${id} no encontrada`));
       }),
-      create: jest.fn().mockImplementation((dto: CreateTaskDto) => {
-        return {
+
+      create: jest.fn((dto: CreateTaskDto) => {
+        if (!dto.description) {
+          return Promise.reject(new BadRequestException('El campo descripción es requerido'));
+        }
+        if (typeof dto.valleyId !== 'number' || typeof dto.faenaId !== 'number' || typeof dto.statusId !== 'number') {
+          return Promise.reject(new BadRequestException('Los campos valleyId, faenaId y statusId deben ser números'));
+        }
+        return Promise.resolve({
           id: mockGeneratedId,
           name: dto.name,
           description: dto.description,
@@ -71,29 +79,36 @@ describe('TasksResolver', () => {
           statusId: dto.statusId,
           valley: mockValley,
           faena: mockFaena,
-          status: mockStatus
-        };
+          status: mockStatus,
+        });
       }),
-      update: jest.fn().mockImplementation((id: string, dto: UpdateTaskDto) => {
+
+      update: jest.fn((id: string, dto: UpdateTaskDto) => {
         if (id !== '1' && id !== '2') {
-          throw new NotFoundException(`Tarea con ID ${id} no encontrada`);
+          return Promise.reject(new NotFoundException(`Tarea con ID ${id} no encontrada`));
+        }
+        if (dto.valleyId && typeof dto.valleyId !== 'number') {
+          return Promise.reject(new BadRequestException('valleyId debe ser un número'));
+        }
+        if (dto.faenaId && typeof dto.faenaId !== 'number') {
+          return Promise.reject(new BadRequestException('faenaId debe ser un número'));
+        }
+        if (dto.statusId && typeof dto.statusId !== 'number') {
+          return Promise.reject(new BadRequestException('statusId debe ser un número'));
         }
         const task = id === '1' ? mockTask : mockTask2;
-        return {
+        return Promise.resolve({
           ...task,
-          name: dto.name || task.name,
-          description: dto.description || task.description,
-          valleyId: dto.valleyId || task.valleyId,
-          faenaId: dto.faenaId || task.faenaId,
-          statusId: dto.statusId || task.statusId
-        };
+          ...dto
+        });
       }),
-      remove: jest.fn().mockImplementation((id: string) => {
+
+      remove: jest.fn((id: string) => {
         if (id !== '1' && id !== '2') {
-          throw new NotFoundException(`Tarea con ID ${id} no encontrada`);
+          return Promise.reject(new NotFoundException(`Tarea con ID ${id} no encontrada`));
         }
-        return id === '1' ? mockTask : mockTask2;
-      })
+        return Promise.resolve(id === '1' ? mockTask : mockTask2);
+      }),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -105,7 +120,14 @@ describe('TasksResolver', () => {
         },
         {
           provide: APP_PIPE,
-          useClass: ValidationPipe
+          useValue: new ValidationPipe({
+            transform: true,
+            whitelist: true,
+            forbidNonWhitelisted: true,
+            transformOptions: {
+              enableImplicitConversion: true
+            }
+          })
         }
       ],
     }).compile();
