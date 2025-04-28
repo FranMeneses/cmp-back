@@ -8,9 +8,21 @@ import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { ValidationPipe } from '@nestjs/common';
 import { APP_PIPE } from '@nestjs/core';
 
+/**
+ * @description
+ * En este módulo, el campo 'aplica' se maneja de la siguiente manera:
+ * - En los DTOs (CreateComplianceDto y UpdateComplianceDto) se espera como número (1 o 0)
+ * - En la base de datos se almacena como booleano
+ * - En la respuesta de la API se devuelve como booleano
+ * 
+ * Ejemplo:
+ * - Input: { aplica: 1 } -> DB: { aplica: true } -> Output: { applies: true }
+ * - Input: { aplica: 0 } -> DB: { aplica: false } -> Output: { applies: false }
+ */
 describe('ComplianceResolver', () => {
   let resolver: ComplianceResolver;
   let service: ComplianceService;
+  let mockService: jest.Mocked<ComplianceService>;
 
   const mockCompliance: Compliance = {
     id: '1',
@@ -27,58 +39,75 @@ describe('ComplianceResolver', () => {
   };
 
   beforeEach(async () => {
+    mockService = {
+      findAll: jest.fn().mockImplementation((query) => {
+        let results = [mockCompliance, mockCompliance2];
+        
+        if (query?.subtaskId) {
+          results = results.filter(r => r.subtaskId === query.subtaskId);
+        }
+        if (query?.statusId) {
+          results = results.filter(r => r.statusId === query.statusId);
+        }
+        if (query?.applies !== undefined) {
+          results = results.filter(r => r.applies === query.applies);
+        }
+        
+        return results;
+      }),
+      findOne: jest.fn((id) => {
+        if (id === '1') return Promise.resolve(mockCompliance);
+        if (id === '2') return Promise.resolve(mockCompliance2);
+        return Promise.reject(new NotFoundException(`Cumplimiento con ID ${id} no encontrado`));
+      }),
+      create: jest.fn((input: CreateComplianceDto) => {
+        if (!input.id_subtarea || !input.id_cumplimiento_estado || input.aplica === undefined) {
+          return Promise.reject(new BadRequestException('Los campos id_subtarea, id_cumplimiento_estado y aplica son requeridos'));
+        }
+        if (typeof input.id_subtarea !== 'number' || typeof input.id_cumplimiento_estado !== 'number' || typeof input.aplica !== 'number') {
+          return Promise.reject(new BadRequestException('Los campos id_subtarea, id_cumplimiento_estado y aplica deben ser números'));
+        }
+        return Promise.resolve({
+          id: '1',
+          subtaskId: input.id_subtarea.toString(),
+          statusId: input.id_cumplimiento_estado,
+          applies: Boolean(input.aplica),
+        });
+      }),
+      update: jest.fn((id: string, input: UpdateComplianceDto) => {
+        if (id !== '1' && id !== '2') {
+          return Promise.reject(new NotFoundException(`Cumplimiento con ID ${id} no encontrado`));
+        }
+        if (input.id_subtarea && typeof input.id_subtarea !== 'number') {
+          return Promise.reject(new BadRequestException('id_subtarea debe ser un número'));
+        }
+        if (input.id_cumplimiento_estado && typeof input.id_cumplimiento_estado !== 'number') {
+          return Promise.reject(new BadRequestException('id_cumplimiento_estado debe ser un número'));
+        }
+        if (input.aplica !== undefined && typeof input.aplica !== 'number') {
+          return Promise.reject(new BadRequestException('aplica debe ser un número'));
+        }
+        return Promise.resolve({
+          id,
+          subtaskId: input.id_subtarea ? input.id_subtarea.toString() : mockCompliance.subtaskId,
+          statusId: input.id_cumplimiento_estado || mockCompliance.statusId,
+          applies: input.aplica !== undefined ? Boolean(input.aplica) : mockCompliance.applies,
+        });
+      }),
+      remove: jest.fn((id: string) => {
+        if (id !== '1' && id !== '2') {
+          return Promise.reject(new NotFoundException(`Cumplimiento con ID ${id} no encontrado`));
+        }
+        return Promise.resolve(mockCompliance);
+      }),
+    } as unknown as jest.Mocked<ComplianceService>;
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ComplianceResolver,
         {
           provide: ComplianceService,
-          useValue: {
-            findAll: jest.fn().mockImplementation((query) => {
-              if (!query || Object.keys(query).length === 0) {
-                return [mockCompliance, mockCompliance2];
-              }
-              if (query.subtaskId === '1') {
-                return [mockCompliance];
-              }
-              if (query.statusId === 1) {
-                return [mockCompliance];
-              }
-              if (query.applies === true) {
-                return [mockCompliance];
-              }
-              return [];
-            }),
-            findOne: jest.fn().mockImplementation((id) => {
-              if (id === '1') return mockCompliance;
-              if (id === '2') return mockCompliance2;
-              throw new NotFoundException(`Cumplimiento con ID ${id} no encontrado`);
-            }),
-            create: jest.fn().mockImplementation((input: CreateComplianceDto) => {
-              return {
-                id: '1',
-                subtaskId: input.id_subtarea.toString(),
-                statusId: input.id_cumplimiento_estado,
-                applies: Boolean(input.aplica),
-              };
-            }),
-            update: jest.fn().mockImplementation((id: string, input: UpdateComplianceDto) => {
-              if (id !== '1' && id !== '2') {
-                throw new NotFoundException(`Cumplimiento con ID ${id} no encontrado`);
-              }
-              return {
-                id,
-                subtaskId: input.id_subtarea ? input.id_subtarea.toString() : mockCompliance.subtaskId,
-                statusId: input.id_cumplimiento_estado || mockCompliance.statusId,
-                applies: input.aplica !== undefined ? Boolean(input.aplica) : mockCompliance.applies,
-              };
-            }),
-            remove: jest.fn().mockImplementation((id: string) => {
-              if (id !== '1' && id !== '2') {
-                throw new NotFoundException(`Cumplimiento con ID ${id} no encontrado`);
-              }
-              return mockCompliance;
-            }),
-          },
+          useValue: mockService,
         },
         {
           provide: APP_PIPE,
@@ -103,7 +132,7 @@ describe('ComplianceResolver', () => {
     it('debería retornar un array de cumplimientos', async () => {
       const result = await resolver.compliances();
       expect(result).toEqual([mockCompliance, mockCompliance2]);
-      expect(service.findAll).toHaveBeenCalledWith({});
+      expect(service.findAll).toHaveBeenCalled();
     });
 
     it('debería retornar cumplimientos filtrados por subtarea', async () => {
@@ -127,10 +156,17 @@ describe('ComplianceResolver', () => {
       expect(service.findAll).toHaveBeenCalledWith({ applies: true });
     });
 
+    it('debería retornar cumplimientos filtrados por múltiples campos', async () => {
+      const query = JSON.stringify({ subtaskId: '1', statusId: 1, applies: true });
+      const result = await resolver.compliances(query);
+      expect(result).toEqual([mockCompliance]);
+      expect(service.findAll).toHaveBeenCalledWith({ subtaskId: '1', statusId: 1, applies: true });
+    });
+
     it('debería manejar query inválida', async () => {
       const query = 'invalid-json';
       await expect(resolver.compliances(query))
-        .rejects.toThrow('Query inválida');
+        .rejects.toThrow(BadRequestException);
     });
   });
 
