@@ -347,11 +347,11 @@ export class CreateTaskInput {
   @Field({ nullable: true })
   description?: string;
 
-  @Field(() => Int)
-  valleyId: number;
+  @Field(() => Int, { nullable: true })
+  valleyId?: number;
 
-  @Field(() => Int)
-  faenaId: number;
+  @Field(() => Int, { nullable: true })
+  faenaId?: number;
 
   @Field(() => Int, { nullable: true })
   statusId?: number;

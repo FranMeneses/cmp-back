@@ -15,12 +15,12 @@ export class CreateTaskDto {
 
   @Field(() => Int, { nullable: true })
   @IsNumber()
-  @IsNotEmpty()
+  @IsOptional()
   valleyId?: number;
 
   @Field(() => Int, { nullable: true })
   @IsNumber()
-  @IsNotEmpty()
+  @IsOptional()
   faenaId?: number;
 
   @Field(() => Int, { nullable: true })
