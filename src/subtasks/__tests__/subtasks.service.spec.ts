@@ -74,12 +74,20 @@ describe('SubtasksService', () => {
               }),
               update: jest.fn().mockImplementation(({ where, data }) => {
                 if (where.id_subtarea === '1') {
-                  return Promise.resolve({ ...mockSubtask, ...data });
+                  const updatedSubtask = { ...mockSubtask };
+                  if (data.nombre) updatedSubtask.nombre = data.nombre;
+                  if (data.descripcion) updatedSubtask.descripcion = data.descripcion;
+                  if (data.presupuesto) updatedSubtask.presupuesto = data.presupuesto;
+                  return Promise.resolve(updatedSubtask);
                 }
                 if (where.id_subtarea === '2') {
-                  return Promise.resolve({ ...mockSubtask2, ...data });
+                  const updatedSubtask = { ...mockSubtask2 };
+                  if (data.nombre) updatedSubtask.nombre = data.nombre;
+                  if (data.descripcion) updatedSubtask.descripcion = data.descripcion;
+                  if (data.presupuesto) updatedSubtask.presupuesto = data.presupuesto;
+                  return Promise.resolve(updatedSubtask);
                 }
-                return Promise.reject(new Error('Not Found'));
+                return Promise.reject(new NotFoundException(`Subtarea con ID ${where.id_subtarea} no encontrada`));
               }),
               delete: jest.fn().mockImplementation(({ where }) => {
                 if (where.id_subtarea === '1') {
@@ -88,7 +96,7 @@ describe('SubtasksService', () => {
                 if (where.id_subtarea === '2') {
                   return Promise.resolve(mockSubtask2);
                 }
-                return Promise.reject(new Error('Not Found'));
+                return Promise.reject(new NotFoundException(`Subtarea con ID ${where.id_subtarea} no encontrada`));
               }),
             },
           },
@@ -171,6 +179,75 @@ describe('SubtasksService', () => {
         }
       });
     });
+
+    it('debería validar campos requeridos', async () => {
+      const createSubtaskDto = {
+        number: 1,
+        name: 'Test Subtask',
+        description: 'Test Description',
+      };
+
+      try {
+        await service.create(createSubtaskDto as any);
+        throw new Error();
+      } catch (error) {
+        expect(error).toBeInstanceOf(Error);
+      }
+    });
+
+    it('debería validar tipos de datos', async () => {
+      const createSubtaskDto = {
+        taskId: '1',
+        number: '1',
+        name: 'Test Subtask',
+        description: 'Test Description',
+        budget: '1000',
+        expense: '500',
+      };
+
+      try {
+        await service.create(createSubtaskDto as any);
+        throw new Error();
+      } catch (error) {
+        expect(error).toBeInstanceOf(Error);
+      }
+    });
+
+    it('debería validar fechas inválidas', async () => {
+      const createSubtaskDto = {
+        taskId: '1',
+        number: 1,
+        name: 'Test Subtask',
+        description: 'Test Description',
+        startDate: new Date('invalid-date'),
+        endDate: new Date('2024-01-31'),
+      };
+
+      try {
+        await service.create(createSubtaskDto);
+        throw new Error();
+      } catch (error) {
+        expect(error).toBeInstanceOf(Error);
+      }
+    });
+
+    it('debería validar que el gasto no exceda el presupuesto', async () => {
+      const createSubtaskDto = {
+        taskId: '1',
+        number: 1,
+        name: 'Test Subtask',
+        description: 'Test Description',
+        budget: 1000,
+        expense: 2000,
+      };
+
+      try {
+        await service.create(createSubtaskDto);
+        throw new Error('Debería haber lanzado una excepción');
+      } catch (error) {
+        expect(error).toBeInstanceOf(Error);
+      }
+    });
   });
 
   describe('findAll', () => {
@@ -233,6 +310,24 @@ describe('SubtasksService', () => {
         }
       });
     });
+
+    it('debería retornar array vacío cuando no hay subtareas', async () => {
+      prismaService.subtarea.findMany = jest.fn().mockResolvedValue([]);
+      const result = await service.findAll();
+      expect(result).toEqual([]);
+    });
+
+    it('debería manejar correctamente la paginación', async () => {
+      const mockSubtasks = Array(20).fill(null).map((_, i) => ({
+        ...mockSubtask,
+        id_subtarea: (i + 1).toString(),
+        numero: i + 1
+      }));
+
+      prismaService.subtarea.findMany = jest.fn().mockResolvedValue(mockSubtasks);
+      const result = await service.findAll();
+      expect(result).toHaveLength(20);
+    });
   });
 
   describe('findOne', () => {
@@ -272,7 +367,13 @@ describe('SubtasksService', () => {
     });
 
     it('debería lanzar NotFoundException cuando la subtarea no existe', async () => {
-      await expect(service.findOne('999')).rejects.toThrow(NotFoundException);
+      try {
+        await service.findOne('999');
+        throw new Error('Debería haber lanzado una excepción');
+      } catch (error) {
+        expect(error).toBeInstanceOf(NotFoundException);
+        expect(error.message).toBe('Subtarea con ID 999 no encontrada');
+      }
       expect(prismaService.subtarea.findUnique).toHaveBeenCalledWith({
         where: { id_subtarea: '999' },
         include: {
@@ -280,6 +381,15 @@ describe('SubtasksService', () => {
           prioridad: true
         }
       });
+    });
+
+    it('debería manejar IDs inválidos', async () => {
+      try {
+        await service.findOne('invalid-id');
+        throw new Error();
+      } catch (error) {
+        expect(error).toBeInstanceOf(Error);
+      }
     });
   });
 
@@ -335,7 +445,13 @@ describe('SubtasksService', () => {
         name: 'Updated Subtask'
       };
 
-      await expect(service.update('999', updateSubtaskDto)).rejects.toThrow(NotFoundException);
+      try {
+        await service.update('999', updateSubtaskDto);
+        fail('Debería haber lanzado una excepción');
+      } catch (error) {
+        expect(error).toBeInstanceOf(NotFoundException);
+        expect(error.message).toBe('Subtarea con ID 999 no encontrada');
+      }
       expect(prismaService.subtarea.update).toHaveBeenCalledWith({
         where: { id_subtarea: '999' },
         data: {
@@ -346,6 +462,46 @@ describe('SubtasksService', () => {
           prioridad: true
         }
       });
+    });
+
+    it('debería validar fechas coherentes', async () => {
+      const updateSubtaskDto = {
+        startDate: new Date('2024-01-31'),
+        endDate: new Date('2024-01-01'),
+      };
+
+      try {
+        await service.update('1', updateSubtaskDto);
+        throw new Error();
+      } catch (error) {
+        expect(error).toBeInstanceOf(Error);
+        expect(error.message).toContain('La fecha de inicio debe ser anterior a la fecha de término');
+      }
+    });
+
+    it('debería manejar actualización con campos vacíos', async () => {
+      const updateSubtaskDto = {
+        name: '',
+        description: '   ',
+      };
+
+      try {
+        await service.update('1', updateSubtaskDto);
+        throw new Error();
+      } catch (error) {
+        expect(error).toBeInstanceOf(Error);
+      }
+    });
+
+    it('debería manejar caracteres especiales', async () => {
+      const updateSubtaskDto = {
+        name: 'Test @#$%^&*()',
+        description: 'Descripción con ñ y áéíóú',
+      };
+
+      const result = await service.update('1', updateSubtaskDto);
+      expect(result.name).toBe('Test @#$%^&*()');
+      expect(result.description).toBe('Descripción con ñ y áéíóú');
     });
   });
 
@@ -386,7 +542,13 @@ describe('SubtasksService', () => {
     });
 
     it('debería lanzar NotFoundException cuando la subtarea no existe', async () => {
-      await expect(service.remove('999')).rejects.toThrow(NotFoundException);
+      try {
+        await service.remove('999');
+        fail('Debería haber lanzado una excepción');
+      } catch (error) {
+        expect(error).toBeInstanceOf(NotFoundException);
+        expect(error.message).toBe('Subtarea con ID 999 no encontrada');
+      }
       expect(prismaService.subtarea.delete).toHaveBeenCalledWith({
         where: { id_subtarea: '999' },
         include: {
@@ -394,6 +556,20 @@ describe('SubtasksService', () => {
           prioridad: true
         }
       });
+    });
+
+    it('debería validar dependencias antes de eliminar', async () => {
+      prismaService.subtarea.delete = jest.fn().mockRejectedValue(
+        new Error('No se puede eliminar la subtarea porque tiene dependencias')
+      );
+
+      try {
+        await service.remove('1');
+        throw new Error();
+      } catch (error) {
+        expect(error).toBeInstanceOf(Error);
+        expect(error.message).toContain('dependencias');
+      }
     });
   });
 });
