@@ -44,12 +44,7 @@ export class TasksService {
     const task = await this.prisma.tarea.create({
       data: this.mapToDatabase(createTaskDto),
       include: {
-        tarea_estado: true,
-        subtareas: {
-          include: {
-            subtarea_estado: true
-          }
-        }
+        tarea_estado: true
       }
     });
     return this.mapFromDatabase(task);
@@ -58,12 +53,7 @@ export class TasksService {
   async findAll() {
     const tasks = await this.prisma.tarea.findMany({
       include: {
-        tarea_estado: true,
-        subtareas: {
-          include: {
-            subtarea_estado: true
-          }
-        }
+        tarea_estado: true
       }
     });
     return tasks.map(task => this.mapFromDatabase(task));
@@ -73,12 +63,7 @@ export class TasksService {
     const task = await this.prisma.tarea.findUnique({
       where: { id_tarea: id },
       include: {
-        tarea_estado: true,
-        subtareas: {
-          include: {
-            subtarea_estado: true
-          }
-        }
+        tarea_estado: true
       }
     });
     return task ? this.mapFromDatabase(task) : null;
@@ -89,12 +74,7 @@ export class TasksService {
       where: { id_tarea: id },
       data: this.mapToDatabase(updateTaskDto),
       include: {
-        tarea_estado: true,
-        subtareas: {
-          include: {
-            subtarea_estado: true
-          }
-        }
+        tarea_estado: true
       }
     });
     return this.mapFromDatabase(task);
@@ -104,12 +84,7 @@ export class TasksService {
     const task = await this.prisma.tarea.delete({
       where: { id_tarea: id },
       include: {
-        tarea_estado: true,
-        subtareas: {
-          include: {
-            subtarea_estado: true
-          }
-        }
+        tarea_estado: true
       }
     });
     return this.mapFromDatabase(task);
