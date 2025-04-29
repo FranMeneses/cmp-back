@@ -1,4 +1,4 @@
-import { Resolver, Query, Mutation, Args, ID, Float } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, ID, Float, Int } from '@nestjs/graphql';
 import { TasksService } from './tasks.service';
 import { Task, Subtask } from '../graphql/graphql.types';
 import { CreateTaskDto } from './dto/create-task.dto';
@@ -54,5 +54,10 @@ export class TasksResolver {
   @Query(() => Float)
   async taskTotalExpense(@Args('id', { type: () => ID }) id: string) {
     return this.tasksService.getTotalExpense(id);
+  }
+
+  @Query(() => Int)
+  async valleyTasksCount(@Args('valleyId', { type: () => Int }) valleyId: number) {
+    return this.tasksService.getValleyTasksCount(valleyId);
   }
 } 

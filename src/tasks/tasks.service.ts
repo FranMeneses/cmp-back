@@ -133,7 +133,6 @@ export class TasksService {
     return totalProgress / subtasks.length;
   }
 
-  
   async getTotalBudget(id: string) {
     const subtasks = await this.prisma.subtarea.findMany({
       where: { id_tarea: id }
@@ -162,20 +161,13 @@ export class TasksService {
     }, 0);
   }
 
-  /*
   async getValleyTasksCount(valleyId: number) {
-    const count = await this.prisma.tarea.count({
-      where: {
-        id_valle: valleyId
-      }
+    return this.prisma.tarea.count({
+      where: { id_valle: valleyId }
     });
-
-    return {
-      valleyId,
-      totalTasks: count
-    };
   }
 
+  /*
   async getInvestmentTasksCount(investmentId: number) {
     const count = await this.prisma.tarea.count({
       where: {

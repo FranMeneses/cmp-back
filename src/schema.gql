@@ -124,6 +124,7 @@ type Query {
   taskTotalBudget(id: ID!): Float!
   taskTotalExpense(id: ID!): Float!
   tasks: [Task!]!
+  valleyTasksCount(valleyId: Int!): Int!
 }
 
 type Subtask {
