@@ -119,7 +119,10 @@ type Query {
   subtask(id: ID!): Subtask!
   subtasks: [Subtask!]!
   task(id: ID!): Task!
+  taskProgress(id: ID!): Float!
   taskSubtasks(id: ID!): [Subtask!]!
+  taskTotalBudget(id: ID!): Float!
+  taskTotalExpense(id: ID!): Float!
   tasks: [Task!]!
 }
 

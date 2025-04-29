@@ -104,50 +104,6 @@ export class TasksService {
     return this.mapFromDatabase(task);
   }
 
-  /* Comentando temporalmente los métodos que no son parte del CRUD básico
-  async getTaskProgress(id: string) {
-    const task = await this.prisma.tarea.findUnique({
-      where: { id_tarea: id },
-      include: {
-        subtareas: {
-          include: {
-            subtarea_estado: true,
-          },
-        },
-      },
-    });
-
-    if (!task || !task.subtareas.length) {
-      return {
-        progress: 0,
-        totalSubtasks: 0,
-        completedSubtasks: 0,
-        subtasksProgress: [],
-      };
-    }
-
-    const totalSubtasks = task.subtareas.length;
-    const subtasksProgress = task.subtareas.map(subtask => ({
-      id: subtask.id_subtarea,
-      name: subtask.nombre,
-      status: subtask.subtarea_estado.estado,
-      percentage: subtask.subtarea_estado.porcentaje,
-    }));
-
-    const totalProgress = subtasksProgress.reduce(
-      (sum, subtask) => sum + subtask.percentage,
-      0
-    );
-    const averageProgress = totalProgress / totalSubtasks;
-
-    return {
-      progress: Math.round(averageProgress),
-      totalSubtasks,
-      completedSubtasks: subtasksProgress.filter(st => st.percentage === 100).length,
-      subtasksProgress,
-    };
-  } */
-
   async getTaskSubtasks(id: string) {
     const subtasks = await this.prisma.subtarea.findMany({
       where: { id_tarea: id }
@@ -158,65 +114,55 @@ export class TasksService {
     ));
   }
 
-  /*
-  async getTotalBudget(id: string) {
-    const task = await this.prisma.tarea.findUnique({
+  async getTaskProgress(id: string) {
+    const subtasks = await this.prisma.subtarea.findMany({
       where: { id_tarea: id },
       include: {
-        subtareas: true
+        subtarea_estado: true
       }
     });
 
-    if (!task) {
-      return null;
+    if (subtasks.length === 0) {
+      return 0;
     }
 
-    const subtasksBudget = task.subtareas.reduce((total, subtask) => {
-      return total + (subtask.presupuesto || 0);
+    const totalProgress = subtasks.reduce((sum, subtask) => {
+      return sum + (subtask.subtarea_estado?.porcentaje || 0);
     }, 0);
 
-    return {
-      taskId: task.id_tarea,
-      taskName: task.nombre,
-      totalBudget: subtasksBudget,
-      subtasksCount: task.subtareas.length,
-      subtasks: task.subtareas.map(subtask => ({
-        id: subtask.id_subtarea,
-        name: subtask.nombre,
-        budget: subtask.presupuesto
-      }))
-    };
+    return totalProgress / subtasks.length;
+  }
+
+  
+  async getTotalBudget(id: string) {
+    const subtasks = await this.prisma.subtarea.findMany({
+      where: { id_tarea: id }
+    });
+
+    if (subtasks.length === 0) {
+      return 0;
+    }
+
+    return subtasks.reduce((total, subtask) => {
+      return total + (subtask.presupuesto || 0);
+    }, 0);
   }
 
   async getTotalExpense(id: string) {
-    const task = await this.prisma.tarea.findUnique({
-      where: { id_tarea: id },
-      include: {
-        subtareas: true
-      }
+    const subtasks = await this.prisma.subtarea.findMany({
+      where: { id_tarea: id }
     });
 
-    if (!task) {
-      return null;
+    if (subtasks.length === 0) {
+      return 0;
     }
 
-    const subtasksExpense = task.subtareas.reduce((total, subtask) => {
+    return subtasks.reduce((total, subtask) => {
       return total + (subtask.gasto || 0);
     }, 0);
-
-    return {
-      taskId: task.id_tarea,
-      taskName: task.nombre,
-      totalExpense: subtasksExpense,
-      subtasksCount: task.subtareas.length,
-      subtasks: task.subtareas.map(subtask => ({
-        id: subtask.id_subtarea,
-        name: subtask.nombre,
-        expense: subtask.gasto
-      }))
-    };
   }
 
+  /*
   async getValleyTasksCount(valleyId: number) {
     const count = await this.prisma.tarea.count({
       where: {
