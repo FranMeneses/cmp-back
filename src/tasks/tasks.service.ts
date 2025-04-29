@@ -2,10 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
+import { SubtasksService } from '../subtasks/subtasks.service';
 
 @Injectable()
 export class TasksService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private subtasksService: SubtasksService
+  ) {}
 
   private mapToDatabase(taskDto: CreateTaskDto | UpdateTaskDto) {
     return {
@@ -44,7 +48,9 @@ export class TasksService {
     const task = await this.prisma.tarea.create({
       data: this.mapToDatabase(createTaskDto),
       include: {
-        tarea_estado: true
+        tarea_estado: true,
+        valle: true,
+        faena: true
       }
     });
     return this.mapFromDatabase(task);
@@ -53,7 +59,9 @@ export class TasksService {
   async findAll() {
     const tasks = await this.prisma.tarea.findMany({
       include: {
-        tarea_estado: true
+        tarea_estado: true,
+        valle: true,
+        faena: true
       }
     });
     return tasks.map(task => this.mapFromDatabase(task));
@@ -63,7 +71,9 @@ export class TasksService {
     const task = await this.prisma.tarea.findUnique({
       where: { id_tarea: id },
       include: {
-        tarea_estado: true
+        tarea_estado: true,
+        valle: true,
+        faena: true
       }
     });
     return task ? this.mapFromDatabase(task) : null;
@@ -74,7 +84,9 @@ export class TasksService {
       where: { id_tarea: id },
       data: this.mapToDatabase(updateTaskDto),
       include: {
-        tarea_estado: true
+        tarea_estado: true,
+        valle: true,
+        faena: true
       }
     });
     return this.mapFromDatabase(task);
@@ -84,28 +96,13 @@ export class TasksService {
     const task = await this.prisma.tarea.delete({
       where: { id_tarea: id },
       include: {
-        tarea_estado: true
+        tarea_estado: true,
+        valle: true,
+        faena: true
       }
     });
     return this.mapFromDatabase(task);
   }
-
-  /* Comentando temporalmente findAllDetailed
-  async findAllDetailed(query: any) {
-    const tasks = await this.prisma.tarea.findMany({
-      where: query,
-      include: {
-        tarea_estado: true,
-        subtareas: {
-          include: {
-            subtarea_estado: true
-          }
-        }
-      }
-    });
-    return tasks.map(task => this.mapFromDatabase(task));
-  }
-  */
 
   /* Comentando temporalmente los métodos que no son parte del CRUD básico
   async getTaskProgress(id: string) {
@@ -149,106 +146,19 @@ export class TasksService {
       completedSubtasks: subtasksProgress.filter(st => st.percentage === 100).length,
       subtasksProgress,
     };
-  }
+  } */
 
   async getTaskSubtasks(id: string) {
-    const task = await this.prisma.tarea.findUnique({
-      where: { id_tarea: id },
-      include: {
-        subtareas: {
-          include: {
-            subtarea_estado: true,
-            prioridad: true,
-            beneficiario: true,
-            documentos: true,
-            cumplimientos: {
-              include: {
-                cumplimiento_estado: true,
-                registros: {
-                  include: {
-                    memos: true,
-                    solpeds: true,
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
+    const subtasks = await this.prisma.subtarea.findMany({
+      where: { id_tarea: id }
     });
-
-    if (!task) {
-      return null;
-    }
-
-    return task.subtareas.map(subtask => ({
-      id: subtask.id_subtarea,
-      taskId: subtask.id_tarea,
-      number: subtask.numero,
-      name: subtask.nombre,
-      description: subtask.descripcion,
-      budget: subtask.presupuesto,
-      expense: subtask.gasto,
-      startDate: subtask.fecha_inicio,
-      endDate: subtask.fecha_termino,
-      finalDate: subtask.fecha_final,
-      beneficiaryId: subtask.id_beneficiario,
-      statusId: subtask.id_estado,
-      priorityId: subtask.id_prioridad,
-      status: subtask.subtarea_estado ? {
-        id: subtask.subtarea_estado.id_subtarea_estado,
-        name: subtask.subtarea_estado.estado,
-        percentage: subtask.subtarea_estado.porcentaje
-      } : null,
-      priority: subtask.prioridad ? {
-        id: subtask.prioridad.id_prioridad,
-        name: subtask.prioridad.prioridad_name
-      } : null,
-      beneficiary: subtask.beneficiario ? {
-        id: subtask.beneficiario.id_beneficiario,
-        legalName: subtask.beneficiario.nombre_legal,
-        rut: subtask.beneficiario.rut,
-        address: subtask.beneficiario.direccion,
-        entityType: subtask.beneficiario.tipo_entidad,
-        representative: subtask.beneficiario.representante,
-        hasLegalPersonality: subtask.beneficiario.personalidad_juridica
-      } : null,
-      documents: subtask.documentos.map(doc => ({
-        id: doc.id_documento,
-        type: doc.tipo_documento,
-        path: doc.ruta,
-        uploadDate: doc.fecha_carga
-      })),
-      compliances: subtask.cumplimientos.map(comp => ({
-        id: comp.id_cumplimiento,
-        statusId: comp.id_cumplimiento_estado,
-        applies: comp.aplica,
-        status: comp.cumplimiento_estado ? {
-          id: comp.cumplimiento_estado.id_cumplimiento_estado,
-          name: comp.cumplimiento_estado.estado
-        } : null,
-        records: comp.registros.map(record => ({
-          id: record.id_registro,
-          hes: record.hes,
-          hem: record.hem,
-          provider: record.proveedor,
-          startDate: record.fecha_inicio,
-          endDate: record.fecha_termino,
-          memos: record.memos.map(memo => ({
-            id: memo.id_memo,
-            value: memo.valor
-          })),
-          solpeds: record.solpeds.map(solped => ({
-            id: solped.id_solped,
-            ceco: solped.ceco,
-            account: solped.cuenta,
-            value: solped.valor
-          }))
-        }))
-      }))
-    }));
+    
+    return Promise.all(subtasks.map(subtask => 
+      this.subtasksService.findOne(subtask.id_subtarea)
+    ));
   }
 
+  /*
   async getTotalBudget(id: string) {
     const task = await this.prisma.tarea.findUnique({
       where: { id_tarea: id },

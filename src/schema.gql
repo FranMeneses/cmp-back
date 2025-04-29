@@ -119,6 +119,7 @@ type Query {
   subtask(id: ID!): Subtask!
   subtasks: [Subtask!]!
   task(id: ID!): Task!
+  taskSubtasks(id: ID!): [Subtask!]!
   tasks: [Task!]!
 }
 

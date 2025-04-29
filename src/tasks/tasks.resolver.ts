@@ -1,6 +1,6 @@
 import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
 import { TasksService } from './tasks.service';
-import { Task } from '../graphql/graphql.types';
+import { Task, Subtask } from '../graphql/graphql.types';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 
@@ -36,15 +36,15 @@ export class TasksResolver {
     return this.tasksService.remove(id);
   }
 
+  @Query(() => [Subtask])
+  async taskSubtasks(@Args('id', { type: () => ID }) id: string) {
+    return this.tasksService.getTaskSubtasks(id);
+  }
+
   /* Comentando temporalmente los resolvers que no son parte del CRUD básico
   @Query(() => Float)
   async taskProgress(@Args('id', { type: () => ID }) id: string) {
     return this.tasksService.getTaskProgress(id);
-  }
-
-  @Query(() => [Task])
-  async taskSubtasks(@Args('id', { type: () => ID }) id: string) {
-    return this.tasksService.getTaskSubtasks(id);
   }
 
   @Query(() => Float)
