@@ -3,12 +3,14 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { SubtasksService } from '../subtasks/subtasks.service';
+import { InfoService } from '../info/info.service';
 
 @Injectable()
 export class TasksService {
   constructor(
     private prisma: PrismaService,
-    private subtasksService: SubtasksService
+    private subtasksService: SubtasksService,
+    private infoService: InfoService
   ) {}
 
   private mapToDatabase(taskDto: CreateTaskDto | UpdateTaskDto) {
@@ -167,89 +169,26 @@ export class TasksService {
     });
   }
 
-  /*
-  async getInvestmentTasksCount(investmentId: number) {
-    const count = await this.prisma.tarea.count({
-      where: {
-        info_tarea: {
-          id_inversion: investmentId
-        }
-      }
-    });
-
-    return {
-      investmentId,
-      totalTasks: count
-    };
-  }
-
-  async getValleyInvestmentTasksCount(valleyId: number, investmentId: number) {
-    const count = await this.prisma.tarea.count({
-      where: {
-        AND: [
-          { id_valle: valleyId },
-          {
-            info_tarea: {
-              id_inversion: investmentId
-            }
-          }
-        ]
-      }
-    });
-
-    return {
-      valleyId,
-      investmentId,
-      totalTasks: count
-    };
-  }
-
   async getTaskInfo(id: string) {
-    const taskInfo = await this.prisma.info_tarea.findUnique({
-      where: { id_tarea: id },
-      include: {
-        origen: true,
-        inversion: true,
-        tipo: true,
-        alcance: true,
-        interaccion: true,
-        riesgo: true
-      }
+    const infoTask = await this.prisma.info_tarea.findFirst({
+      where: { id_tarea: id }
     });
 
-    if (!taskInfo) {
+    if (!infoTask) {
       return null;
     }
 
     return {
-      taskId: id,
-      origin: taskInfo.origen ? {
-        id: taskInfo.origen.id_origen,
-        name: taskInfo.origen.origen_name
-      } : null,
-      investment: taskInfo.inversion ? {
-        id: taskInfo.inversion.id_inversion,
-        line: taskInfo.inversion.linea
-      } : null,
-      type: taskInfo.tipo ? {
-        id: taskInfo.tipo.id_tipo,
-        name: taskInfo.tipo.tipo_name
-      } : null,
-      scope: taskInfo.alcance ? {
-        id: taskInfo.alcance.id_alcance,
-        name: taskInfo.alcance.alcance_name
-      } : null,
-      interaction: taskInfo.interaccion ? {
-        id: taskInfo.interaccion.id_interaccion,
-        operation: taskInfo.interaccion.operacion
-      } : null,
-      risk: taskInfo.riesgo ? {
-        id: taskInfo.riesgo.id_riesgo,
-        type: taskInfo.riesgo.tipo_riesgo
-      } : null
+      id: infoTask.id_info_tarea,
+      taskId: infoTask.id_tarea,
+      originId: infoTask.id_origen,
+      investmentId: infoTask.id_inversion,
+      typeId: infoTask.id_tipo,
+      scopeId: infoTask.id_alcance,
+      interactionId: infoTask.id_interaccion,
+      riskId: infoTask.id_riesgo
     };
   }
-  */
 
   //metodo que me devuelva las subtareas de un valle
   //metodo que retorne la fecha de termino de una tarea
@@ -257,4 +196,7 @@ export class TasksService {
   //gastos totales por mes
   //presupuesto total mes y valle
   //gastos totales mes y valle
+  //lista de tareas por valle
+  //getInvestmentTasksCount(investmentId: number)
+  //getValleyInvestmentTasksCount(valleyId: number, investmentId: number)
 } 

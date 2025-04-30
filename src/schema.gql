@@ -103,7 +103,6 @@ type InfoTask {
   originId: Int!
   riskId: Int!
   scopeId: Int!
-  task: Task
   taskId: ID!
   typeId: Int!
 }
@@ -146,6 +145,7 @@ type Query {
   subtask(id: ID!): Subtask!
   subtasks: [Subtask!]!
   task(id: ID!): Task!
+  taskInfo(id: ID!): InfoTask!
   taskProgress(id: ID!): Float!
   taskSubtasks(id: ID!): [Subtask!]!
   taskTotalBudget(id: ID!): Float!
@@ -184,6 +184,7 @@ type Task {
   faena: Faena
   faenaId: Int
   id: ID!
+  info: InfoTask
   name: String
   status: TaskStatus
   statusId: Int

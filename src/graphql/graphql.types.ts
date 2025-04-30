@@ -307,6 +307,81 @@ export class UpdateSubtaskInput {
 }
 
 @ObjectType()
+export class InfoTask {
+  @Field(() => ID)
+  id: string;
+
+  @Field(() => ID)
+  taskId: string;
+
+  @Field(() => Int)
+  originId: number;
+
+  @Field(() => Int)
+  investmentId: number;
+
+  @Field(() => Int)
+  typeId: number;
+
+  @Field(() => Int)
+  scopeId: number;
+
+  @Field(() => Int)
+  interactionId: number;
+
+  @Field(() => Int)
+  riskId: number;
+}
+
+@InputType()
+export class CreateInfoTaskInput {
+  @Field(() => ID)
+  taskId: string;
+
+  @Field(() => Int)
+  originId: number;
+
+  @Field(() => Int)
+  investmentId: number;
+
+  @Field(() => Int)
+  typeId: number;
+
+  @Field(() => Int)
+  scopeId: number;
+
+  @Field(() => Int)
+  interactionId: number;
+
+  @Field(() => Int)
+  riskId: number;
+}
+
+@InputType()
+export class UpdateInfoTaskInput {
+  @Field(() => ID, { nullable: true })
+  taskId?: string;
+
+  @Field(() => Int, { nullable: true })
+  originId?: number;
+
+  @Field(() => Int, { nullable: true })
+  investmentId?: number;
+
+  @Field(() => Int, { nullable: true })
+  typeId?: number;
+
+  @Field(() => Int, { nullable: true })
+  scopeId?: number;
+
+  @Field(() => Int, { nullable: true })
+  interactionId?: number;
+
+  @Field(() => Int, { nullable: true })
+  riskId?: number;
+} 
+
+@ObjectType()
 export class Task {
   @Field(() => ID)
   id: string;
@@ -337,6 +412,9 @@ export class Task {
 
   @Field(() => [Subtask], { nullable: true })
   subtasks?: Subtask[];
+
+  @Field(() => InfoTask, { nullable: true })
+  info?: InfoTask;
 }
 
 @InputType()
@@ -413,81 +491,3 @@ export class UpdateComplianceInput {
   @Field({ nullable: true })
   applies?: boolean;
 }
-
-@ObjectType()
-export class InfoTask {
-  @Field(() => ID)
-  id: string;
-
-  @Field(() => ID)
-  taskId: string;
-
-  @Field(() => Int)
-  originId: number;
-
-  @Field(() => Int)
-  investmentId: number;
-
-  @Field(() => Int)
-  typeId: number;
-
-  @Field(() => Int)
-  scopeId: number;
-
-  @Field(() => Int)
-  interactionId: number;
-
-  @Field(() => Int)
-  riskId: number;
-
-  @Field(() => Task, { nullable: true })
-  task?: Task;
-}
-
-@InputType()
-export class CreateInfoTaskInput {
-  @Field(() => ID)
-  taskId: string;
-
-  @Field(() => Int)
-  originId: number;
-
-  @Field(() => Int)
-  investmentId: number;
-
-  @Field(() => Int)
-  typeId: number;
-
-  @Field(() => Int)
-  scopeId: number;
-
-  @Field(() => Int)
-  interactionId: number;
-
-  @Field(() => Int)
-  riskId: number;
-}
-
-@InputType()
-export class UpdateInfoTaskInput {
-  @Field(() => ID, { nullable: true })
-  taskId?: string;
-
-  @Field(() => Int, { nullable: true })
-  originId?: number;
-
-  @Field(() => Int, { nullable: true })
-  investmentId?: number;
-
-  @Field(() => Int, { nullable: true })
-  typeId?: number;
-
-  @Field(() => Int, { nullable: true })
-  scopeId?: number;
-
-  @Field(() => Int, { nullable: true })
-  interactionId?: number;
-
-  @Field(() => Int, { nullable: true })
-  riskId?: number;
-} 

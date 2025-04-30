@@ -9,6 +9,15 @@ export class InfoService {
 
   // Info Task CRUD
   async create(createInfoDto: CreateInfoDto) {
+    // Verificar si ya existe una info_tarea para esta tarea
+    const existingInfo = await this.prisma.info_tarea.findFirst({
+      where: { id_tarea: createInfoDto.taskId }
+    });
+
+    if (existingInfo) {
+      throw new Error('Ya existe una información asociada a esta tarea');
+    }
+
     const info = await this.prisma.info_tarea.create({
       data: {
         id_tarea: createInfoDto.taskId,
@@ -167,255 +176,112 @@ export class InfoService {
     };
   }
 
-  // Origen
+  //Tablas asociadas
   async findAllOrigins() {
-    const origins = await this.prisma.origen.findMany({
-      include: {
-        info_tareas: {
-          include: {
-            tarea: true
-          }
-        }
-      }
-    });
+    const origins = await this.prisma.origen.findMany();
     return origins.map(origin => ({
       id: origin.id_origen,
-      name: origin.origen_name,
-      tasks: origin.info_tareas.map(info => ({
-        id: info.tarea.id_tarea,
-        name: info.tarea.nombre
-      }))
+      name: origin.origen_name
     }));
   }
 
   async findOneOrigin(id: number) {
     const origin = await this.prisma.origen.findUnique({
-      where: { id_origen: id },
-      include: {
-        info_tareas: {
-          include: {
-            tarea: true
-          }
-        }
-      }
+      where: { id_origen: id }
     });
     return origin ? {
       id: origin.id_origen,
-      name: origin.origen_name,
-      tasks: origin.info_tareas.map(info => ({
-        id: info.tarea.id_tarea,
-        name: info.tarea.nombre
-      }))
+      name: origin.origen_name
     } : null;
   }
 
-  // Inversión
   async findAllInvestments() {
-    const investments = await this.prisma.inversion.findMany({
-      include: {
-        info_tareas: {
-          include: {
-            tarea: true
-          }
-        }
-      }
-    });
+    const investments = await this.prisma.inversion.findMany();
     return investments.map(investment => ({
       id: investment.id_inversion,
-      line: investment.linea,
-      tasks: investment.info_tareas.map(info => ({
-        id: info.tarea.id_tarea,
-        name: info.tarea.nombre
-      }))
+      line: investment.linea
     }));
   }
 
   async findOneInvestment(id: number) {
     const investment = await this.prisma.inversion.findUnique({
-      where: { id_inversion: id },
-      include: {
-        info_tareas: {
-          include: {
-            tarea: true
-          }
-        }
-      }
+      where: { id_inversion: id }
     });
     return investment ? {
       id: investment.id_inversion,
-      line: investment.linea,
-      tasks: investment.info_tareas.map(info => ({
-        id: info.tarea.id_tarea,
-        name: info.tarea.nombre
-      }))
+      line: investment.linea
     } : null;
   }
 
-  // Tipo
   async findAllTypes() {
-    const types = await this.prisma.tipo.findMany({
-      include: {
-        info_tareas: {
-          include: {
-            tarea: true
-          }
-        }
-      }
-    });
+    const types = await this.prisma.tipo.findMany();
     return types.map(type => ({
       id: type.id_tipo,
-      name: type.tipo_name,
-      tasks: type.info_tareas.map(info => ({
-        id: info.tarea.id_tarea,
-        name: info.tarea.nombre
-      }))
+      name: type.tipo_name
     }));
   }
 
   async findOneType(id: number) {
     const type = await this.prisma.tipo.findUnique({
-      where: { id_tipo: id },
-      include: {
-        info_tareas: {
-          include: {
-            tarea: true
-          }
-        }
-      }
+      where: { id_tipo: id }
     });
     return type ? {
       id: type.id_tipo,
-      name: type.tipo_name,
-      tasks: type.info_tareas.map(info => ({
-        id: info.tarea.id_tarea,
-        name: info.tarea.nombre
-      }))
+      name: type.tipo_name
     } : null;
   }
 
-  // Alcance
   async findAllScopes() {
-    const scopes = await this.prisma.alcance.findMany({
-      include: {
-        info_tareas: {
-          include: {
-            tarea: true
-          }
-        }
-      }
-    });
+    const scopes = await this.prisma.alcance.findMany();
     return scopes.map(scope => ({
       id: scope.id_alcance,
-      name: scope.alcance_name,
-      tasks: scope.info_tareas.map(info => ({
-        id: info.tarea.id_tarea,
-        name: info.tarea.nombre
-      }))
+      name: scope.alcance_name
     }));
   }
 
   async findOneScope(id: number) {
     const scope = await this.prisma.alcance.findUnique({
-      where: { id_alcance: id },
-      include: {
-        info_tareas: {
-          include: {
-            tarea: true
-          }
-        }
-      }
+      where: { id_alcance: id }
     });
     return scope ? {
       id: scope.id_alcance,
-      name: scope.alcance_name,
-      tasks: scope.info_tareas.map(info => ({
-        id: info.tarea.id_tarea,
-        name: info.tarea.nombre
-      }))
+      name: scope.alcance_name
     } : null;
   }
 
-  // Interacción
   async findAllInteractions() {
-    const interactions = await this.prisma.interaccion.findMany({
-      include: {
-        info_tareas: {
-          include: {
-            tarea: true
-          }
-        }
-      }
-    });
+    const interactions = await this.prisma.interaccion.findMany();
     return interactions.map(interaction => ({
       id: interaction.id_interaccion,
-      operation: interaction.operacion,
-      tasks: interaction.info_tareas.map(info => ({
-        id: info.tarea.id_tarea,
-        name: info.tarea.nombre
-      }))
+      operation: interaction.operacion
     }));
   }
 
   async findOneInteraction(id: number) {
     const interaction = await this.prisma.interaccion.findUnique({
-      where: { id_interaccion: id },
-      include: {
-        info_tareas: {
-          include: {
-            tarea: true
-          }
-        }
-      }
+      where: { id_interaccion: id }
     });
     return interaction ? {
       id: interaction.id_interaccion,
-      operation: interaction.operacion,
-      tasks: interaction.info_tareas.map(info => ({
-        id: info.tarea.id_tarea,
-        name: info.tarea.nombre
-      }))
+      operation: interaction.operacion
     } : null;
   }
 
-  // Riesgo
   async findAllRisks() {
-    const risks = await this.prisma.riesgo.findMany({
-      include: {
-        info_tareas: {
-          include: {
-            tarea: true
-          }
-        }
-      }
-    });
+    const risks = await this.prisma.riesgo.findMany();
     return risks.map(risk => ({
       id: risk.id_riesgo,
-      type: risk.tipo_riesgo,
-      tasks: risk.info_tareas.map(info => ({
-        id: info.tarea.id_tarea,
-        name: info.tarea.nombre
-      }))
+      type: risk.tipo_riesgo
     }));
   }
 
   async findOneRisk(id: number) {
     const risk = await this.prisma.riesgo.findUnique({
-      where: { id_riesgo: id },
-      include: {
-        info_tareas: {
-          include: {
-            tarea: true
-          }
-        }
-      }
+      where: { id_riesgo: id }
     });
     return risk ? {
       id: risk.id_riesgo,
-      type: risk.tipo_riesgo,
-      tasks: risk.info_tareas.map(info => ({
-        id: info.tarea.id_tarea,
-        name: info.tarea.nombre
-      }))
+      type: risk.tipo_riesgo
     } : null;
   }
 } 
