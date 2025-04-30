@@ -53,6 +53,16 @@ input CreateContactDto {
   position: String
 }
 
+input CreateInfoTaskInput {
+  interactionId: Int!
+  investmentId: Int!
+  originId: Int!
+  riskId: Int!
+  scopeId: Int!
+  taskId: ID!
+  typeId: Int!
+}
+
 input CreateSubtaskDto {
   beneficiaryId: ID
   budget: Int
@@ -86,20 +96,35 @@ type Faena {
   name: String
 }
 
+type InfoTask {
+  id: ID!
+  interactionId: Int!
+  investmentId: Int!
+  originId: Int!
+  riskId: Int!
+  scopeId: Int!
+  task: Task
+  taskId: ID!
+  typeId: Int!
+}
+
 type Mutation {
   createBeneficiary(input: CreateBeneficiaryDto!): Beneficiary!
   createCompliance(input: CreateComplianceDto!): Compliance!
   createContact(input: CreateContactDto!): Contact!
+  createInfoTask(createInfoTaskInput: CreateInfoTaskInput!): InfoTask!
   createSubtask(input: CreateSubtaskDto!): Subtask!
   createTask(input: CreateTaskDto!): Task!
   removeBeneficiary(id: ID!): Beneficiary!
   removeCompliance(id: ID!): Compliance!
   removeContact(id: ID!): Contact!
+  removeInfoTask(id: ID!): InfoTask!
   removeSubtask(id: ID!): Subtask!
   removeTask(id: ID!): Task!
   updateBeneficiary(id: ID!, input: UpdateBeneficiaryDto!): Beneficiary!
   updateCompliance(id: ID!, input: UpdateComplianceDto!): Compliance!
   updateContact(id: ID!, input: UpdateContactDto!): Contact!
+  updateInfoTask(id: ID!, updateInfoTaskInput: UpdateInfoTaskInput!): InfoTask!
   updateSubtask(id: ID!, input: UpdateSubtaskDto!): Subtask!
   updateTask(id: ID!, input: UpdateTaskDto!): Task!
 }
@@ -116,6 +141,8 @@ type Query {
   compliances(query: String): [Compliance!]!
   contact(id: ID!): Contact!
   contacts: [Contact!]!
+  infoTask(id: ID!): InfoTask!
+  infoTasks: [InfoTask!]!
   subtask(id: ID!): Subtask!
   subtasks: [Subtask!]!
   task(id: ID!): Task!
@@ -191,6 +218,16 @@ input UpdateContactDto {
   name: String
   phone: String
   position: String
+}
+
+input UpdateInfoTaskInput {
+  interactionId: Int
+  investmentId: Int
+  originId: Int
+  riskId: Int
+  scopeId: Int
+  taskId: ID
+  typeId: Int
 }
 
 input UpdateSubtaskDto {

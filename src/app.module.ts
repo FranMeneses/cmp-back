@@ -8,6 +8,7 @@ import { TasksModule } from './tasks/tasks.module';
 import { ComplianceModule } from './compliance/compliance.module';
 import { SubtasksModule } from './subtasks/subtasks.module';
 import { BeneficiariesModule } from './beneficiaries/beneficiaries.module';
+import { InfoModule } from './info/info.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { BeneficiariesModule } from './beneficiaries/beneficiaries.module';
     ComplianceModule,
     SubtasksModule,
     BeneficiariesModule,
+    InfoModule,
   ],
   providers: [AppService],
 })

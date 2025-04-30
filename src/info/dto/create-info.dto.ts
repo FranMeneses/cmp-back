@@ -3,29 +3,29 @@ import { IsString, IsNotEmpty, IsUUID, IsInt } from 'class-validator';
 export class CreateInfoDto {
   @IsUUID()
   @IsNotEmpty()
-  id_tarea: string;
+  taskId: string;
 
   @IsInt()
   @IsNotEmpty()
-  id_origen: number;
+  originId: number;
 
   @IsInt()
   @IsNotEmpty()
-  id_inversion: number;
+  investmentId: number;
 
   @IsInt()
   @IsNotEmpty()
-  id_tipo: number;
+  typeId: number;
 
   @IsInt()
   @IsNotEmpty()
-  id_alcance: number;
+  scopeId: number;
 
   @IsInt()
   @IsNotEmpty()
-  id_interaccion: number;
+  interactionId: number;
 
   @IsInt()
   @IsNotEmpty()
-  id_riesgo: number;
+  riskId: number;
 } 

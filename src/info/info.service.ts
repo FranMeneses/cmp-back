@@ -1,15 +1,171 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { UpdateOriginDto } from './dto/update-origin.dto';
-import { UpdateInvestmentDto } from './dto/update-investment.dto';
-import { UpdateTypeDto } from './dto/update-type.dto';
-import { UpdateScopeDto } from './dto/update-scope.dto';
-import { UpdateInteractionDto } from './dto/update-interaction.dto';
-import { UpdateRiskDto } from './dto/update-risk.dto';
+import { CreateInfoDto } from './dto/create-info.dto';
+import { UpdateInfoDto } from './dto/update-info.dto';
 
 @Injectable()
 export class InfoService {
   constructor(private prisma: PrismaService) {}
+
+  // Info Task CRUD
+  async create(createInfoDto: CreateInfoDto) {
+    const info = await this.prisma.info_tarea.create({
+      data: {
+        id_tarea: createInfoDto.taskId,
+        id_origen: createInfoDto.originId,
+        id_inversion: createInfoDto.investmentId,
+        id_tipo: createInfoDto.typeId,
+        id_alcance: createInfoDto.scopeId,
+        id_interaccion: createInfoDto.interactionId,
+        id_riesgo: createInfoDto.riskId,
+      },
+      include: {
+        tarea: true,
+        origen: true,
+        inversion: true,
+        tipo: true,
+        alcance: true,
+        interaccion: true,
+        riesgo: true,
+      }
+    });
+
+    return {
+      id: info.id_info_tarea,
+      taskId: info.id_tarea,
+      originId: info.id_origen,
+      investmentId: info.id_inversion,
+      typeId: info.id_tipo,
+      scopeId: info.id_alcance,
+      interactionId: info.id_interaccion,
+      riskId: info.id_riesgo,
+      task: info.tarea ? {
+        id: info.tarea.id_tarea,
+        name: info.tarea.nombre,
+        description: info.tarea.descripcion,
+      } : null,
+    };
+  }
+
+  async findAll() {
+    const infos = await this.prisma.info_tarea.findMany({
+      include: {
+        tarea: true,
+        origen: true,
+        inversion: true,
+        tipo: true,
+        alcance: true,
+        interaccion: true,
+        riesgo: true,
+      }
+    });
+
+    return infos.map(info => ({
+      id: info.id_info_tarea,
+      taskId: info.id_tarea,
+      originId: info.id_origen,
+      investmentId: info.id_inversion,
+      typeId: info.id_tipo,
+      scopeId: info.id_alcance,
+      interactionId: info.id_interaccion,
+      riskId: info.id_riesgo,
+      task: info.tarea ? {
+        id: info.tarea.id_tarea,
+        name: info.tarea.nombre,
+        description: info.tarea.descripcion,
+      } : null,
+    }));
+  }
+
+  async findOne(id: string) {
+    const info = await this.prisma.info_tarea.findUnique({
+      where: { id_info_tarea: id },
+      include: {
+        tarea: true,
+        origen: true,
+        inversion: true,
+        tipo: true,
+        alcance: true,
+        interaccion: true,
+        riesgo: true,
+      }
+    });
+
+    if (!info) return null;
+
+    return {
+      id: info.id_info_tarea,
+      taskId: info.id_tarea,
+      originId: info.id_origen,
+      investmentId: info.id_inversion,
+      typeId: info.id_tipo,
+      scopeId: info.id_alcance,
+      interactionId: info.id_interaccion,
+      riskId: info.id_riesgo,
+      task: info.tarea ? {
+        id: info.tarea.id_tarea,
+        name: info.tarea.nombre,
+        description: info.tarea.descripcion,
+      } : null,
+    };
+  }
+
+  async update(id: string, updateInfoDto: UpdateInfoDto) {
+    const info = await this.prisma.info_tarea.update({
+      where: { id_info_tarea: id },
+      data: {
+        id_tarea: updateInfoDto.taskId,
+        id_origen: updateInfoDto.originId,
+        id_inversion: updateInfoDto.investmentId,
+        id_tipo: updateInfoDto.typeId,
+        id_alcance: updateInfoDto.scopeId,
+        id_interaccion: updateInfoDto.interactionId,
+        id_riesgo: updateInfoDto.riskId,
+      },
+      include: {
+        tarea: true,
+        origen: true,
+        inversion: true,
+        tipo: true,
+        alcance: true,
+        interaccion: true,
+        riesgo: true,
+      }
+    });
+
+    return {
+      id: info.id_info_tarea,
+      taskId: info.id_tarea,
+      originId: info.id_origen,
+      investmentId: info.id_inversion,
+      typeId: info.id_tipo,
+      scopeId: info.id_alcance,
+      interactionId: info.id_interaccion,
+      riskId: info.id_riesgo,
+      task: info.tarea ? {
+        id: info.tarea.id_tarea,
+        name: info.tarea.nombre,
+        description: info.tarea.descripcion,
+      } : null,
+    };
+  }
+
+  async remove(id: string) {
+    const info = await this.prisma.info_tarea.delete({
+      where: { id_info_tarea: id }
+    });
+
+    return {
+      id: info.id_info_tarea,
+      taskId: info.id_tarea,
+      originId: info.id_origen,
+      investmentId: info.id_inversion,
+      typeId: info.id_tipo,
+      scopeId: info.id_alcance,
+      interactionId: info.id_interaccion,
+      riskId: info.id_riesgo,
+    };
+  }
 
   // Origen
   async findAllOrigins() {
@@ -51,13 +207,6 @@ export class InfoService {
         name: info.tarea.nombre
       }))
     } : null;
-  }
-
-  async updateOrigin(id: number, updateOriginDto: UpdateOriginDto) {
-    return this.prisma.origen.update({
-      where: { id_origen: id },
-      data: { origen_name: updateOriginDto.origen_name }
-    });
   }
 
   // Inversión
@@ -102,13 +251,6 @@ export class InfoService {
     } : null;
   }
 
-  async updateInvestment(id: number, updateInvestmentDto: UpdateInvestmentDto) {
-    return this.prisma.inversion.update({
-      where: { id_inversion: id },
-      data: { linea: updateInvestmentDto.linea }
-    });
-  }
-
   // Tipo
   async findAllTypes() {
     const types = await this.prisma.tipo.findMany({
@@ -149,13 +291,6 @@ export class InfoService {
         name: info.tarea.nombre
       }))
     } : null;
-  }
-
-  async updateType(id: number, updateTypeDto: UpdateTypeDto) {
-    return this.prisma.tipo.update({
-      where: { id_tipo: id },
-      data: { tipo_name: updateTypeDto.tipo_name }
-    });
   }
 
   // Alcance
@@ -200,13 +335,6 @@ export class InfoService {
     } : null;
   }
 
-  async updateScope(id: number, updateScopeDto: UpdateScopeDto) {
-    return this.prisma.alcance.update({
-      where: { id_alcance: id },
-      data: { alcance_name: updateScopeDto.alcance_name }
-    });
-  }
-
   // Interacción
   async findAllInteractions() {
     const interactions = await this.prisma.interaccion.findMany({
@@ -249,13 +377,6 @@ export class InfoService {
     } : null;
   }
 
-  async updateInteraction(id: number, updateInteractionDto: UpdateInteractionDto) {
-    return this.prisma.interaccion.update({
-      where: { id_interaccion: id },
-      data: { operacion: updateInteractionDto.operacion }
-    });
-  }
-
   // Riesgo
   async findAllRisks() {
     const risks = await this.prisma.riesgo.findMany({
@@ -296,12 +417,5 @@ export class InfoService {
         name: info.tarea.nombre
       }))
     } : null;
-  }
-
-  async updateRisk(id: number, updateRiskDto: UpdateRiskDto) {
-    return this.prisma.riesgo.update({
-      where: { id_riesgo: id },
-      data: { tipo_riesgo: updateRiskDto.tipo_riesgo }
-    });
   }
 } 

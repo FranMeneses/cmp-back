@@ -250,4 +250,11 @@ export class TasksService {
     };
   }
   */
+
+  //metodo que me devuelva las subtareas de un valle
+  //metodo que retorne la fecha de termino de una tarea
+  //presupuesto total por mes
+  //gastos totales por mes
+  //presupuesto total mes y valle
+  //gastos totales mes y valle
 } 
