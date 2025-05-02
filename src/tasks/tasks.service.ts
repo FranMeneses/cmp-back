@@ -167,7 +167,29 @@ export class TasksService {
     });
   }
 
-  //metodo que me devuelva las subtareas de un valle
+  async getValleySubtasks(valleyId: number) {
+    const tasks = await this.prisma.tarea.findMany({
+      where: { id_valle: valleyId },
+      select: { id_tarea: true }
+    });
+
+    if (tasks.length === 0) {
+      return [];
+    }
+
+    const subtasks = await this.prisma.subtarea.findMany({
+      where: {
+        id_tarea: {
+          in: tasks.map(task => task.id_tarea)
+        }
+      }
+    });
+
+    return Promise.all(subtasks.map(subtask => 
+      this.subtasksService.findOne(subtask.id_subtarea)
+    ));
+  }
+
   //metodo que retorne la fecha de termino de una tarea
   //presupuesto total por mes
   //gastos totales por mes

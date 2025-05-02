@@ -60,4 +60,9 @@ export class TasksResolver {
   async valleyTasksCount(@Args('valleyId', { type: () => Int }) valleyId: number) {
     return this.tasksService.getValleyTasksCount(valleyId);
   }
+
+  @Query(() => [Subtask])
+  async valleySubtasks(@Args('valleyId', { type: () => Int }) valleyId: number) {
+    return this.tasksService.getValleySubtasks(valleyId);
+  }
 } 
