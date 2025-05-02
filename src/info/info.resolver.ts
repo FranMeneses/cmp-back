@@ -35,4 +35,9 @@ export class InfoResolver {
   removeInfoTask(@Args('id', { type: () => ID }) id: string) {
     return this.infoService.remove(id);
   }
+
+  @Query(() => InfoTask)
+  async taskInfo(@Args('id', { type: () => ID }) id: string) {
+    return this.infoService.getTaskInfo(id);
+  }
 } 

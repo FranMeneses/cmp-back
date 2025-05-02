@@ -307,6 +307,75 @@ export class UpdateSubtaskInput {
 }
 
 @ObjectType()
+export class Task {
+  @Field(() => ID)
+  id: string;
+
+  @Field({ nullable: true })
+  name?: string;
+
+  @Field({ nullable: true })
+  description?: string;
+
+  @Field(() => Int, { nullable: true })
+  valleyId?: number;
+
+  @Field(() => Int, { nullable: true })
+  faenaId?: number;
+
+  @Field(() => Int, { nullable: true })
+  statusId?: number;
+
+  @Field(() => Valley, { nullable: true })
+  valley?: Valley;
+
+  @Field(() => Faena, { nullable: true })
+  faena?: Faena;
+
+  @Field(() => TaskStatus, { nullable: true })
+  status?: TaskStatus;
+
+  @Field(() => [Subtask], { nullable: true })
+  subtasks?: Subtask[];
+}
+
+@InputType()
+export class CreateTaskInput {
+  @Field({ nullable: true })
+  name?: string;
+
+  @Field({ nullable: true })
+  description?: string;
+
+  @Field(() => Int, { nullable: true })
+  valleyId?: number;
+
+  @Field(() => Int, { nullable: true })
+  faenaId?: number;
+
+  @Field(() => Int, { nullable: true })
+  statusId?: number;
+}
+
+@InputType()
+export class UpdateTaskInput {
+  @Field({ nullable: true })
+  name?: string;
+
+  @Field({ nullable: true })
+  description?: string;
+
+  @Field(() => Int, { nullable: true })
+  valleyId?: number;
+
+  @Field(() => Int, { nullable: true })
+  faenaId?: number;
+
+  @Field(() => Int, { nullable: true })
+  statusId?: number;
+}
+
+@ObjectType()
 export class InfoTask {
   @Field(() => ID)
   id: string;
@@ -331,6 +400,9 @@ export class InfoTask {
 
   @Field(() => Int)
   riskId: number;
+
+  @Field(() => Task, { nullable: true })
+  task?: Task;
 }
 
 @InputType()
@@ -379,78 +451,6 @@ export class UpdateInfoTaskInput {
 
   @Field(() => Int, { nullable: true })
   riskId?: number;
-} 
-
-@ObjectType()
-export class Task {
-  @Field(() => ID)
-  id: string;
-
-  @Field({ nullable: true })
-  name?: string;
-
-  @Field({ nullable: true })
-  description?: string;
-
-  @Field(() => Int, { nullable: true })
-  valleyId?: number;
-
-  @Field(() => Int, { nullable: true })
-  faenaId?: number;
-
-  @Field(() => Int, { nullable: true })
-  statusId?: number;
-
-  @Field(() => Valley, { nullable: true })
-  valley?: Valley;
-
-  @Field(() => Faena, { nullable: true })
-  faena?: Faena;
-
-  @Field(() => TaskStatus, { nullable: true })
-  status?: TaskStatus;
-
-  @Field(() => [Subtask], { nullable: true })
-  subtasks?: Subtask[];
-
-  @Field(() => InfoTask, { nullable: true })
-  info?: InfoTask;
-}
-
-@InputType()
-export class CreateTaskInput {
-  @Field({ nullable: true })
-  name?: string;
-
-  @Field({ nullable: true })
-  description?: string;
-
-  @Field(() => Int, { nullable: true })
-  valleyId?: number;
-
-  @Field(() => Int, { nullable: true })
-  faenaId?: number;
-
-  @Field(() => Int, { nullable: true })
-  statusId?: number;
-}
-
-@InputType()
-export class UpdateTaskInput {
-  @Field({ nullable: true })
-  name?: string;
-
-  @Field({ nullable: true })
-  description?: string;
-
-  @Field(() => Int, { nullable: true })
-  valleyId?: number;
-
-  @Field(() => Int, { nullable: true })
-  faenaId?: number;
-
-  @Field(() => Int, { nullable: true })
-  statusId?: number;
 }
 
 @ObjectType()

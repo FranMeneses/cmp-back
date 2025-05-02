@@ -27,15 +27,6 @@ export class InfoService {
         id_alcance: createInfoDto.scopeId,
         id_interaccion: createInfoDto.interactionId,
         id_riesgo: createInfoDto.riskId,
-      },
-      include: {
-        tarea: true,
-        origen: true,
-        inversion: true,
-        tipo: true,
-        alcance: true,
-        interaccion: true,
-        riesgo: true,
       }
     });
 
@@ -47,25 +38,20 @@ export class InfoService {
       typeId: info.id_tipo,
       scopeId: info.id_alcance,
       interactionId: info.id_interaccion,
-      riskId: info.id_riesgo,
-      task: info.tarea ? {
-        id: info.tarea.id_tarea,
-        name: info.tarea.nombre,
-        description: info.tarea.descripcion,
-      } : null,
+      riskId: info.id_riesgo
     };
   }
 
   async findAll() {
     const infos = await this.prisma.info_tarea.findMany({
       include: {
-        tarea: true,
-        origen: true,
-        inversion: true,
-        tipo: true,
-        alcance: true,
-        interaccion: true,
-        riesgo: true,
+        tarea: {
+          select: {
+            id_tarea: true,
+            nombre: true,
+            descripcion: true
+          }
+        }
       }
     });
 
@@ -81,8 +67,8 @@ export class InfoService {
       task: info.tarea ? {
         id: info.tarea.id_tarea,
         name: info.tarea.nombre,
-        description: info.tarea.descripcion,
-      } : null,
+        description: info.tarea.descripcion
+      } : null
     }));
   }
 
@@ -90,13 +76,13 @@ export class InfoService {
     const info = await this.prisma.info_tarea.findUnique({
       where: { id_info_tarea: id },
       include: {
-        tarea: true,
-        origen: true,
-        inversion: true,
-        tipo: true,
-        alcance: true,
-        interaccion: true,
-        riesgo: true,
+        tarea: {
+          select: {
+            id_tarea: true,
+            nombre: true,
+            descripcion: true
+          }
+        }
       }
     });
 
@@ -114,8 +100,8 @@ export class InfoService {
       task: info.tarea ? {
         id: info.tarea.id_tarea,
         name: info.tarea.nombre,
-        description: info.tarea.descripcion,
-      } : null,
+        description: info.tarea.descripcion
+      } : null
     };
   }
 
@@ -130,15 +116,6 @@ export class InfoService {
         id_alcance: updateInfoDto.scopeId,
         id_interaccion: updateInfoDto.interactionId,
         id_riesgo: updateInfoDto.riskId,
-      },
-      include: {
-        tarea: true,
-        origen: true,
-        inversion: true,
-        tipo: true,
-        alcance: true,
-        interaccion: true,
-        riesgo: true,
       }
     });
 
@@ -150,12 +127,7 @@ export class InfoService {
       typeId: info.id_tipo,
       scopeId: info.id_alcance,
       interactionId: info.id_interaccion,
-      riskId: info.id_riesgo,
-      task: info.tarea ? {
-        id: info.tarea.id_tarea,
-        name: info.tarea.nombre,
-        description: info.tarea.descripcion,
-      } : null,
+      riskId: info.id_riesgo
     };
   }
 
@@ -172,7 +144,42 @@ export class InfoService {
       typeId: info.id_tipo,
       scopeId: info.id_alcance,
       interactionId: info.id_interaccion,
-      riskId: info.id_riesgo,
+      riskId: info.id_riesgo
+    };
+  }
+
+  async getTaskInfo(id: string) {
+    const infoTask = await this.prisma.info_tarea.findFirst({
+      where: { id_tarea: id },
+      include: {
+        tarea: {
+          select: {
+            id_tarea: true,
+            nombre: true,
+            descripcion: true
+          }
+        }
+      }
+    });
+
+    if (!infoTask) {
+      return null;
+    }
+
+    return {
+      id: infoTask.id_info_tarea,
+      taskId: infoTask.id_tarea,
+      originId: infoTask.id_origen,
+      investmentId: infoTask.id_inversion,
+      typeId: infoTask.id_tipo,
+      scopeId: infoTask.id_alcance,
+      interactionId: infoTask.id_interaccion,
+      riskId: infoTask.id_riesgo,
+      task: infoTask.tarea ? {
+        id: infoTask.tarea.id_tarea,
+        name: infoTask.tarea.nombre,
+        description: infoTask.tarea.descripcion
+      } : null
     };
   }
 

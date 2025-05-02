@@ -1,6 +1,6 @@
 import { Resolver, Query, Mutation, Args, ID, Float, Int } from '@nestjs/graphql';
 import { TasksService } from './tasks.service';
-import { Task, Subtask, InfoTask } from '../graphql/graphql.types';
+import { Task, Subtask } from '../graphql/graphql.types';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 
@@ -59,10 +59,5 @@ export class TasksResolver {
   @Query(() => Int)
   async valleyTasksCount(@Args('valleyId', { type: () => Int }) valleyId: number) {
     return this.tasksService.getValleyTasksCount(valleyId);
-  }
-
-  @Query(() => InfoTask)
-  async taskInfo(@Args('id', { type: () => ID }) id: string) {
-    return this.tasksService.getTaskInfo(id);
   }
 } 

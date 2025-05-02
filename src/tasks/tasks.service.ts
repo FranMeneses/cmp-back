@@ -3,14 +3,12 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { SubtasksService } from '../subtasks/subtasks.service';
-import { InfoService } from '../info/info.service';
 
 @Injectable()
 export class TasksService {
   constructor(
     private prisma: PrismaService,
-    private subtasksService: SubtasksService,
-    private infoService: InfoService
+    private subtasksService: SubtasksService
   ) {}
 
   private mapToDatabase(taskDto: CreateTaskDto | UpdateTaskDto) {
@@ -167,27 +165,6 @@ export class TasksService {
     return this.prisma.tarea.count({
       where: { id_valle: valleyId }
     });
-  }
-
-  async getTaskInfo(id: string) {
-    const infoTask = await this.prisma.info_tarea.findFirst({
-      where: { id_tarea: id }
-    });
-
-    if (!infoTask) {
-      return null;
-    }
-
-    return {
-      id: infoTask.id_info_tarea,
-      taskId: infoTask.id_tarea,
-      originId: infoTask.id_origen,
-      investmentId: infoTask.id_inversion,
-      typeId: infoTask.id_tipo,
-      scopeId: infoTask.id_alcance,
-      interactionId: infoTask.id_interaccion,
-      riskId: infoTask.id_riesgo
-    };
   }
 
   //metodo que me devuelva las subtareas de un valle
