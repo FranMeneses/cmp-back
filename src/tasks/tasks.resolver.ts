@@ -65,4 +65,14 @@ export class TasksResolver {
   async valleySubtasks(@Args('valleyId', { type: () => Int }) valleyId: number) {
     return this.tasksService.getValleySubtasks(valleyId);
   }
-} 
+
+  @Query(() => Float)
+  async totalBudgetByMonth(@Args('monthName', { type: () => String }) monthName: string) {
+    return this.tasksService.getTotalBudgetByMonth(monthName);
+  }
+
+  @Query(() => Float)
+  async totalExpenseByMonth(@Args('monthName', { type: () => String }) monthName: string) {
+    return this.tasksService.getTotalExpenseByMonth(monthName);
+  }
+}

@@ -44,6 +44,32 @@ export class TasksService {
     };
   }
 
+  private readonly MONTH_MAPPING = {
+    'enero': 1,
+    'febrero': 2,
+    'marzo': 3,
+    'abril': 4,
+    'mayo': 5,
+    'junio': 6,
+    'julio': 7,
+    'agosto': 8,
+    'septiembre': 9,
+    'octubre': 10,
+    'noviembre': 11,
+    'diciembre': 12
+  };
+
+  private getMonthNumber(monthName: string): number {
+    const normalizedMonth = monthName.toLowerCase();
+    const monthNumber = this.MONTH_MAPPING[normalizedMonth];
+    
+    if (!monthNumber) {
+      throw new Error(`Invalid month name: ${monthName}`);
+    }
+    
+    return monthNumber;
+  }
+
   async create(createTaskDto: CreateTaskDto) {
     const task = await this.prisma.tarea.create({
       data: this.mapToDatabase(createTaskDto),
@@ -190,9 +216,48 @@ export class TasksService {
     ));
   }
 
-  //metodo que retorne la fecha de termino de una tarea
-  //presupuesto total por mes
-  //gastos totales por mes
+  async getTotalBudgetByMonth(monthName: string) {
+    const monthId = this.getMonthNumber(monthName);
+    const subtasks = await this.prisma.subtarea.findMany({
+      where: {
+        fecha_final: {
+          not: null,
+          gte: new Date(new Date().getFullYear(), monthId - 1, 1),
+          lt: new Date(new Date().getFullYear(), monthId, 1)
+        }
+      }
+    });
+
+    const mappedSubtasks = await Promise.all(
+      subtasks.map(subtask => this.subtasksService.findOne(subtask.id_subtarea))
+    );
+
+    return mappedSubtasks.reduce((total, subtask) => {
+      return total + (subtask?.budget || 0);
+    }, 0);
+  }
+
+  async getTotalExpenseByMonth(monthName: string) {
+    const monthId = this.getMonthNumber(monthName);    
+    const subtasks = await this.prisma.subtarea.findMany({
+      where: {
+        fecha_final: {
+          not: null,
+          gte: new Date(new Date().getFullYear(), monthId - 1, 1),
+          lt: new Date(new Date().getFullYear(), monthId, 1)
+        }
+      }
+    });
+
+    const mappedSubtasks = await Promise.all(
+      subtasks.map(subtask => this.subtasksService.findOne(subtask.id_subtarea))
+    );
+
+    return mappedSubtasks.reduce((total, subtask) => {
+      return total + (subtask?.expense || 0);
+    }, 0);
+  }
+
   //presupuesto total mes y valle
   //gastos totales mes y valle
   //lista de tareas por valle
