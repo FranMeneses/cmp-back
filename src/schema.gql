@@ -152,8 +152,8 @@ type Query {
   taskTotalBudget(id: ID!): Float!
   taskTotalExpense(id: ID!): Float!
   tasks: [Task!]!
-  totalBudgetByMonth(monthName: String!): Float!
-  totalExpenseByMonth(monthName: String!): Float!
+  totalBudgetByMonth(monthName: String!, year: Int!): Float!
+  totalExpenseByMonth(monthName: String!, year: Int!): Float!
   valleySubtasks(valleyId: Int!): [Subtask!]!
   valleyTasksCount(valleyId: Int!): Int!
 }

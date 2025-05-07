@@ -67,12 +67,18 @@ export class TasksResolver {
   }
 
   @Query(() => Float)
-  async totalBudgetByMonth(@Args('monthName', { type: () => String }) monthName: string) {
-    return this.tasksService.getTotalBudgetByMonth(monthName);
+  async totalBudgetByMonth(
+    @Args('monthName', { type: () => String }) monthName: string,
+    @Args('year', { type: () => Int }) year: number
+  ) {
+    return this.tasksService.getTotalBudgetByMonth(monthName, year);
   }
 
   @Query(() => Float)
-  async totalExpenseByMonth(@Args('monthName', { type: () => String }) monthName: string) {
-    return this.tasksService.getTotalExpenseByMonth(monthName);
+  async totalExpenseByMonth(
+    @Args('monthName', { type: () => String }) monthName: string,
+    @Args('year', { type: () => Int }) year: number
+  ) {
+    return this.tasksService.getTotalExpenseByMonth(monthName, year);
   }
 }

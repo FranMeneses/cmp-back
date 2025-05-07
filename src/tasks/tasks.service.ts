@@ -216,14 +216,15 @@ export class TasksService {
     ));
   }
 
-  async getTotalBudgetByMonth(monthName: string) {
+  async getTotalBudgetByMonth(monthName: string, year: number) {
     const monthId = this.getMonthNumber(monthName);
+    
     const subtasks = await this.prisma.subtarea.findMany({
       where: {
         fecha_final: {
           not: null,
-          gte: new Date(new Date().getFullYear(), monthId - 1, 1),
-          lt: new Date(new Date().getFullYear(), monthId, 1)
+          gte: new Date(year, monthId - 1, 1),
+          lt: new Date(year, monthId, 1)
         }
       }
     });
@@ -237,14 +238,15 @@ export class TasksService {
     }, 0);
   }
 
-  async getTotalExpenseByMonth(monthName: string) {
-    const monthId = this.getMonthNumber(monthName);    
+  async getTotalExpenseByMonth(monthName: string, year: number) {
+    const monthId = this.getMonthNumber(monthName);
+    
     const subtasks = await this.prisma.subtarea.findMany({
       where: {
         fecha_final: {
           not: null,
-          gte: new Date(new Date().getFullYear(), monthId - 1, 1),
-          lt: new Date(new Date().getFullYear(), monthId, 1)
+          gte: new Date(year, monthId - 1, 1),
+          lt: new Date(year, monthId, 1)
         }
       }
     });
