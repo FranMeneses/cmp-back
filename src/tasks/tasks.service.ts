@@ -260,9 +260,84 @@ export class TasksService {
     }, 0);
   }
 
-  //presupuesto total mes y valle
-  //gastos totales mes y valle
-  //lista de tareas por valle
-  //getInvestmentTasksCount(investmentId: number)
-  //getValleyInvestmentTasksCount(valleyId: number, investmentId: number)
+  async getTotalExpenseByMonthAndValley(monthName: string, year: number, valleyId: number) {
+    const monthId = this.getMonthNumber(monthName);
+    
+    const tasks = await this.prisma.tarea.findMany({
+      where: { id_valle: valleyId },
+      select: { id_tarea: true }
+    });
+
+    if (tasks.length === 0) {
+      return 0;
+    }
+
+    const subtasks = await this.prisma.subtarea.findMany({
+      where: {
+        id_tarea: {
+          in: tasks.map(task => task.id_tarea)
+        },
+        fecha_final: {
+          not: null,
+          gte: new Date(year, monthId - 1, 1),
+          lt: new Date(year, monthId, 1)
+        }
+      }
+    });
+
+    const mappedSubtasks = await Promise.all(
+      subtasks.map(subtask => this.subtasksService.findOne(subtask.id_subtarea))
+    );
+
+    return mappedSubtasks.reduce((total, subtask) => {
+      return total + (subtask?.expense || 0);
+    }, 0);
+  }
+
+  async getTotalBudgetByMonthAndValley(monthName: string, year: number, valleyId: number) {
+    const monthId = this.getMonthNumber(monthName);
+    
+    const tasks = await this.prisma.tarea.findMany({
+      where: { id_valle: valleyId },
+      select: { id_tarea: true }
+    });
+
+    if (tasks.length === 0) {
+      return 0;
+    }
+
+    const subtasks = await this.prisma.subtarea.findMany({
+      where: {
+        id_tarea: {
+          in: tasks.map(task => task.id_tarea)
+        },
+        fecha_final: {
+          not: null,
+          gte: new Date(year, monthId - 1, 1),
+          lt: new Date(year, monthId, 1)
+        }
+      }
+    });
+
+    const mappedSubtasks = await Promise.all(
+      subtasks.map(subtask => this.subtasksService.findOne(subtask.id_subtarea))
+    );
+
+    return mappedSubtasks.reduce((total, subtask) => {
+      return total + (subtask?.budget || 0);
+    }, 0);
+  }
+
+  async getTasksByValley(valleyId: number) {
+    const tasks = await this.prisma.tarea.findMany({
+      where: { id_valle: valleyId },
+      include: {
+        tarea_estado: true,
+        valle: true,
+        faena: true
+      }
+    });
+
+    return tasks.map(task => this.mapFromDatabase(task));
+  }
 } 

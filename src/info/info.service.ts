@@ -291,4 +291,7 @@ export class InfoService {
       type: risk.tipo_riesgo
     } : null;
   }
+
+  //getInvestmentTasksCount(investmentId: number)
+  //getValleyInvestmentTasksCount(valleyId: number, investmentId: number)
 } 

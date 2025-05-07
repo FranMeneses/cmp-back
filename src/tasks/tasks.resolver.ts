@@ -81,4 +81,27 @@ export class TasksResolver {
   ) {
     return this.tasksService.getTotalExpenseByMonth(monthName, year);
   }
+
+  @Query(() => Float)
+  async totalBudgetByMonthAndValley(
+    @Args('monthName', { type: () => String }) monthName: string,
+    @Args('year', { type: () => Int }) year: number,
+    @Args('valleyId', { type: () => Int }) valleyId: number
+  ) {
+    return this.tasksService.getTotalBudgetByMonthAndValley(monthName, year, valleyId);
+  }
+
+  @Query(() => Float)
+  async totalExpenseByMonthAndValley(
+    @Args('monthName', { type: () => String }) monthName: string,
+    @Args('year', { type: () => Int }) year: number,
+    @Args('valleyId', { type: () => Int }) valleyId: number
+  ) {
+    return this.tasksService.getTotalExpenseByMonthAndValley(monthName, year, valleyId);
+  }
+
+  @Query(() => [Task])
+  async tasksByValley(@Args('valleyId', { type: () => Int }) valleyId: number) {
+    return this.tasksService.getTasksByValley(valleyId);
+  }
 }
