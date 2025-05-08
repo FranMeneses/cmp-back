@@ -104,4 +104,12 @@ export class TasksResolver {
   async tasksByValley(@Args('valleyId', { type: () => Int }) valleyId: number) {
     return this.tasksService.getTasksByValley(valleyId);
   }
+
+  @Query(() => Int)
+  async valleyInvestmentTasksCount(
+    @Args('valleyId', { type: () => Int }) valleyId: number,
+    @Args('investmentId', { type: () => Int }) investmentId: number
+  ) {
+    return this.tasksService.getValleyInvestmentTasksCount(valleyId, investmentId);
+  }
 }

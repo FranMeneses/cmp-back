@@ -340,4 +340,24 @@ export class TasksService {
 
     return tasks.map(task => this.mapFromDatabase(task));
   }
+
+  async getValleyInvestmentTasksCount(valleyId: number, investmentId: number) {
+    const tasks = await this.prisma.tarea.findMany({
+      where: { id_valle: valleyId },
+      select: { id_tarea: true }
+    });
+
+    if (tasks.length === 0) {
+      return 0;
+    }
+
+    return this.prisma.info_tarea.count({
+      where: {
+        id_tarea: {
+          in: tasks.map(task => task.id_tarea)
+        },
+        id_inversion: investmentId
+      }
+    });
+  }
 } 

@@ -294,6 +294,11 @@ export class InfoService {
     } : null;
   }
 
-  //getInvestmentTasksCount(investmentId: number)
+  async getInvestmentTasksCount(investmentId: number) {
+    return this.prisma.info_tarea.count({
+      where: { id_inversion: investmentId }
+    });
+  }
+
   //getValleyInvestmentTasksCount(valleyId: number, investmentId: number)
 } 

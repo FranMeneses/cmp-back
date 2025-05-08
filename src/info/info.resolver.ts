@@ -1,4 +1,4 @@
-import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, ID, Int } from '@nestjs/graphql';
 import { InfoService } from './info.service';
 import { InfoTask } from '../graphql/graphql.types';
 import { CreateInfoTaskInput, UpdateInfoTaskInput } from '../graphql/graphql.types';
@@ -39,5 +39,10 @@ export class InfoResolver {
   @Query(() => InfoTask)
   async taskInfo(@Args('id', { type: () => ID }) id: string) {
     return this.infoService.getTaskInfo(id);
+  }
+
+  @Query(() => Int)
+  async investmentTasksCount(@Args('investmentId', { type: () => Int }) investmentId: number) {
+    return this.infoService.getInvestmentTasksCount(investmentId);
   }
 } 
