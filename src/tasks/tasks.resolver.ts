@@ -1,6 +1,6 @@
 import { Resolver, Query, Mutation, Args, ID, Float, Int } from '@nestjs/graphql';
 import { TasksService } from './tasks.service';
-import { Task, Subtask } from '../graphql/graphql.types';
+import { Task, Subtask, Valley, Faena } from '../graphql/graphql.types';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 
@@ -111,5 +111,15 @@ export class TasksResolver {
     @Args('investmentId', { type: () => Int }) investmentId: number
   ) {
     return this.tasksService.getValleyInvestmentTasksCount(valleyId, investmentId);
+  }
+
+  @Query(() => [Valley])
+  async valleys() {
+    return this.tasksService.getAllValleys();
+  }
+
+  @Query(() => [Faena])
+  async faenas() {
+    return this.tasksService.getAllFaenas();
   }
 }

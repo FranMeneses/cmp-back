@@ -10,6 +10,60 @@ export class Valley {
 }
 
 @ObjectType()
+export class Origin {
+  @Field(() => Int)
+  id: number;
+
+  @Field({ nullable: true })
+  name?: string;
+}
+
+@ObjectType()
+export class Investment {
+  @Field(() => Int)
+  id: number;
+
+  @Field({ nullable: true })
+  line?: string;
+}
+
+@ObjectType()
+export class Type {
+  @Field(() => Int)
+  id: number;
+
+  @Field({ nullable: true })
+  name?: string;
+}
+
+@ObjectType()
+export class Scope {
+  @Field(() => Int)
+  id: number;
+
+  @Field({ nullable: true })
+  name?: string;
+}
+
+@ObjectType()
+export class Interaction {
+  @Field(() => Int)
+  id: number;
+
+  @Field({ nullable: true })
+  operation?: string;
+}
+
+@ObjectType()
+export class Risk {
+  @Field(() => Int)
+  id: number;
+
+  @Field({ nullable: true })
+  type?: string;
+}
+
+@ObjectType()
 export class Faena {
   @Field(() => Int)
   id: number;

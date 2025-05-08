@@ -108,6 +108,16 @@ type InfoTask {
   typeId: Int!
 }
 
+type Interaction {
+  id: Int!
+  operation: String
+}
+
+type Investment {
+  id: Int!
+  line: String
+}
+
 type Mutation {
   createBeneficiary(input: CreateBeneficiaryDto!): Beneficiary!
   createCompliance(input: CreateComplianceDto!): Compliance!
@@ -129,6 +139,11 @@ type Mutation {
   updateTask(id: ID!, input: UpdateTaskDto!): Task!
 }
 
+type Origin {
+  id: Int!
+  name: String
+}
+
 type Priority {
   id: Int!
   name: String
@@ -141,9 +156,20 @@ type Query {
   compliances(query: String): [Compliance!]!
   contact(id: ID!): Contact!
   contacts: [Contact!]!
+  faenas: [Faena!]!
   infoTask(id: ID!): InfoTask!
   infoTasks: [InfoTask!]!
+  interaction(id: Int!): Interaction!
+  interactions: [Interaction!]!
+  investment(id: Int!): Investment!
   investmentTasksCount(investmentId: Int!): Int!
+  investments: [Investment!]!
+  origin(id: Int!): Origin!
+  origins: [Origin!]!
+  risk(id: Int!): Risk!
+  risks: [Risk!]!
+  scope(id: Int!): Scope!
+  scopes: [Scope!]!
   subtask(id: ID!): Subtask!
   subtasks: [Subtask!]!
   task(id: ID!): Task!
@@ -158,9 +184,22 @@ type Query {
   totalBudgetByMonthAndValley(monthName: String!, valleyId: Int!, year: Int!): Float!
   totalExpenseByMonth(monthName: String!, year: Int!): Float!
   totalExpenseByMonthAndValley(monthName: String!, valleyId: Int!, year: Int!): Float!
+  type(id: Int!): Type!
+  types: [Type!]!
   valleyInvestmentTasksCount(investmentId: Int!, valleyId: Int!): Int!
   valleySubtasks(valleyId: Int!): [Subtask!]!
   valleyTasksCount(valleyId: Int!): Int!
+  valleys: [Valley!]!
+}
+
+type Risk {
+  id: Int!
+  type: String
+}
+
+type Scope {
+  id: Int!
+  name: String
 }
 
 type Subtask {
@@ -202,6 +241,11 @@ type Task {
 }
 
 type TaskStatus {
+  id: Int!
+  name: String
+}
+
+type Type {
   id: Int!
   name: String
 }

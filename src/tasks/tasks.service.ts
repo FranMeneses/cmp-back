@@ -360,4 +360,35 @@ export class TasksService {
       }
     });
   }
+
+  async getAllValleys() {
+    const valleys = await this.prisma.valle.findMany({
+      select: {
+        id_valle: true,
+        valle_name: true
+      }
+    });
+
+    return valleys.map(valley => ({
+      id: valley.id_valle,
+      name: valley.valle_name
+    }));
+  }
+
+  async getAllFaenas() {
+    const faenas = await this.prisma.faena.findMany({
+      select: {
+        id_faena: true,
+        faena_name: true
+      }
+    });
+
+    return faenas.map(faena => ({
+      id: faena.id_faena,
+      name: faena.faena_name
+    }));
+  }
+
+  //lista de presupuestos por mes, pero ingresando valle y año
+  //faenas por valle
 } 

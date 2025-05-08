@@ -105,4 +105,7 @@ export class SubtasksService {
     });
     return this.mapFromDatabase(subtask);
   }
+
+  //get prioridad (lista)
+  //get estado (lista)
 } 
