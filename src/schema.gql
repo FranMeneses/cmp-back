@@ -176,15 +176,18 @@ type Query {
   investments: [Investment!]!
   origin(id: Int!): Origin!
   origins: [Origin!]!
+  priorities: [Priority!]!
   risk(id: Int!): Risk!
   risks: [Risk!]!
   scope(id: Int!): Scope!
   scopes: [Scope!]!
   subtask(id: ID!): Subtask!
+  subtaskStatuses: [SubtaskStatus!]!
   subtasks: [Subtask!]!
   task(id: ID!): Task!
   taskInfo(id: ID!): InfoTask!
   taskProgress(id: ID!): Float!
+  taskStatuses: [TaskStatus!]!
   taskSubtasks(id: ID!): [Subtask!]!
   taskTotalBudget(id: ID!): Float!
   taskTotalExpense(id: ID!): Float!

@@ -427,6 +427,19 @@ export class TasksService {
     return monthlyExpenses;
   }
 
-  //lista de presupuestos por mes, pero ingresando valle y año
+  async getAllTaskStatuses() {
+    const statuses = await this.prisma.tarea_estado.findMany({
+      select: {
+        id_tarea_estado: true,
+        estado: true
+      }
+    });
+
+    return statuses.map(status => ({
+      id: status.id_tarea_estado,
+      name: status.estado
+    }));
+  }
+
   //faenas por valle
 } 

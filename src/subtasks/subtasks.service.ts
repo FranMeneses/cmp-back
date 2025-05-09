@@ -106,6 +106,33 @@ export class SubtasksService {
     return this.mapFromDatabase(subtask);
   }
 
-  //get prioridad (lista)
-  //get estado (lista)
+  async getAllPriorities() {
+    const priorities = await this.prisma.prioridad.findMany({
+      select: {
+        id_prioridad: true,
+        prioridad_name: true
+      }
+    });
+
+    return priorities.map(priority => ({
+      id: priority.id_prioridad,
+      name: priority.prioridad_name
+    }));
+  }
+
+  async getAllSubtaskStatuses() {
+    const statuses = await this.prisma.subtarea_estado.findMany({
+      select: {
+        id_subtarea_estado: true,
+        estado: true,
+        porcentaje: true
+      }
+    });
+
+    return statuses.map(status => ({
+      id: status.id_subtarea_estado,
+      name: status.estado,
+      percentage: status.porcentaje
+    }));
+  }
 } 

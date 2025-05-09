@@ -1,6 +1,6 @@
 import { Resolver, Query, Mutation, Args, ID, Float, Int } from '@nestjs/graphql';
 import { TasksService } from './tasks.service';
-import { Task, Subtask, Valley, Faena, MonthlyBudget, MonthlyExpense } from '../graphql/graphql.types';
+import { Task, Subtask, Valley, Faena, MonthlyBudget, MonthlyExpense, TaskStatus } from '../graphql/graphql.types';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 
@@ -137,5 +137,10 @@ export class TasksResolver {
     @Args('year', { type: () => Int }) year: number
   ) {
     return this.tasksService.getValleyMonthlyExpenses(valleyId, year);
+  }
+
+  @Query(() => [TaskStatus])
+  async taskStatuses() {
+    return this.tasksService.getAllTaskStatuses();
   }
 }

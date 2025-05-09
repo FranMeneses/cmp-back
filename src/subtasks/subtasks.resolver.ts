@@ -4,6 +4,8 @@ import { CreateSubtaskDto } from './dto/create-subtask.dto';
 import { UpdateSubtaskDto } from './dto/update-subtask.dto';
 import { Subtask } from '../graphql/graphql.types';
 import { Int } from '@nestjs/graphql';
+import { Priority } from '../graphql/graphql.types';
+import { SubtaskStatus } from '../graphql/graphql.types';
 
 @Resolver(() => Subtask)
 export class SubtasksResolver {
@@ -35,5 +37,15 @@ export class SubtasksResolver {
   @Mutation(() => Subtask)
   removeSubtask(@Args('id', { type: () => ID }) id: string) {
     return this.subtasksService.remove(id);
+  }
+
+  @Query(() => [Priority])
+  async priorities() {
+    return this.subtasksService.getAllPriorities();
+  }
+
+  @Query(() => [SubtaskStatus])
+  async subtaskStatuses() {
+    return this.subtasksService.getAllSubtaskStatuses();
   }
 } 
