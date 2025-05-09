@@ -64,6 +64,24 @@ export class Risk {
 }
 
 @ObjectType()
+export class MonthlyBudget {
+  @Field()
+  month: string;
+
+  @Field(() => Float)
+  budget: number;
+}
+
+@ObjectType()
+export class MonthlyExpense {
+  @Field()
+  month: string;
+
+  @Field(() => Float)
+  expense: number;
+}
+
+@ObjectType()
 export class Faena {
   @Field(() => Int)
   id: number;

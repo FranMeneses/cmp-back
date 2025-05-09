@@ -389,6 +389,44 @@ export class TasksService {
     }));
   }
 
+  async getValleyMonthlyBudgets(valleyId: number, year: number) {
+    const months = [
+      'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+      'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
+    ];
+
+    const monthlyBudgets = await Promise.all(
+      months.map(async (month) => {
+        const budget = await this.getTotalBudgetByMonthAndValley(month, year, valleyId);
+        return {
+          month,
+          budget
+        };
+      })
+    );
+
+    return monthlyBudgets;
+  }
+
+  async getValleyMonthlyExpenses(valleyId: number, year: number) {
+    const months = [
+      'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+      'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
+    ];
+
+    const monthlyExpenses = await Promise.all(
+      months.map(async (month) => {
+        const expense = await this.getTotalExpenseByMonthAndValley(month, year, valleyId);
+        return {
+          month,
+          expense
+        };
+      })
+    );
+
+    return monthlyExpenses;
+  }
+
   //lista de presupuestos por mes, pero ingresando valle y año
   //faenas por valle
 } 

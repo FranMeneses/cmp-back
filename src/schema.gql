@@ -118,6 +118,16 @@ type Investment {
   line: String
 }
 
+type MonthlyBudget {
+  budget: Float!
+  month: String!
+}
+
+type MonthlyExpense {
+  expense: Float!
+  month: String!
+}
+
 type Mutation {
   createBeneficiary(input: CreateBeneficiaryDto!): Beneficiary!
   createCompliance(input: CreateComplianceDto!): Compliance!
@@ -187,6 +197,8 @@ type Query {
   type(id: Int!): Type!
   types: [Type!]!
   valleyInvestmentTasksCount(investmentId: Int!, valleyId: Int!): Int!
+  valleyMonthlyBudgets(valleyId: Int!, year: Int!): [MonthlyBudget!]!
+  valleyMonthlyExpenses(valleyId: Int!, year: Int!): [MonthlyExpense!]!
   valleySubtasks(valleyId: Int!): [Subtask!]!
   valleyTasksCount(valleyId: Int!): Int!
   valleys: [Valley!]!
