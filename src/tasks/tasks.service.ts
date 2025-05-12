@@ -221,7 +221,7 @@ export class TasksService {
     
     const subtasks = await this.prisma.subtarea.findMany({
       where: {
-        fecha_final: {
+        fecha_inicio: {
           not: null,
           gte: new Date(year, monthId - 1, 1),
           lt: new Date(year, monthId, 1)
@@ -243,7 +243,7 @@ export class TasksService {
     
     const subtasks = await this.prisma.subtarea.findMany({
       where: {
-        fecha_final: {
+        fecha_inicio: {
           not: null,
           gte: new Date(year, monthId - 1, 1),
           lt: new Date(year, monthId, 1)
@@ -277,7 +277,7 @@ export class TasksService {
         id_tarea: {
           in: tasks.map(task => task.id_tarea)
         },
-        fecha_final: {
+        fecha_inicio: {
           not: null,
           gte: new Date(year, monthId - 1, 1),
           lt: new Date(year, monthId, 1)
@@ -311,7 +311,7 @@ export class TasksService {
         id_tarea: {
           in: tasks.map(task => task.id_tarea)
         },
-        fecha_final: {
+        fecha_inicio: {
           not: null,
           gte: new Date(year, monthId - 1, 1),
           lt: new Date(year, monthId, 1)
@@ -397,10 +397,42 @@ export class TasksService {
 
     const monthlyBudgets = await Promise.all(
       months.map(async (month) => {
-        const budget = await this.getTotalBudgetByMonthAndValley(month, year, valleyId);
+        const monthId = this.getMonthNumber(month);
+        const startDate = new Date(year, monthId - 1, 1);
+        const endDate = new Date(year, monthId, 0);
+
+        const tasks = await this.prisma.tarea.findMany({
+          where: { id_valle: valleyId },
+          select: { id_tarea: true }
+        });
+
+        if (tasks.length === 0) {
+          return {
+            month,
+            budget: 0
+          };
+        }
+
+        const subtasks = await this.prisma.subtarea.findMany({
+          where: {
+            id_tarea: {
+              in: tasks.map(task => task.id_tarea)
+            },
+            fecha_inicio: {
+              not: null,
+              gte: startDate,
+              lte: endDate
+            }
+          }
+        });
+
+        const totalBudget = subtasks.reduce((total, subtask) => {
+          return total + (subtask.presupuesto || 0);
+        }, 0);
+
         return {
           month,
-          budget
+          budget: totalBudget
         };
       })
     );
@@ -416,10 +448,42 @@ export class TasksService {
 
     const monthlyExpenses = await Promise.all(
       months.map(async (month) => {
-        const expense = await this.getTotalExpenseByMonthAndValley(month, year, valleyId);
+        const monthId = this.getMonthNumber(month);
+        const startDate = new Date(year, monthId - 1, 1);
+        const endDate = new Date(year, monthId, 0);
+
+        const tasks = await this.prisma.tarea.findMany({
+          where: { id_valle: valleyId },
+          select: { id_tarea: true }
+        });
+
+        if (tasks.length === 0) {
+          return {
+            month,
+            expense: 0
+          };
+        }
+
+        const subtasks = await this.prisma.subtarea.findMany({
+          where: {
+            id_tarea: {
+              in: tasks.map(task => task.id_tarea)
+            },
+            fecha_inicio: {
+              not: null,
+              gte: startDate,
+              lte: endDate
+            }
+          }
+        });
+
+        const totalExpense = subtasks.reduce((total, subtask) => {
+          return total + (subtask.gasto || 0);
+        }, 0);
+
         return {
           month,
-          expense
+          expense: totalExpense
         };
       })
     );
