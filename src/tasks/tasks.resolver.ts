@@ -143,4 +143,12 @@ export class TasksResolver {
   async taskStatuses() {
     return this.tasksService.getAllTaskStatuses();
   }
+
+  @Query(() => [Task])
+  async tasksByValleyAndStatus(
+    @Args('valleyId', { type: () => Int }) valleyId: number,
+    @Args('statusId', { type: () => Int }) statusId: number
+  ) {
+    return this.tasksService.getTasksByValleyAndStatus(valleyId, statusId);
+  }
 }
