@@ -8,225 +8,233 @@ datasource db {
 }
 
 model origen {
-  id_origen    Int      @id @default(autoincrement())
-  origen_name  String?  @db.NVarChar(65)
-  info_tareas  info_tarea[]
+  id_origen   Int          @id(map: "PK_origen") @default(autoincrement())
+  origen_name String?      @db.NVarChar(65)
+  info_tareas info_tarea[]
 }
 
 model inversion {
-  id_inversion Int      @id @default(autoincrement())
-  linea        String?  @db.NVarChar(50)
+  id_inversion Int          @id(map: "PK_inversion") @default(autoincrement())
+  linea        String?      @db.NVarChar(50)
   info_tareas  info_tarea[]
 }
 
 model tipo {
-  id_tipo     Int      @id @default(autoincrement())
-  tipo_name   String?  @db.NVarChar(50)
+  id_tipo     Int          @id(map: "PK_tipo") @default(autoincrement())
+  tipo_name   String?      @db.NVarChar(50)
   info_tareas info_tarea[]
 }
 
 model alcance {
-  id_alcance    Int      @id @default(autoincrement())
-  alcance_name  String?  @db.NVarChar(50)
-  info_tareas   info_tarea[]
+  id_alcance   Int          @id(map: "PK_alcance") @default(autoincrement())
+  alcance_name String?      @db.NVarChar(50)
+  info_tareas  info_tarea[]
 }
 
 model interaccion {
-  id_interaccion Int      @id @default(autoincrement())
-  operacion      String?  @db.NVarChar(50)
+  id_interaccion Int          @id(map: "PK_interaccion") @default(autoincrement())
+  operacion      String?      @db.NVarChar(50)
   info_tareas    info_tarea[]
 }
 
 model riesgo {
-  id_riesgo   Int      @id @default(autoincrement())
-  tipo_riesgo String?  @db.NVarChar(50)
+  id_riesgo   Int          @id(map: "PK_riesgo") @default(autoincrement())
+  tipo_riesgo String?      @db.NVarChar(50)
   info_tareas info_tarea[]
 }
 
 model valle {
-  id_valle    Int      @id @default(autoincrement())
-  valle_name  String?  @db.NVarChar(50)
-  tareas      tarea[]
+  id_valle   Int     @id(map: "PK_valle") @default(autoincrement())
+  valle_name String? @db.NVarChar(50)
+  tareas     tarea[]
 }
 
 model faena {
-  id_faena    Int      @id @default(autoincrement())
-  faena_name  String?  @db.NVarChar(50)
-  tareas      tarea[]
+  id_faena   Int     @id(map: "PK_faena") @default(autoincrement())
+  faena_name String? @db.NVarChar(50)
+  tareas     tarea[]
+}
+
+model proceso {
+  id_proceso   Int     @id(map: "PK_proceso") @default(autoincrement())
+  proceso_name String  @db.NVarChar(50)
+  tareas       tarea[]
 }
 
 model prioridad {
-  id_prioridad     Int      @id @default(autoincrement())
-  prioridad_name   String?  @db.NVarChar(30)
-  subtareas        subtarea[]
+  id_prioridad   Int        @id(map: "PK_prioridad") @default(autoincrement())
+  prioridad_name String?    @db.NVarChar(30)
+  subtareas      subtarea[]
 }
 
 model cumplimiento_estado {
-  id_cumplimiento_estado Int      @id @default(autoincrement())
-  estado                 String?  @db.NVarChar(50)
+  id_cumplimiento_estado Int            @id(map: "PK_cumplimiento_estado") @default(autoincrement())
+  estado                 String?        @db.NVarChar(50)
   cumplimientos          cumplimiento[]
 }
 
 model subtarea_estado {
-  id_subtarea_estado Int      @id @default(autoincrement())
-  estado             String?  @db.NVarChar(50)
-  porcentaje         Int
+  id_subtarea_estado Int        @id(map: "PK_subtarea_estado") @default(autoincrement())
+  estado             String?    @db.NVarChar(50)
+  porcentaje         Int?
   subtareas          subtarea[]
 }
 
 model tarea_estado {
-  id_tarea_estado Int      @id @default(autoincrement())
-  estado          String?  @db.NVarChar(50)
+  id_tarea_estado Int     @id(map: "PK_tarea_estado") @default(autoincrement())
+  estado          String? @db.NVarChar(50)
   tareas          tarea[]
 }
 
 model beneficiario {
-  id_beneficiario      String      @id @default(uuid()) @db.UniqueIdentifier
-  nombre_legal         String?     @db.NVarChar(50)
-  rut                  String?     @db.NVarChar(50)
-  direccion            String?     @db.NVarChar(50)
-  tipo_entidad         String?     @db.NVarChar(50)
-  representante        String?     @db.NVarChar(50)
+  id_beneficiario       String     @id(clustered: false, map: "PK_beneficiario") @default(dbgenerated("newsequentialid()"), map: "DF__beneficia__id_be__73BA3083") @db.UniqueIdentifier
+  nombre_legal          String?    @db.NVarChar(50)
+  rut                   String?    @db.NVarChar(50)
+  direccion             String?    @db.NVarChar(50)
+  tipo_entidad          String?    @db.NVarChar(50)
+  representante         String?    @db.NVarChar(50)
   personalidad_juridica Boolean?
-  contactos            contacto[]
-  subtareas            subtarea[]
+  contactos             contacto[]
+  subtareas             subtarea[]
 }
 
 model contacto {
-  id_contacto      String      @id @default(uuid()) @db.UniqueIdentifier
-  id_beneficiario  String      @db.UniqueIdentifier
-  nombre           String?     @db.NVarChar(50)
-  cargo            String?     @db.NVarChar(50)
-  mail             String?     @db.NVarChar(50)
-  phone            String?     @db.NVarChar(50)
-  beneficiario     beneficiario @relation(fields: [id_beneficiario], references: [id_beneficiario], onDelete: Cascade)
+  id_contacto     String       @id(clustered: false, map: "PK_contacto") @default(dbgenerated("newsequentialid()"), map: "DF__contacto__id_con__76969D2E") @db.UniqueIdentifier
+  id_beneficiario String       @db.UniqueIdentifier
+  nombre          String?      @db.NVarChar(50)
+  cargo           String?      @db.NVarChar(50)
+  mail            String?      @db.NVarChar(50)
+  phone           String?      @db.NVarChar(50)
+  beneficiario    beneficiario @relation(fields: [id_beneficiario], references: [id_beneficiario], onDelete: Cascade, onUpdate: NoAction, map: "FK_contacto_beneficiario")
 }
 
 model rol {
-  id_rol     Int      @id @default(autoincrement())
-  rol_name   String?  @db.NVarChar(50)
-  usuarios   usuario[]
+  id_rol   Int       @id(map: "PK_rol") @default(autoincrement())
+  rol_name String?   @db.NVarChar(50)
+  usuarios usuario[]
 }
 
 model usuario {
-  AzureId    String   @id @db.UniqueIdentifier
-  nombre     String?  @db.NVarChar(50)
-  mail       String?  @db.NVarChar(50)
-  id_rol     Int
-  rol        rol      @relation(fields: [id_rol], references: [id_rol], onDelete: Cascade)
+  AzureId String  @id(clustered: false, map: "PK_usuario") @db.UniqueIdentifier
+  nombre  String? @db.NVarChar(50)
+  mail    String? @db.NVarChar(50)
+  id_rol  Int
+  rol     rol     @relation(fields: [id_rol], references: [id_rol], onDelete: Cascade, onUpdate: NoAction, map: "FK_usuario_rol")
 }
 
 model tarea {
-  id_tarea     String      @id @default(uuid()) @db.UniqueIdentifier
+  id_tarea     String        @id(clustered: false, map: "PK_tarea") @default(dbgenerated("newsequentialid()"), map: "DF__tarea__id_tarea__7F2BE32F") @db.UniqueIdentifier
   id_valle     Int?
   id_faena     Int?
-  nombre       String?     @db.NVarChar(100)
-  descripcion  String?     @db.NVarChar(500)
-  id_estado    Int?        @map("estado") @default(1)
-  valle        valle?      @relation(fields: [id_valle], references: [id_valle], onDelete: Cascade)
-  faena        faena?      @relation(fields: [id_faena], references: [id_faena], onDelete: Cascade)
-  tarea_estado tarea_estado? @relation(fields: [id_estado], references: [id_tarea_estado], onDelete: Cascade)
-  info_tarea   info_tarea?
-  subtareas    subtarea[]
+  nombre       String?       @db.NVarChar(100)
+  descripcion  String?       @db.NVarChar(500)
+  id_estado    Int?          @default(1, map: "DF_tarea_estado") @map("estado")
+  id_proceso   Int?
   documentos   documento[]
+  info_tarea   info_tarea[]
+  subtareas    subtarea[]
+  tarea_estado tarea_estado? @relation(fields: [id_estado], references: [id_tarea_estado], onDelete: Cascade, onUpdate: NoAction, map: "FK_tarea_estado")
+  faena        faena?        @relation(fields: [id_faena], references: [id_faena], onDelete: Cascade, onUpdate: NoAction, map: "FK_tarea_faena")
+  proceso      proceso?      @relation(fields: [id_proceso], references: [id_proceso], onDelete: NoAction, onUpdate: NoAction, map: "FK_tarea_proceso")
+  valle        valle?        @relation(fields: [id_valle], references: [id_valle], onDelete: Cascade, onUpdate: NoAction, map: "FK_tarea_valle")
 }
 
 model info_tarea {
-  id_info_tarea   String      @id @default(uuid()) @db.UniqueIdentifier
-  id_tarea        String      @unique @db.UniqueIdentifier
-  id_origen       Int
-  id_inversion    Int
-  id_tipo         Int
-  id_alcance      Int
-  id_interaccion  Int
-  id_riesgo       Int
-  tarea           tarea       @relation(fields: [id_tarea], references: [id_tarea], onDelete: Cascade)
-  origen          origen      @relation(fields: [id_origen], references: [id_origen], onDelete: Cascade)
-  inversion       inversion   @relation(fields: [id_inversion], references: [id_inversion], onDelete: Cascade)
-  tipo            tipo        @relation(fields: [id_tipo], references: [id_tipo], onDelete: Cascade)
-  alcance         alcance     @relation(fields: [id_alcance], references: [id_alcance], onDelete: Cascade)
-  interaccion     interaccion @relation(fields: [id_interaccion], references: [id_interaccion], onDelete: Cascade)
-  riesgo          riesgo      @relation(fields: [id_riesgo], references: [id_riesgo], onDelete: Cascade)
+  id_info_tarea  String      @id(clustered: false, map: "PK_info_tarea") @default(dbgenerated("newsequentialid()"), map: "DF__info_tare__id_in__04E4BC85") @db.UniqueIdentifier
+  id_tarea       String      @db.UniqueIdentifier
+  id_origen      Int
+  id_inversion   Int
+  id_tipo        Int
+  id_alcance     Int
+  id_interaccion Int
+  id_riesgo      Int
+  tarea          tarea       @relation(fields: [id_tarea], references: [id_tarea], onDelete: Cascade, onUpdate: NoAction, map: "FK_info_tarea")
+  alcance        alcance     @relation(fields: [id_alcance], references: [id_alcance], onDelete: Cascade, onUpdate: NoAction, map: "FK_info_tarea_alcance")
+  interaccion    interaccion @relation(fields: [id_interaccion], references: [id_interaccion], onDelete: Cascade, onUpdate: NoAction, map: "FK_info_tarea_interaccion")
+  inversion      inversion   @relation(fields: [id_inversion], references: [id_inversion], onDelete: Cascade, onUpdate: NoAction, map: "FK_info_tarea_inversion")
+  origen         origen      @relation(fields: [id_origen], references: [id_origen], onDelete: Cascade, onUpdate: NoAction, map: "FK_info_tarea_origen")
+  riesgo         riesgo      @relation(fields: [id_riesgo], references: [id_riesgo], onDelete: Cascade, onUpdate: NoAction, map: "FK_info_tarea_riesgo")
+  tipo           tipo        @relation(fields: [id_tipo], references: [id_tipo], onDelete: Cascade, onUpdate: NoAction, map: "FK_info_tarea_tipo")
 }
 
 model subtarea {
-  id_subtarea      String      @id @default(uuid()) @db.UniqueIdentifier
-  id_tarea         String      @db.UniqueIdentifier
-  numero           Int?
-  nombre           String?     @db.NVarChar(100)
-  descripcion      String?     @db.NVarChar(500)
-  presupuesto      Int?
-  gasto            Int?
-  fecha_inicio     DateTime?   @db.Date
-  fecha_termino    DateTime?   @db.Date
-  fecha_final      DateTime?   @db.Date
-  id_beneficiario  String?     @db.UniqueIdentifier
-  id_estado        Int?        @default(1)
-  id_prioridad     Int?
-  tarea            tarea       @relation(fields: [id_tarea], references: [id_tarea], onDelete: Cascade)
-  beneficiario     beneficiario? @relation(fields: [id_beneficiario], references: [id_beneficiario], onDelete: Cascade)
-  subtarea_estado  subtarea_estado? @relation(fields: [id_estado], references: [id_subtarea_estado], onDelete: Cascade)
-  prioridad        prioridad?      @relation(fields: [id_prioridad], references: [id_prioridad], onDelete: Cascade)
-  documentos       documento[]
-  cumplimientos    cumplimiento[]
-  registros        registro[]
+  id_subtarea     String           @id(clustered: false, map: "PK_subtarea") @default(dbgenerated("newsequentialid()"), map: "DF__subtarea__id_sub__0E6E26BF") @db.UniqueIdentifier
+  id_tarea        String           @db.UniqueIdentifier
+  numero          Int?
+  nombre          String?          @db.NVarChar(100)
+  descripcion     String?          @db.NVarChar(500)
+  presupuesto     Int?
+  gasto           Int?
+  fecha_inicio    DateTime?        @db.Date
+  fecha_termino   DateTime?        @db.Date
+  fecha_final     DateTime?        @db.Date
+  id_beneficiario String?          @db.UniqueIdentifier
+  id_estado       Int?             @default(1, map: "DF_subtarea_estado")
+  id_prioridad    Int?
+  cumplimientos   cumplimiento[]
+  documentos      documento[]
+  registros       registro[]
+  beneficiario    beneficiario?    @relation(fields: [id_beneficiario], references: [id_beneficiario], onDelete: Cascade, onUpdate: NoAction, map: "FK_subtarea_beneficiario")
+  subtarea_estado subtarea_estado? @relation(fields: [id_estado], references: [id_subtarea_estado], onDelete: Cascade, onUpdate: NoAction, map: "FK_subtarea_estado")
+  prioridad       prioridad?       @relation(fields: [id_prioridad], references: [id_prioridad], onDelete: Cascade, onUpdate: NoAction, map: "FK_subtarea_prioridad")
+  tarea           tarea            @relation(fields: [id_tarea], references: [id_tarea], onDelete: Cascade, onUpdate: NoAction, map: "FK_subtarea_tarea")
 }
 
 model tipo_documento {
-  id_tipo_documento Int      @id @default(autoincrement())
-  tipo_documento    String?  @db.NVarChar(50)
+  id_tipo_documento Int         @id(map: "PK_tipo_documento") @default(autoincrement())
+  tipo_documento    String?     @db.NVarChar(50)
   documentos        documento[]
 }
 
 model documento {
-  id_documento     String      @id @default(uuid()) @db.UniqueIdentifier
-  id_tarea         String?     @db.UniqueIdentifier
-  id_subtarea      String?     @db.UniqueIdentifier
-  tipo_documento   Int
-  ruta             String?     @db.NVarChar(500)
-  fecha_carga      DateTime?   @db.Date
-  tarea            tarea?      @relation(fields: [id_tarea], references: [id_tarea], onDelete: NoAction, onUpdate: NoAction)
-  subtarea         subtarea?   @relation(fields: [id_subtarea], references: [id_subtarea], onDelete: NoAction, onUpdate: NoAction)
-  tipo_doc         tipo_documento @relation(fields: [tipo_documento], references: [id_tipo_documento], onDelete: NoAction, onUpdate: NoAction)
+  id_documento   String         @id(clustered: false, map: "PK_documento") @default(dbgenerated("newsequentialid()"), map: "DF__documento__id_do__17036CC0") @db.UniqueIdentifier
+  id_tarea       String?        @db.UniqueIdentifier
+  id_subtarea    String?        @db.UniqueIdentifier
+  tipo_documento Int
+  ruta           String?        @db.NVarChar(500)
+  fecha_carga    DateTime?      @db.Date
+  subtarea       subtarea?      @relation(fields: [id_subtarea], references: [id_subtarea], onDelete: NoAction, onUpdate: NoAction, map: "FK_documento_subtarea")
+  tarea          tarea?         @relation(fields: [id_tarea], references: [id_tarea], onDelete: NoAction, onUpdate: NoAction, map: "FK_documento_tarea")
+  tipo_doc       tipo_documento @relation(fields: [tipo_documento], references: [id_tipo_documento], onDelete: Cascade, onUpdate: NoAction, map: "FK_documento_tipo_documento")
 }
 
 model cumplimiento {
-  id_cumplimiento       String      @id @default(uuid()) @db.UniqueIdentifier
-  id_subtarea           String      @db.UniqueIdentifier
+  id_cumplimiento        String              @id(clustered: false, map: "PK_cumplimiento") @default(dbgenerated("newsequentialid()"), map: "DF__cumplimie__id_cu__1CBC4616") @db.UniqueIdentifier
+  id_subtarea            String              @db.UniqueIdentifier
   id_cumplimiento_estado Int
-  aplica                Boolean?
-  subtarea              subtarea    @relation(fields: [id_subtarea], references: [id_subtarea], onDelete: Cascade)
-  cumplimiento_estado   cumplimiento_estado @relation(fields: [id_cumplimiento_estado], references: [id_cumplimiento_estado], onDelete: Cascade)
-  registros             registro[]
+  aplica                 Boolean?
+  cumplimiento_estado    cumplimiento_estado @relation(fields: [id_cumplimiento_estado], references: [id_cumplimiento_estado], onDelete: Cascade, onUpdate: NoAction, map: "FK_cumplimiento_estado")
+  subtarea               subtarea            @relation(fields: [id_subtarea], references: [id_subtarea], onDelete: Cascade, onUpdate: NoAction, map: "FK_cumplimiento_subtarea")
+  registros              registro[]
 }
 
 model registro {
-  id_registro      String      @id @default(uuid()) @db.UniqueIdentifier
-  id_subtarea      String      @db.UniqueIdentifier
-  id_cumplimiento  String      @db.UniqueIdentifier
-  hes              Boolean?
-  hem              Boolean?
-  proveedor        String?     @db.NVarChar(100)
-  fecha_inicio     DateTime?   @db.Date
-  fecha_termino    DateTime?   @db.Date
-  subtarea         subtarea    @relation(fields: [id_subtarea], references: [id_subtarea], onDelete: NoAction, onUpdate: NoAction)
-  cumplimiento     cumplimiento @relation(fields: [id_cumplimiento], references: [id_cumplimiento], onDelete: NoAction, onUpdate: NoAction)
-  memos            memo[]
-  solpeds          solped[]
+  id_registro     String       @id(clustered: false, map: "PK_registro") @default(dbgenerated("newsequentialid()"), map: "DF__registro__id_reg__2180FB33") @db.UniqueIdentifier
+  id_subtarea     String       @db.UniqueIdentifier
+  id_cumplimiento String       @db.UniqueIdentifier
+  hes             Boolean?
+  hem             Boolean?
+  proveedor       String?      @db.NVarChar(100)
+  fecha_inicio    DateTime?    @db.Date
+  fecha_termino   DateTime?    @db.Date
+  memos           memo[]
+  cumplimiento    cumplimiento @relation(fields: [id_cumplimiento], references: [id_cumplimiento], onUpdate: NoAction, map: "FK_registro_cumplimiento")
+  subtarea        subtarea     @relation(fields: [id_subtarea], references: [id_subtarea], onUpdate: NoAction, map: "FK_registro_subtarea")
+  solpeds         solped[]
 }
 
 model memo {
-  id_memo      String      @id @default(uuid()) @db.UniqueIdentifier
-  id_registro  String      @db.UniqueIdentifier
-  valor        Int?
-  registro     registro    @relation(fields: [id_registro], references: [id_registro], onDelete: NoAction)
+  id_memo     String   @id(clustered: false, map: "PK_memo") @default(dbgenerated("newsequentialid()"), map: "DF__memo__id_memo__2645B050") @db.UniqueIdentifier
+  id_registro String   @db.UniqueIdentifier
+  valor       Int?
+  registro    registro @relation(fields: [id_registro], references: [id_registro], onUpdate: NoAction, map: "FK_memo_registro")
 }
 
 model solped {
-  id_solped    String      @id @default(uuid()) @db.UniqueIdentifier
-  id_registro  String      @db.UniqueIdentifier
-  ceco         Int?
-  cuenta       Int?
-  valor        Int?
-  registro     registro    @relation(fields: [id_registro], references: [id_registro], onDelete: NoAction)
-} 
+  id_solped   String   @id(clustered: false, map: "PK_solped") @default(dbgenerated("newsequentialid()"), map: "DF__solped__id_solpe__2A164134") @db.UniqueIdentifier
+  id_registro String   @db.UniqueIdentifier
+  ceco        Int?
+  cuenta      Int?
+  valor       Int?
+  registro    registro @relation(fields: [id_registro], references: [id_registro], onUpdate: NoAction, map: "FK_solped_registro")
+}

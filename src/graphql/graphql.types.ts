@@ -64,6 +64,15 @@ export class Risk {
 }
 
 @ObjectType()
+export class Process {
+  @Field(() => Int)
+  id: number;
+
+  @Field()
+  name: string;
+}
+
+@ObjectType()
 export class MonthlyBudget {
   @Field()
   month: string;
@@ -396,6 +405,9 @@ export class Task {
   faenaId?: number;
 
   @Field(() => Int, { nullable: true })
+  processId?: number;
+
+  @Field(() => Int, { nullable: true })
   statusId?: number;
 
   @Field(() => Valley, { nullable: true })
@@ -403,6 +415,9 @@ export class Task {
 
   @Field(() => Faena, { nullable: true })
   faena?: Faena;
+
+  @Field(() => Process, { nullable: true })
+  process?: Process;
 
   @Field(() => TaskStatus, { nullable: true })
   status?: TaskStatus;
@@ -426,6 +441,9 @@ export class CreateTaskInput {
   faenaId?: number;
 
   @Field(() => Int, { nullable: true })
+  processId?: number;
+
+  @Field(() => Int, { nullable: true })
   statusId?: number;
 }
 
@@ -442,6 +460,9 @@ export class UpdateTaskInput {
 
   @Field(() => Int, { nullable: true })
   faenaId?: number;
+
+  @Field(() => Int, { nullable: true })
+  processId?: number;
 
   @Field(() => Int, { nullable: true })
   statusId?: number;

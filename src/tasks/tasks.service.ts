@@ -17,6 +17,7 @@ export class TasksService {
       descripcion: taskDto.description,
       id_valle: taskDto.valleyId,
       id_faena: taskDto.faenaId,
+      id_proceso: taskDto.processId,
       id_estado: taskDto.statusId
     };
   }
@@ -28,6 +29,7 @@ export class TasksService {
       description: task.descripcion,
       valleyId: task.id_valle,
       faenaId: task.id_faena,
+      processId: task.id_proceso,
       statusId: task.id_estado,
       valley: task.valle ? {
         id: task.valle.id_valle,
@@ -36,6 +38,10 @@ export class TasksService {
       faena: task.faena ? {
         id: task.faena.id_faena,
         name: task.faena.faena_name
+      } : null,
+      process: task.proceso ? {
+        id: task.proceso.id_proceso,
+        name: task.proceso.proceso_name
       } : null,
       status: task.tarea_estado ? {
         id: task.tarea_estado.id_tarea_estado,
@@ -76,7 +82,8 @@ export class TasksService {
       include: {
         tarea_estado: true,
         valle: true,
-        faena: true
+        faena: true,
+        proceso: true
       }
     });
     return this.mapFromDatabase(task);
@@ -87,7 +94,8 @@ export class TasksService {
       include: {
         tarea_estado: true,
         valle: true,
-        faena: true
+        faena: true,
+        proceso: true
       }
     });
     return tasks.map(task => this.mapFromDatabase(task));
@@ -99,7 +107,8 @@ export class TasksService {
       include: {
         tarea_estado: true,
         valle: true,
-        faena: true
+        faena: true,
+        proceso: true
       }
     });
     return task ? this.mapFromDatabase(task) : null;
@@ -112,7 +121,8 @@ export class TasksService {
       include: {
         tarea_estado: true,
         valle: true,
-        faena: true
+        faena: true,
+        proceso: true
       }
     });
     return this.mapFromDatabase(task);
@@ -124,7 +134,8 @@ export class TasksService {
       include: {
         tarea_estado: true,
         valle: true,
-        faena: true
+        faena: true,
+        proceso: true
       }
     });
     return this.mapFromDatabase(task);
@@ -519,6 +530,14 @@ export class TasksService {
     });
 
     return tasks.map(task => this.mapFromDatabase(task));
+  }
+
+  async getAllProcesses() {
+    const processes = await this.prisma.proceso.findMany();
+    return processes.map(process => ({
+      id: process.id_proceso,
+      name: process.proceso_name
+    }));
   }
 
   //faenas por valle

@@ -82,6 +82,7 @@ input CreateTaskDto {
   description: String
   faenaId: Int
   name: String
+  processId: Int
   statusId: Int
   valleyId: Int
 }
@@ -159,6 +160,11 @@ type Priority {
   name: String
 }
 
+type Process {
+  id: Int!
+  name: String!
+}
+
 type Query {
   beneficiaries: [Beneficiary!]!
   beneficiary(id: ID!): Beneficiary!
@@ -177,6 +183,7 @@ type Query {
   origin(id: Int!): Origin!
   origins: [Origin!]!
   priorities: [Priority!]!
+  processes: [Process!]!
   risk(id: Int!): Risk!
   risks: [Risk!]!
   scope(id: Int!): Scope!
@@ -249,6 +256,8 @@ type Task {
   faenaId: Int
   id: ID!
   name: String
+  process: Process
+  processId: Int
   status: TaskStatus
   statusId: Int
   subtasks: [Subtask!]
@@ -318,6 +327,7 @@ input UpdateTaskDto {
   description: String
   faenaId: Int
   name: String
+  processId: Int
   statusId: Int
   valleyId: Int
 }

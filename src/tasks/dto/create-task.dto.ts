@@ -26,5 +26,10 @@ export class CreateTaskDto {
   @Field(() => Int, { nullable: true })
   @IsNumber()
   @IsOptional()
+  processId?: number;
+
+  @Field(() => Int, { nullable: true })
+  @IsNumber()
+  @IsOptional()
   statusId?: number;
 } 
