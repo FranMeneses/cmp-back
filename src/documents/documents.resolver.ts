@@ -1,6 +1,6 @@
 import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
 import { DocumentsService } from './documents.service';
-import { Document, CreateDocumentInput } from '../graphql/graphql.types';
+import { Document, CreateDocumentInput, TipoDocumento } from '../graphql/graphql.types';
 import { CreateDocumentDto } from './dto/create-document.dto';
 
 @Resolver(() => Document)
@@ -36,5 +36,10 @@ export class DocumentsResolver {
   async deleteDocument(@Args('id_documento') id_documento: string) {
     await this.documentsService.deleteFile(id_documento);
     return true;
+  }
+
+  @Query(() => [TipoDocumento])
+  async getAllDocumentTypes() {
+    return this.documentsService.getAllDocumentTypes();
   }
 } 

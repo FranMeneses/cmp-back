@@ -195,6 +195,8 @@ type Query {
   valleyMonthlyExpenses(valleyId: Int!, year: Int!): [MonthlyExpense!]!
   taskStatuses: [TaskStatus!]!
   tasksByValleyAndStatus(valleyId: Int!, statusId: Int!): [Task!]!
+  tasksByProcessAndValley(processId: Int!, valleyId: Int!): [Task!]!
+  tasksByProcessAndStatus(processId: Int!, statusId: Int!): [Task!]!
   subtasks: [Subtask!]!
   subtask(id: ID!): Subtask!
   priorities: [Priority!]!
@@ -223,6 +225,7 @@ type Query {
   risk(id: Int!): Risk!
   documents(tipo_documento: Int): [Document!]!
   document(id_documento: String!): Document!
+  getAllDocumentTypes: [TipoDocumento!]!
 }
 
 type Mutation {

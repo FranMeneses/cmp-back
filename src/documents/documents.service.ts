@@ -127,4 +127,8 @@ export class DocumentsService {
       where: { id_documento }
     });
   }
+
+  async getAllDocumentTypes() {
+    return this.prisma.tipo_documento.findMany();
+  }
 } 
