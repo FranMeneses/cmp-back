@@ -1,4 +1,6 @@
-import { Field, ID, ObjectType, InputType, Int, Float } from '@nestjs/graphql';
+import { Field, ID, ObjectType, InputType, Int, Float, Scalar } from '@nestjs/graphql';
+import { GraphQLScalarType } from 'graphql';
+import { GraphQLUpload, FileUpload } from 'graphql-upload/GraphQLUpload.js';
 
 @ObjectType()
 export class Valley {
@@ -583,4 +585,88 @@ export class UpdateComplianceInput {
 
   @Field({ nullable: true })
   applies?: boolean;
+}
+
+@ObjectType()
+export class TipoDocumento {
+  @Field(() => Int)
+  id_tipo_documento: number;
+
+  @Field(() => String, { nullable: true })
+  tipo_documento?: string;
+}
+
+@ObjectType()
+export class Document {
+  @Field(() => ID)
+  id_documento: string;
+
+  @Field(() => String, { nullable: true })
+  id_tarea?: string;
+
+  @Field(() => String, { nullable: true })
+  id_subtarea?: string;
+
+  @Field(() => Int)
+  tipo_documento: number;
+
+  @Field(() => String, { nullable: true })
+  ruta?: string;
+
+  @Field(() => Date, { nullable: true })
+  fecha_carga?: Date;
+
+  @Field(() => Task, { nullable: true })
+  tarea?: Task;
+
+  @Field(() => Subtask, { nullable: true })
+  subtarea?: Subtask;
+
+  @Field(() => TipoDocumento)
+  tipo_doc: TipoDocumento;
+}
+
+@InputType()
+export class CreateDocumentInput {
+  @Field(() => Int)
+  tipo_documento: number;
+
+  @Field(() => String)
+  ruta: string;
+
+  @Field(() => String, { nullable: true })
+  id_tarea?: string;
+
+  @Field(() => String, { nullable: true })
+  id_subtarea?: string;
+}
+
+@InputType()
+export class UpdateDocumentInput {
+  @Field(() => Int, { nullable: true })
+  tipo_documento?: number;
+
+  @Field(() => String, { nullable: true })
+  id_tarea?: string;
+
+  @Field(() => String, { nullable: true })
+  id_subtarea?: string;
+}
+
+@Scalar('Upload')
+export class UploadScalar {
+  description = 'File upload scalar type';
+  private readonly graphQLUploadInstance = GraphQLUpload;
+
+  parseValue(value: any) {
+    return this.graphQLUploadInstance.parseValue(value);
+  }
+
+  serialize(value: any) {
+    return this.graphQLUploadInstance.serialize(value);
+  }
+
+  parseLiteral(ast: any) {
+    return this.graphQLUploadInstance.parseLiteral(ast);
+  }
 }

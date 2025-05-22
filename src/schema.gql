@@ -2,152 +2,9 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-type Beneficiary {
-  address: String
-  contacts: [Contact!]
-  entityType: String
-  hasLegalPersonality: Boolean
-  id: ID!
-  legalName: String
-  representative: String
-  rut: String
-  subtasks: [Subtask!]
-}
-
-type Compliance {
-  applies: Boolean!
-  id: ID!
-  statusId: Int!
-  subtaskId: ID!
-}
-
-type Contact {
-  beneficiary: Beneficiary
-  email: String
-  id: ID!
-  name: String
-  phone: String
-  position: String
-}
-
-input CreateBeneficiaryDto {
-  address: String
-  entityType: String
-  hasLegalPersonality: Boolean
-  legalName: String
-  representative: String
-  rut: String
-}
-
-input CreateComplianceDto {
-  aplica: Int!
-  id_cumplimiento_estado: Int!
-  id_subtarea: Int!
-}
-
-input CreateContactDto {
-  beneficiaryId: ID!
-  email: String
-  name: String
-  phone: String
-  position: String
-}
-
-input CreateInfoTaskInput {
-  interactionId: Int!
-  investmentId: Int!
-  originId: Int!
-  riskId: Int!
-  scopeId: Int!
-  taskId: ID!
-  typeId: Int!
-}
-
-input CreateSubtaskDto {
-  beneficiaryId: ID
-  budget: Int
-  description: String
-  endDate: DateTime
-  expense: Int
-  finalDate: DateTime
-  name: String
-  number: Int
-  priorityId: Int
-  startDate: DateTime
-  statusId: Int
-  taskId: ID!
-}
-
-input CreateTaskDto {
-  description: String
-  faenaId: Int
-  name: String
-  processId: Int
-  statusId: Int
-  valleyId: Int
-}
-
-"""
-A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
-"""
-scalar DateTime
-
-type Faena {
+type Valley {
   id: Int!
   name: String
-}
-
-type InfoTask {
-  id: ID!
-  interactionId: Int!
-  investmentId: Int!
-  originId: Int!
-  riskId: Int!
-  scopeId: Int!
-  task: Task
-  taskId: ID!
-  typeId: Int!
-}
-
-type Interaction {
-  id: Int!
-  operation: String
-}
-
-type Investment {
-  id: Int!
-  line: String
-}
-
-type MonthlyBudget {
-  budget: Float!
-  month: String!
-}
-
-type MonthlyExpense {
-  expense: Float!
-  month: String!
-}
-
-type Mutation {
-  createBeneficiary(input: CreateBeneficiaryDto!): Beneficiary!
-  createCompliance(input: CreateComplianceDto!): Compliance!
-  createContact(input: CreateContactDto!): Contact!
-  createInfoTask(createInfoTaskInput: CreateInfoTaskInput!): InfoTask!
-  createSubtask(input: CreateSubtaskDto!): Subtask!
-  createTask(input: CreateTaskDto!): Task!
-  removeBeneficiary(id: ID!): Beneficiary!
-  removeCompliance(id: ID!): Compliance!
-  removeContact(id: ID!): Contact!
-  removeInfoTask(id: ID!): InfoTask!
-  removeSubtask(id: ID!): Subtask!
-  removeTask(id: ID!): Task!
-  updateBeneficiary(id: ID!, input: UpdateBeneficiaryDto!): Beneficiary!
-  updateCompliance(id: ID!, input: UpdateComplianceDto!): Compliance!
-  updateContact(id: ID!, input: UpdateContactDto!): Contact!
-  updateInfoTask(id: ID!, updateInfoTaskInput: UpdateInfoTaskInput!): InfoTask!
-  updateSubtask(id: ID!, input: UpdateSubtaskDto!): Subtask!
-  updateTask(id: ID!, input: UpdateTaskDto!): Task!
 }
 
 type Origin {
@@ -155,70 +12,14 @@ type Origin {
   name: String
 }
 
-type Priority {
+type Investment {
+  id: Int!
+  line: String
+}
+
+type Type {
   id: Int!
   name: String
-}
-
-type Process {
-  id: Int!
-  name: String!
-}
-
-type Query {
-  beneficiaries: [Beneficiary!]!
-  beneficiary(id: ID!): Beneficiary!
-  compliance(id: ID!): Compliance!
-  compliances(query: String): [Compliance!]!
-  contact(id: ID!): Contact!
-  contacts: [Contact!]!
-  faenas: [Faena!]!
-  infoTask(id: ID!): InfoTask!
-  infoTasks: [InfoTask!]!
-  interaction(id: Int!): Interaction!
-  interactions: [Interaction!]!
-  investment(id: Int!): Investment!
-  investmentTasksCount(investmentId: Int!): Int!
-  investments: [Investment!]!
-  origin(id: Int!): Origin!
-  origins: [Origin!]!
-  priorities: [Priority!]!
-  processes: [Process!]!
-  risk(id: Int!): Risk!
-  risks: [Risk!]!
-  scope(id: Int!): Scope!
-  scopes: [Scope!]!
-  subtask(id: ID!): Subtask!
-  subtaskStatuses: [SubtaskStatus!]!
-  subtasks: [Subtask!]!
-  task(id: ID!): Task!
-  taskInfo(id: ID!): InfoTask!
-  taskProgress(id: ID!): Float!
-  taskStatuses: [TaskStatus!]!
-  taskSubtasks(id: ID!): [Subtask!]!
-  taskTotalBudget(id: ID!): Float!
-  taskTotalExpense(id: ID!): Float!
-  tasks: [Task!]!
-  tasksByProcess(processId: Int!): [Task!]!
-  tasksByValley(valleyId: Int!): [Task!]!
-  tasksByValleyAndStatus(statusId: Int!, valleyId: Int!): [Task!]!
-  totalBudgetByMonth(monthName: String!, year: Int!): Float!
-  totalBudgetByMonthAndValley(monthName: String!, valleyId: Int!, year: Int!): Float!
-  totalExpenseByMonth(monthName: String!, year: Int!): Float!
-  totalExpenseByMonthAndValley(monthName: String!, valleyId: Int!, year: Int!): Float!
-  type(id: Int!): Type!
-  types: [Type!]!
-  valleyInvestmentTasksCount(investmentId: Int!, valleyId: Int!): Int!
-  valleyMonthlyBudgets(valleyId: Int!, year: Int!): [MonthlyBudget!]!
-  valleyMonthlyExpenses(valleyId: Int!, year: Int!): [MonthlyExpense!]!
-  valleySubtasks(valleyId: Int!): [Subtask!]!
-  valleyTasksCount(valleyId: Int!): Int!
-  valleys: [Valley!]!
-}
-
-type Risk {
-  id: Int!
-  type: String
 }
 
 type Scope {
@@ -226,23 +27,60 @@ type Scope {
   name: String
 }
 
-type Subtask {
-  beneficiary: Beneficiary
-  beneficiaryId: ID
-  budget: Int
-  description: String
-  endDate: DateTime
-  expense: Int
-  finalDate: DateTime
+type Interaction {
+  id: Int!
+  operation: String
+}
+
+type Risk {
+  id: Int!
+  type: String
+}
+
+type Process {
+  id: Int!
+  name: String!
+}
+
+type MonthlyBudget {
+  month: String!
+  budget: Float!
+}
+
+type MonthlyExpense {
+  month: String!
+  expense: Float!
+}
+
+type Faena {
+  id: Int!
+  name: String
+}
+
+type TaskStatus {
+  id: Int!
+  name: String
+}
+
+type Beneficiary {
+  id: ID!
+  legalName: String
+  rut: String
+  address: String
+  entityType: String
+  representative: String
+  hasLegalPersonality: Boolean
+  contacts: [Contact!]
+  subtasks: [Subtask!]
+}
+
+type Contact {
   id: ID!
   name: String
-  number: Int
-  priority: Priority
-  priorityId: Int
-  startDate: DateTime
-  status: SubtaskStatus
-  statusId: Int
-  taskId: ID!
+  position: String
+  email: String
+  phone: String
+  beneficiary: Beneficiary
 }
 
 type SubtaskStatus {
@@ -251,89 +89,289 @@ type SubtaskStatus {
   percentage: Int!
 }
 
-type Task {
+type Priority {
+  id: Int!
+  name: String
+}
+
+type Subtask {
+  id: ID!
+  taskId: ID!
+  number: Int
+  name: String
   description: String
-  faena: Faena
-  faenaId: Int
+  budget: Int
+  expense: Int
+  startDate: DateTime
+  endDate: DateTime
+  finalDate: DateTime
+  beneficiaryId: ID
+  statusId: Int
+  priorityId: Int
+  beneficiary: Beneficiary
+  status: SubtaskStatus
+  priority: Priority
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Task {
   id: ID!
   name: String
-  process: Process
-  processId: Int
-  status: TaskStatus
-  statusId: Int
-  subtasks: [Subtask!]
-  valley: Valley
+  description: String
   valleyId: Int
+  faenaId: Int
+  processId: Int
+  statusId: Int
+  valley: Valley
+  faena: Faena
+  process: Process
+  status: TaskStatus
+  subtasks: [Subtask!]
 }
 
-type TaskStatus {
-  id: Int!
+type InfoTask {
+  id: ID!
+  taskId: ID!
+  originId: Int!
+  investmentId: Int!
+  typeId: Int!
+  scopeId: Int!
+  interactionId: Int!
+  riskId: Int!
+  task: Task
+}
+
+type Compliance {
+  id: ID!
+  subtaskId: ID!
+  statusId: Int!
+  applies: Boolean!
+}
+
+type TipoDocumento {
+  id_tipo_documento: Int!
+  tipo_documento: String
+}
+
+type Document {
+  id_documento: ID!
+  id_tarea: String
+  id_subtarea: String
+  tipo_documento: Int!
+  ruta: String
+  fecha_carga: DateTime
+  tarea: Task
+  subtarea: Subtask
+  tipo_doc: TipoDocumento!
+}
+
+"""File upload scalar type"""
+scalar Upload
+
+type Query {
+  tasks: [Task!]!
+  task(id: ID!): Task!
+  processes: [Process!]!
+  tasksByProcess(processId: Int!): [Task!]!
+  taskSubtasks(id: ID!): [Subtask!]!
+  taskProgress(id: ID!): Float!
+  taskTotalBudget(id: ID!): Float!
+  taskTotalExpense(id: ID!): Float!
+  valleyTasksCount(valleyId: Int!): Int!
+  valleySubtasks(valleyId: Int!): [Subtask!]!
+  totalBudgetByMonth(monthName: String!, year: Int!): Float!
+  totalExpenseByMonth(monthName: String!, year: Int!): Float!
+  totalBudgetByMonthAndValley(monthName: String!, year: Int!, valleyId: Int!): Float!
+  totalExpenseByMonthAndValley(monthName: String!, year: Int!, valleyId: Int!): Float!
+  tasksByValley(valleyId: Int!): [Task!]!
+  valleyInvestmentTasksCount(valleyId: Int!, investmentId: Int!): Int!
+  valleys: [Valley!]!
+  faenas: [Faena!]!
+  valleyMonthlyBudgets(valleyId: Int!, year: Int!): [MonthlyBudget!]!
+  valleyMonthlyExpenses(valleyId: Int!, year: Int!): [MonthlyExpense!]!
+  taskStatuses: [TaskStatus!]!
+  tasksByValleyAndStatus(valleyId: Int!, statusId: Int!): [Task!]!
+  subtasks: [Subtask!]!
+  subtask(id: ID!): Subtask!
+  priorities: [Priority!]!
+  subtaskStatuses: [SubtaskStatus!]!
+  compliances(query: String): [Compliance!]!
+  compliance(id: ID!): Compliance!
+  beneficiaries: [Beneficiary!]!
+  beneficiary(id: ID!): Beneficiary!
+  contacts: [Contact!]!
+  contact(id: ID!): Contact!
+  infoTasks: [InfoTask!]!
+  infoTask(id: ID!): InfoTask!
+  taskInfo(id: ID!): InfoTask!
+  investmentTasksCount(investmentId: Int!): Int!
+  origins: [Origin!]!
+  origin(id: Int!): Origin!
+  investments: [Investment!]!
+  investment(id: Int!): Investment!
+  types: [Type!]!
+  type(id: Int!): Type!
+  scopes: [Scope!]!
+  scope(id: Int!): Scope!
+  interactions: [Interaction!]!
+  interaction(id: Int!): Interaction!
+  risks: [Risk!]!
+  risk(id: Int!): Risk!
+  documents(tipo_documento: Int): [Document!]!
+  document(id_documento: String!): Document!
+}
+
+type Mutation {
+  createTask(input: CreateTaskDto!): Task!
+  updateTask(id: ID!, input: UpdateTaskDto!): Task!
+  removeTask(id: ID!): Task!
+  createSubtask(input: CreateSubtaskDto!): Subtask!
+  updateSubtask(id: ID!, input: UpdateSubtaskDto!): Subtask!
+  removeSubtask(id: ID!): Subtask!
+  createCompliance(input: CreateComplianceDto!): Compliance!
+  updateCompliance(id: ID!, input: UpdateComplianceDto!): Compliance!
+  removeCompliance(id: ID!): Compliance!
+  createBeneficiary(input: CreateBeneficiaryDto!): Beneficiary!
+  updateBeneficiary(id: ID!, input: UpdateBeneficiaryDto!): Beneficiary!
+  removeBeneficiary(id: ID!): Beneficiary!
+  createContact(input: CreateContactDto!): Contact!
+  updateContact(id: ID!, input: UpdateContactDto!): Contact!
+  removeContact(id: ID!): Contact!
+  createInfoTask(createInfoTaskInput: CreateInfoTaskInput!): InfoTask!
+  updateInfoTask(id: ID!, updateInfoTaskInput: UpdateInfoTaskInput!): InfoTask!
+  removeInfoTask(id: ID!): InfoTask!
+  createDocument(input: CreateDocumentInput!): Document!
+  uploadDocument(input: CreateDocumentDto!): Boolean!
+  deleteDocument(id_documento: String!): Boolean!
+}
+
+input CreateTaskDto {
   name: String
+  description: String
+  valleyId: Int
+  faenaId: Int
+  processId: Int
+  statusId: Int
 }
 
-type Type {
-  id: Int!
+input UpdateTaskDto {
   name: String
+  description: String
+  valleyId: Int
+  faenaId: Int
+  processId: Int
+  statusId: Int
 }
 
-input UpdateBeneficiaryDto {
-  address: String
-  entityType: String
-  hasLegalPersonality: Boolean
-  legalName: String
-  representative: String
-  rut: String
+input CreateSubtaskDto {
+  taskId: ID!
+  number: Int
+  name: String
+  description: String
+  budget: Int
+  expense: Int
+  startDate: DateTime
+  endDate: DateTime
+  finalDate: DateTime
+  beneficiaryId: ID
+  statusId: Int
+  priorityId: Int
+}
+
+input UpdateSubtaskDto {
+  name: String
+  description: String
+  taskId: ID
+  number: Int
+  statusId: Int
+  priorityId: Int
+  beneficiaryId: ID
+  budget: Int
+  expense: Int
+  startDate: DateTime
+  endDate: DateTime
+  finalDate: DateTime
+}
+
+input CreateComplianceDto {
+  id_subtarea: Int!
+  id_cumplimiento_estado: Int!
+  aplica: Int!
 }
 
 input UpdateComplianceDto {
-  aplica: Int
-  id_cumplimiento_estado: Int
   id_subtarea: Int
+  id_cumplimiento_estado: Int
+  aplica: Int
+}
+
+input CreateBeneficiaryDto {
+  legalName: String
+  rut: String
+  address: String
+  entityType: String
+  representative: String
+  hasLegalPersonality: Boolean
+}
+
+input UpdateBeneficiaryDto {
+  legalName: String
+  rut: String
+  address: String
+  entityType: String
+  representative: String
+  hasLegalPersonality: Boolean
+}
+
+input CreateContactDto {
+  beneficiaryId: ID!
+  name: String
+  position: String
+  email: String
+  phone: String
 }
 
 input UpdateContactDto {
   beneficiaryId: ID
-  email: String
   name: String
-  phone: String
   position: String
+  email: String
+  phone: String
+}
+
+input CreateInfoTaskInput {
+  taskId: ID!
+  originId: Int!
+  investmentId: Int!
+  typeId: Int!
+  scopeId: Int!
+  interactionId: Int!
+  riskId: Int!
 }
 
 input UpdateInfoTaskInput {
-  interactionId: Int
-  investmentId: Int
+  taskId: ID
   originId: Int
-  riskId: Int
-  scopeId: Int
-  taskId: ID
+  investmentId: Int
   typeId: Int
+  scopeId: Int
+  interactionId: Int
+  riskId: Int
 }
 
-input UpdateSubtaskDto {
-  beneficiaryId: ID
-  budget: Int
-  description: String
-  endDate: DateTime
-  expense: Int
-  finalDate: DateTime
-  name: String
-  number: Int
-  priorityId: Int
-  startDate: DateTime
-  statusId: Int
-  taskId: ID
+input CreateDocumentInput {
+  tipo_documento: Int!
+  ruta: String!
+  id_tarea: String
+  id_subtarea: String
 }
 
-input UpdateTaskDto {
-  description: String
-  faenaId: Int
-  name: String
-  processId: Int
-  statusId: Int
-  valleyId: Int
-}
-
-type Valley {
-  id: Int!
-  name: String
+input CreateDocumentDto {
+  tipo_documento: Int!
+  id_tarea: String
+  id_subtarea: String
 }
