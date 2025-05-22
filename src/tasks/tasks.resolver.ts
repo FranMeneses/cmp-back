@@ -161,4 +161,20 @@ export class TasksResolver {
   ) {
     return this.tasksService.getTasksByValleyAndStatus(valleyId, statusId);
   }
+
+  @Query(() => [Task])
+  async tasksByProcessAndValley(
+    @Args('processId', { type: () => Int }) processId: number,
+    @Args('valleyId', { type: () => Int }) valleyId: number
+  ) {
+    return this.tasksService.getTasksByProcessAndValley(processId, valleyId);
+  }
+
+  @Query(() => [Task])
+  async tasksByProcessAndStatus(
+    @Args('processId', { type: () => Int }) processId: number,
+    @Args('statusId', { type: () => Int }) statusId: number
+  ) {
+    return this.tasksService.getTasksByProcessAndStatus(processId, statusId);
+  }
 }

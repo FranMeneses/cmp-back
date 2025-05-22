@@ -554,4 +554,35 @@ export class TasksService {
   }
 
   //faenas por valle
+  async getTasksByProcessAndValley(processId: number, valleyId: number) {
+    const tasks = await this.prisma.tarea.findMany({
+      where: { 
+        id_proceso: processId,
+        id_valle: valleyId 
+      },
+      include: {
+        tarea_estado: true,
+        valle: true,
+        faena: true,
+        proceso: true
+      }
+    });
+    return tasks.map(task => this.mapFromDatabase(task));
+  }
+
+  async getTasksByProcessAndStatus(processId: number, statusId: number) {
+    const tasks = await this.prisma.tarea.findMany({
+      where: { 
+        id_proceso: processId,
+        id_estado: statusId 
+      },
+      include: {
+        tarea_estado: true,
+        valle: true,
+        faena: true,
+        proceso: true
+      }
+    });
+    return tasks.map(task => this.mapFromDatabase(task));
+  }
 } 
