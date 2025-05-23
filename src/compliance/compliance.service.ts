@@ -33,18 +33,18 @@ export class ComplianceService {
         id: compliance.cumplimiento_estado.id_cumplimiento_estado,
         nombre: compliance.cumplimiento_estado.estado
       } : null,
-      registros: compliance.registros?.map(record => ({
+      registros: compliance.registro?.map(record => ({
         id: record.id_registro,
         hes: record.hes,
         hem: record.hem,
         proveedor: record.proveedor,
         fecha_inicio: record.fecha_inicio,
         fecha_termino: record.fecha_termino,
-        memos: record.memos?.map(memo => ({
+        memos: record.memo?.map(memo => ({
           id: memo.id_memo,
           valor: memo.valor
         })) || [],
-        solpeds: record.solpeds?.map(solped => ({
+        solpeds: record.solped?.map(solped => ({
           id: solped.id_solped,
           ceco: solped.ceco,
           cuenta: solped.cuenta,
@@ -59,10 +59,10 @@ export class ComplianceService {
       data: this.mapToDatabase(createComplianceDto),
       include: {
         cumplimiento_estado: true,
-        registros: {
+        registro: {
           include: {
-            memos: true,
-            solpeds: true
+            memo: true,
+            solped: true
           }
         }
       }
@@ -75,10 +75,10 @@ export class ComplianceService {
       where: query,
       include: {
         cumplimiento_estado: true,
-        registros: {
+        registro: {
           include: {
-            memos: true,
-            solpeds: true
+            memo: true,
+            solped: true
           }
         }
       }
@@ -91,10 +91,10 @@ export class ComplianceService {
       where: { id_cumplimiento: id },
       include: {
         cumplimiento_estado: true,
-        registros: {
+        registro: {
           include: {
-            memos: true,
-            solpeds: true
+            memo: true,
+            solped: true
           }
         }
       }
@@ -108,10 +108,10 @@ export class ComplianceService {
       data: this.mapToDatabase(updateComplianceDto),
       include: {
         cumplimiento_estado: true,
-        registros: {
+        registro: {
           include: {
-            memos: true,
-            solpeds: true
+            memo: true,
+            solped: true
           }
         }
       }
@@ -124,10 +124,10 @@ export class ComplianceService {
       where: { id_cumplimiento: id },
       include: {
         cumplimiento_estado: true,
-        registros: {
+        registro: {
           include: {
-            memos: true,
-            solpeds: true
+            memo: true,
+            solped: true
           }
         }
       }

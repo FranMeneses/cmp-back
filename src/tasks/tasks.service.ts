@@ -520,7 +520,7 @@ export class TasksService {
     const tasks = await this.prisma.tarea.findMany({
       where: {
         id_valle: valleyId,
-        id_estado: statusId
+        estado: statusId
       },
       include: {
         tarea_estado: true,
@@ -574,7 +574,7 @@ export class TasksService {
     const tasks = await this.prisma.tarea.findMany({
       where: { 
         id_proceso: processId,
-        id_estado: statusId 
+        estado: statusId 
       },
       include: {
         tarea_estado: true,

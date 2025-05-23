@@ -616,6 +616,9 @@ export class Document {
   @Field(() => Date, { nullable: true })
   fecha_carga?: Date;
 
+  @Field(() => String, { nullable: true })
+  nombre_archivo?: string;
+
   @Field(() => Task, { nullable: true })
   tarea?: Task;
 
@@ -639,6 +642,9 @@ export class CreateDocumentInput {
 
   @Field(() => String, { nullable: true })
   id_subtarea?: string;
+
+  @Field(() => String, { nullable: true })
+  nombre_archivo?: string;
 }
 
 @InputType()
@@ -651,6 +657,9 @@ export class UpdateDocumentInput {
 
   @Field(() => String, { nullable: true })
   id_subtarea?: string;
+
+  @Field(() => String, { nullable: true })
+  nombre_archivo?: string;
 }
 
 @Scalar('Upload')

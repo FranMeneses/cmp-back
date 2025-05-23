@@ -164,6 +164,7 @@ type Document {
   tipo_documento: Int!
   ruta: String
   fecha_carga: DateTime
+  nombre_archivo: String
   tarea: Task
   subtarea: Subtask
   tipo_doc: TipoDocumento!
@@ -371,10 +372,12 @@ input CreateDocumentInput {
   ruta: String!
   id_tarea: String
   id_subtarea: String
+  nombre_archivo: String
 }
 
 input CreateDocumentDto {
   tipo_documento: Int!
   id_tarea: String
   id_subtarea: String
+  nombre_archivo: String
 }

@@ -157,7 +157,7 @@ export class InfoService {
             id_tarea: true,
             nombre: true,
             descripcion: true,
-            id_estado: true
+            estado: true
           }
         }
       }
@@ -180,7 +180,7 @@ export class InfoService {
         id: infoTask.tarea.id_tarea,
         name: infoTask.tarea.nombre,
         description: infoTask.tarea.descripcion,
-        statusId: infoTask.tarea.id_estado
+        statusId: infoTask.tarea.estado
       } : null
     };
   }

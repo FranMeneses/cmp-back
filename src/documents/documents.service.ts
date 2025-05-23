@@ -67,6 +67,7 @@ export class DocumentsService {
         ruta: input.ruta,
         id_tarea: input.id_tarea || null,
         id_subtarea: input.id_subtarea || null,
+        nombre_archivo: input.nombre_archivo || null,
         fecha_carga: new Date()
       },
       include: {
@@ -89,6 +90,7 @@ export class DocumentsService {
         ruta: blobInfo.ruta,
         id_tarea: input.id_tarea || null,
         id_subtarea: input.id_subtarea || null,
+        nombre_archivo: input.nombre_archivo || blobInfo.filename,
         fecha_carga: new Date()
       },
       include: {
