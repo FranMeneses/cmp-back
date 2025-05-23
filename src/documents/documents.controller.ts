@@ -3,18 +3,23 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { DocumentsService } from './documents.service';
 import { CreateDocumentDto } from './dto/create-document.dto';
 import { Express } from 'express';
+import { memoryStorage } from 'multer';
 
 @Controller('documents')
 export class DocumentsController {
   constructor(private readonly documentsService: DocumentsService) {}
 
   @Post('upload')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file', {
+    storage: memoryStorage() 
+  }))
   async uploadFile(@UploadedFile() file: Express.Multer.File) {
-    // Sube el archivo a Azure Blob Storage pero NO guarda metadata en DB
-    const blobInfo = await this.documentsService.uploadBlobOnly(file);
     
-    // Devuelve la información del blob para usar con GraphQL después
+    if (!file) {
+      throw new Error('No file received in controller');
+    }
+    
+    const blobInfo = await this.documentsService.uploadBlobOnly(file);
     return { 
       success: true, 
       ruta: blobInfo.ruta,

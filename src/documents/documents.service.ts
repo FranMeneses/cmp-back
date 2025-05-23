@@ -19,27 +19,42 @@ export class DocumentsService {
       throw new Error('Azure Storage connection string is not configured');
     }
     const blobServiceClient = BlobServiceClient.fromConnectionString(connectionString);
-    this.containerClient = blobServiceClient.getContainerClient('documentos');
+    this.containerClient = blobServiceClient.getContainerClient('cmpdocs');
   }
 
   /**
    * Sube un archivo a Azure Blob Storage sin guardar metadata en la base de datos
    */
   async uploadBlobOnly(file: Express.Multer.File) {
-    const uniqueId = crypto.randomUUID();
-    const fileExtension = file.originalname.split('.').pop();
-    const blobName = `${uniqueId}.${fileExtension}`;
+
     
-    const blockBlobClient = this.containerClient.getBlockBlobClient(blobName);
+    if (!file) {
+      throw new Error('File is null or undefined');
+    }
     
-    await blockBlobClient.upload(file.buffer, file.buffer.length);
-    
-    return {
-      ruta: blockBlobClient.url,
-      filename: file.originalname,
-      contentType: file.mimetype,
-      size: file.size
-    };
+    if (file.buffer) {
+    } else {
+      throw new Error('File buffer is undefined. Make sure Multer is configured to use memory storage.');
+    }
+
+    try {
+      const uniqueId = crypto.randomUUID();
+      const fileExtension = file.originalname.split('.').pop();
+      const blobName = `${uniqueId}.${fileExtension}`;
+      
+      const blockBlobClient = this.containerClient.getBlockBlobClient(blobName);
+
+      await blockBlobClient.upload(file.buffer, file.buffer.length);
+      
+      return {
+        ruta: blockBlobClient.url,
+        filename: file.originalname,
+        contentType: file.mimetype,
+        size: file.size
+      };
+    } catch (error) {
+      throw error;
+    }
   }
 
   /**
