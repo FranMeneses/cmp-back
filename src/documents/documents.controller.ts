@@ -1,7 +1,6 @@
 import { Controller, Post, Body, UseInterceptors, UploadedFile, Get, Param, Delete, Res, HttpException, HttpStatus } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { DocumentsService } from './documents.service';
-import { CreateDocumentDto } from './dto/create-document.dto';
 import { Express } from 'express';
 import { memoryStorage } from 'multer';
 import { Response } from 'express';
@@ -33,11 +32,13 @@ export class DocumentsController {
   async downloadFile(@Param('id') id: string, @Res() res: Response) {
     try {
       const fileData = await this.documentsService.downloadFile(id);
+      const safeFilename = fileData.filename.replace(/[^\w\s.-]/gi, '_');
       
       res.set({
         'Content-Type': fileData.contentType,
-        'Content-Disposition': `attachment; filename="${fileData.filename}"`,
+        'Content-Disposition': `attachment; filename="${safeFilename}"`,
         'Content-Length': fileData.size.toString(),
+        'Cache-Control': 'no-cache',
       });
       
       res.send(fileData.buffer);

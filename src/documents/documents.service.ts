@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { BlobServiceClient, ContainerClient } from '@azure/storage-blob';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateDocumentDto } from './dto/create-document.dto';
 import { CreateDocumentInput } from '../graphql/graphql.types';
 import * as crypto from 'crypto';
 
@@ -124,9 +123,25 @@ export class DocumentsService {
       }
       const buffer = Buffer.concat(chunks);
 
+      // Determinar el nombre del archivo con extensión
+      let filename = doc.nombre_archivo || blobName;
+      
+      // Si el nombre del archivo no tiene extensión, extraerla del blobName
+      if (filename && !filename.includes('.')) {
+        const blobExtension = blobName.split('.').pop();
+        if (blobExtension) {
+          filename = `${filename}.${blobExtension}`;
+        }
+      }
+      
+      // Si aún no tenemos un nombre válido, usar el blobName completo
+      if (!filename || filename === blobName) {
+        filename = blobName;
+      }
+
       return {
         buffer,
-        filename: doc.nombre_archivo || blobName,
+        filename,
         contentType: downloadResponse.contentType || 'application/octet-stream',
         size: downloadResponse.contentLength || buffer.length
       };
