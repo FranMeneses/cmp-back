@@ -109,13 +109,17 @@ export class DocumentsService {
       console.log(`Document ruta: ${doc.ruta}`);
       
       const url = new URL(doc.ruta);
-      const blobName = url.pathname.split('/').pop();
-
-      console.log(`Extracted blobName: ${blobName}`);
-
-      if (!blobName) {
+      const encodedBlobName = url.pathname.split('/').pop();
+      
+      if (!encodedBlobName) {
         throw new Error(`Invalid blob path for document ${id_documento}`);
       }
+      
+      // Decodificar la URL para manejar caracteres especiales como espacios
+      const blobName = decodeURIComponent(encodedBlobName);
+
+      console.log(`Encoded blobName: ${encodedBlobName}`);
+      console.log(`Decoded blobName: ${blobName}`);
 
       const blockBlobClient = this.containerClient.getBlockBlobClient(blobName);
       
