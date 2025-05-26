@@ -105,8 +105,13 @@ export class DocumentsService {
     }
 
     try {
+      console.log(`Downloading document ${id_documento}`);
+      console.log(`Document ruta: ${doc.ruta}`);
+      
       const url = new URL(doc.ruta);
       const blobName = url.pathname.split('/').pop();
+
+      console.log(`Extracted blobName: ${blobName}`);
 
       if (!blobName) {
         throw new Error(`Invalid blob path for document ${id_documento}`);
@@ -115,9 +120,12 @@ export class DocumentsService {
       const blockBlobClient = this.containerClient.getBlockBlobClient(blobName);
       
       // Verificar que el blob existe
+      console.log(`Checking if blob exists: ${blobName}`);
       const exists = await blockBlobClient.exists();
+      console.log(`Blob exists: ${exists}`);
+      
       if (!exists) {
-        throw new Error(`File not found in Azure Storage for document ${id_documento}`);
+        throw new Error(`File not found in Azure Storage for document ${id_documento}. BlobName: ${blobName}`);
       }
 
       // Obtener el buffer del archivo
@@ -153,6 +161,8 @@ export class DocumentsService {
         filename = `${nameWithoutTimestamp}.${blobExtension}`;
       }
 
+      console.log(`Final filename: ${filename}`);
+
       return {
         buffer,
         filename,
@@ -160,6 +170,7 @@ export class DocumentsService {
         size: downloadResponse.contentLength || buffer.length
       };
     } catch (error) {
+      console.error(`Download error for document ${id_documento}:`, error);
       throw new Error(`Failed to download file: ${error.message}`);
     }
   }
