@@ -43,7 +43,15 @@ export class DocumentsService {
       
       const blockBlobClient = this.containerClient.getBlockBlobClient(blobName);
 
-      await blockBlobClient.upload(file.buffer, file.buffer.length);
+      // Configurar las opciones de upload con el contentType correcto
+      const uploadOptions = {
+        blobHTTPHeaders: {
+          blobContentType: file.mimetype || 'application/octet-stream',
+          blobContentDisposition: `attachment; filename="${file.originalname}"`,
+        }
+      };
+
+      await blockBlobClient.upload(file.buffer, file.buffer.length, uploadOptions);
       
       return {
         ruta: blockBlobClient.url,
