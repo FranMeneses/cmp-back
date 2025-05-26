@@ -115,7 +115,6 @@ export class DocumentsService {
         throw new Error(`Invalid blob path for document ${id_documento}`);
       }
       
-      // Decodificar la URL para manejar caracteres especiales como espacios
       const blobName = decodeURIComponent(encodedBlobName);
 
       console.log(`Encoded blobName: ${encodedBlobName}`);
@@ -149,20 +148,30 @@ export class DocumentsService {
       // Determinar el nombre del archivo con extensión
       let filename: string;
       
+      console.log(`Document nombre_archivo from DB: ${doc.nombre_archivo}`);
+      console.log(`BlobName for filename extraction: ${blobName}`);
+      
       if (doc.nombre_archivo) {
         filename = doc.nombre_archivo;
+        console.log(`Using nombre_archivo from DB: ${filename}`);
         
         if (!filename.includes('.')) {
           const blobExtension = blobName.split('.').pop();
           if (blobExtension) {
             filename = `${filename}.${blobExtension}`;
+            console.log(`Added extension to filename: ${filename}`);
           }
         }
       } else {
+        console.log(`No nombre_archivo in DB, extracting from blobName`);
         const blobExtension = blobName.split('.').pop();
         const nameWithoutExt = blobName.replace(/\.[^/.]+$/, ""); // Remover extensión
         const nameWithoutTimestamp = nameWithoutExt.replace(/_\d+$/, ""); // Remover timestamp
         filename = `${nameWithoutTimestamp}.${blobExtension}`;
+        console.log(`Extracted filename: ${filename}`);
+        console.log(`  - blobExtension: ${blobExtension}`);
+        console.log(`  - nameWithoutExt: ${nameWithoutExt}`);
+        console.log(`  - nameWithoutTimestamp: ${nameWithoutTimestamp}`);
       }
 
       console.log(`Final filename: ${filename}`);
