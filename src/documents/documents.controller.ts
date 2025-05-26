@@ -32,7 +32,10 @@ export class DocumentsController {
   async downloadFile(@Param('id') id: string, @Res() res: Response) {
     try {
       const fileData = await this.documentsService.downloadFile(id);
+      
+      console.log(`Controller - Original filename: ${fileData.filename}`);
       const safeFilename = fileData.filename.replace(/[^\w\s.-]/gi, '_');
+      console.log(`Controller - Safe filename: ${safeFilename}`);
       
       res.set({
         'Content-Type': fileData.contentType,
