@@ -249,7 +249,6 @@ type Mutation {
   updateInfoTask(id: ID!, updateInfoTaskInput: UpdateInfoTaskInput!): InfoTask!
   removeInfoTask(id: ID!): InfoTask!
   createDocument(input: CreateDocumentInput!): Document!
-  uploadDocument(input: CreateDocumentDto!): Boolean!
   deleteDocument(id_documento: String!): Boolean!
 }
 
@@ -370,13 +369,6 @@ input UpdateInfoTaskInput {
 input CreateDocumentInput {
   tipo_documento: Int!
   ruta: String!
-  id_tarea: String
-  id_subtarea: String
-  nombre_archivo: String
-}
-
-input CreateDocumentDto {
-  tipo_documento: Int!
   id_tarea: String
   id_subtarea: String
   nombre_archivo: String

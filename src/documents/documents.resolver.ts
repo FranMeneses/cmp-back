@@ -1,7 +1,6 @@
 import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
 import { DocumentsService } from './documents.service';
 import { Document, CreateDocumentInput, TipoDocumento } from '../graphql/graphql.types';
-import { CreateDocumentDto } from './dto/create-document.dto';
 
 @Resolver(() => Document)
 export class DocumentsResolver {
@@ -12,13 +11,6 @@ export class DocumentsResolver {
     @Args('input') input: CreateDocumentInput
   ) {
     return this.documentsService.createDocumentMetadata(input);
-  }
-
-  @Mutation(() => Boolean)
-  async uploadDocument(
-    @Args('input') input: CreateDocumentDto,
-  ) {
-    return true;
   }
 
   @Query(() => [Document])

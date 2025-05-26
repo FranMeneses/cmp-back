@@ -1,9 +1,10 @@
-import { Controller, Post, Body, UseInterceptors, UploadedFile, Get, Param, Delete } from '@nestjs/common';
+import { Controller, Post, Body, UseInterceptors, UploadedFile, Get, Param, Delete, Res, HttpException, HttpStatus } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { DocumentsService } from './documents.service';
 import { CreateDocumentDto } from './dto/create-document.dto';
 import { Express } from 'express';
 import { memoryStorage } from 'multer';
+import { Response } from 'express';
 
 @Controller('documents')
 export class DocumentsController {
@@ -28,14 +29,24 @@ export class DocumentsController {
     };
   }
 
-  @Post('upload-complete')
-  @UseInterceptors(FileInterceptor('file'))
-  async uploadFileComplete(
-    @UploadedFile() file: Express.Multer.File,
-    @Body() createDocumentDto: CreateDocumentDto,
-  ) {
-    const result = await this.documentsService.uploadFile(file, createDocumentDto);
-    return { success: true, id: result.id_documento };
+  @Get('download/:id')
+  async downloadFile(@Param('id') id: string, @Res() res: Response) {
+    try {
+      const fileData = await this.documentsService.downloadFile(id);
+      
+      res.set({
+        'Content-Type': fileData.contentType,
+        'Content-Disposition': `attachment; filename="${fileData.filename}"`,
+        'Content-Length': fileData.size.toString(),
+      });
+      
+      res.send(fileData.buffer);
+    } catch (error) {
+      throw new HttpException(
+        error.message || 'Failed to download file',
+        HttpStatus.NOT_FOUND
+      );
+    }
   }
 
   @Get()
