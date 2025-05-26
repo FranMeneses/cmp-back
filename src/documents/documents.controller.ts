@@ -32,15 +32,16 @@ export class DocumentsController {
   async downloadFile(@Param('id') id: string, @Res() res: Response) {
     try {
       const fileData = await this.documentsService.downloadFile(id);
-      
-      console.log(`Controller - Original filename: ${fileData.filename}`);
       const safeFilename = fileData.filename.replace(/[^\w\s.-]/gi, '_');
-      console.log(`Controller - Safe filename: ${safeFilename}`);
+      const encodedFilename = encodeURIComponent(fileData.filename);
       
       res.set({
         'Content-Type': fileData.contentType,
         'Content-Disposition': `attachment; filename="${safeFilename}"`,
         'Content-Length': fileData.size.toString(),
+        'Access-Control-Expose-Headers': 'Content-Disposition, Content-Length',
+        'Access-Control-Allow-Origin': 'http://localhost:3000',
+        'Access-Control-Allow-Credentials': 'true',
         'Cache-Control': 'no-cache',
       });
       
