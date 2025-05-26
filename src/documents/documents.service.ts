@@ -3,7 +3,6 @@ import { BlobServiceClient, ContainerClient } from '@azure/storage-blob';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateDocumentInput } from '../graphql/graphql.types';
-import * as crypto from 'crypto';
 
 @Injectable()
 export class DocumentsService {
@@ -37,13 +36,14 @@ export class DocumentsService {
     }
 
     try {
-      const uniqueId = crypto.randomUUID();
+      // Usar el nombre original del archivo con timestamp para evitar conflictos
+      const timestamp = Date.now();
       const fileExtension = file.originalname.split('.').pop();
-      const blobName = `${uniqueId}.${fileExtension}`;
+      const fileNameWithoutExt = file.originalname.replace(/\.[^/.]+$/, "");
+      const blobName = `${fileNameWithoutExt}_${timestamp}.${fileExtension}`;
       
       const blockBlobClient = this.containerClient.getBlockBlobClient(blobName);
 
-      // Configurar las opciones de upload con el contentType correcto
       const uploadOptions = {
         blobHTTPHeaders: {
           blobContentType: file.mimetype || 'application/octet-stream',
@@ -90,7 +90,10 @@ export class DocumentsService {
    */
   async downloadFile(id_documento: string) {
     const doc = await this.prisma.documento.findUnique({
-      where: { id_documento }
+      where: { id_documento },
+      include: {
+        tipo_doc: true
+      }
     });
 
     if (!doc) {
@@ -132,19 +135,22 @@ export class DocumentsService {
       const buffer = Buffer.concat(chunks);
 
       // Determinar el nombre del archivo con extensión
-      let filename = doc.nombre_archivo || blobName;
+      let filename: string;
       
-      // Si el nombre del archivo no tiene extensión, extraerla del blobName
-      if (filename && !filename.includes('.')) {
-        const blobExtension = blobName.split('.').pop();
-        if (blobExtension) {
-          filename = `${filename}.${blobExtension}`;
+      if (doc.nombre_archivo) {
+        filename = doc.nombre_archivo;
+        
+        if (!filename.includes('.')) {
+          const blobExtension = blobName.split('.').pop();
+          if (blobExtension) {
+            filename = `${filename}.${blobExtension}`;
+          }
         }
-      }
-      
-      // Si aún no tenemos un nombre válido, usar el blobName completo
-      if (!filename || filename === blobName) {
-        filename = blobName;
+      } else {
+        const blobExtension = blobName.split('.').pop();
+        const nameWithoutExt = blobName.replace(/\.[^/.]+$/, ""); // Remover extensión
+        const nameWithoutTimestamp = nameWithoutExt.replace(/_\d+$/, ""); // Remover timestamp
+        filename = `${nameWithoutTimestamp}.${blobExtension}`;
       }
 
       return {
