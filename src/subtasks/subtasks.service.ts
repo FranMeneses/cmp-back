@@ -175,7 +175,7 @@ export class SubtasksService {
       return [];
     }
 
-    // Luego buscamos las subtareas que pertenezcan a esas tareas y tengan fecha de inicio en el mes y año especificados
+    // Luego buscamos las subtareas que pertenezcan a esas tareas y tengan fecha de termino en el mes y año especificados
     const subtasks = await this.prisma.subtarea.findMany({
       where: {
         id_tarea: {
@@ -184,7 +184,7 @@ export class SubtasksService {
         fecha_termino: {
           not: null,
           gte: new Date(year, monthId - 1, 1),
-          lt: new Date(year, monthId, 1)
+          lte: new Date(year, monthId - 1, new Date(year, monthId, 0).getDate())
         }
       },
       include: {
