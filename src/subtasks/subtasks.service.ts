@@ -135,4 +135,64 @@ export class SubtasksService {
       percentage: status.porcentaje
     }));
   }
+
+  private readonly MONTH_MAPPING = {
+    'enero': 1,
+    'febrero': 2,
+    'marzo': 3,
+    'abril': 4,
+    'mayo': 5,
+    'junio': 6,
+    'julio': 7,
+    'agosto': 8,
+    'septiembre': 9,
+    'octubre': 10,
+    'noviembre': 11,
+    'diciembre': 12
+  };
+
+  private getMonthNumber(monthName: string): number {
+    const normalizedMonth = monthName.toLowerCase();
+    const monthNumber = this.MONTH_MAPPING[normalizedMonth];
+    
+    if (!monthNumber) {
+      throw new Error(`Invalid month name: ${monthName}`);
+    }
+    
+    return monthNumber;
+  }
+
+  async getSubtasksByMonthYearAndValley(monthName: string, year: number, valleyId: number) {
+    const monthId = this.getMonthNumber(monthName);
+    
+    // Primero obtenemos todas las tareas del valle especificado
+    const valleyTasks = await this.prisma.tarea.findMany({
+      where: { id_valle: valleyId },
+      select: { id_tarea: true }
+    });
+
+    if (valleyTasks.length === 0) {
+      return [];
+    }
+
+    // Luego buscamos las subtareas que pertenezcan a esas tareas y tengan fecha de inicio en el mes y año especificados
+    const subtasks = await this.prisma.subtarea.findMany({
+      where: {
+        id_tarea: {
+          in: valleyTasks.map(task => task.id_tarea)
+        },
+        fecha_inicio: {
+          not: null,
+          gte: new Date(year, monthId - 1, 1),
+          lt: new Date(year, monthId, 1)
+        }
+      },
+      include: {
+        subtarea_estado: true,
+        prioridad: true
+      }
+    });
+
+    return subtasks.map(subtask => this.mapFromDatabase(subtask));
+  }
 } 

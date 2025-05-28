@@ -48,4 +48,13 @@ export class SubtasksResolver {
   async subtaskStatuses() {
     return this.subtasksService.getAllSubtaskStatuses();
   }
+
+  @Query(() => [Subtask])
+  async subtasksByMonthYearAndValley(
+    @Args('monthName', { type: () => String }) monthName: string,
+    @Args('year', { type: () => Int }) year: number,
+    @Args('valleyId', { type: () => Int }) valleyId: number
+  ) {
+    return this.subtasksService.getSubtasksByMonthYearAndValley(monthName, year, valleyId);
+  }
 } 

@@ -202,6 +202,7 @@ type Query {
   subtask(id: ID!): Subtask!
   priorities: [Priority!]!
   subtaskStatuses: [SubtaskStatus!]!
+  subtasksByMonthYearAndValley(monthName: String!, year: Int!, valleyId: Int!): [Subtask!]!
   compliances(query: String): [Compliance!]!
   compliance(id: ID!): Compliance!
   beneficiaries: [Beneficiary!]!
