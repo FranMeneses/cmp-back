@@ -181,7 +181,7 @@ export class SubtasksService {
         id_tarea: {
           in: valleyTasks.map(task => task.id_tarea)
         },
-        fecha_final: {
+        fecha_termino: {
           not: null,
           gte: new Date(year, monthId - 1, 1),
           lt: new Date(year, monthId, 1)
