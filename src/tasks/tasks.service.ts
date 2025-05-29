@@ -18,7 +18,7 @@ export class TasksService {
       id_valle: taskDto.valleyId,
       id_faena: taskDto.faenaId,
       id_proceso: taskDto.processId,
-      id_estado: taskDto.statusId
+      estado: taskDto.statusId
     };
   }
 
@@ -30,7 +30,7 @@ export class TasksService {
       valleyId: task.id_valle,
       faenaId: task.id_faena,
       processId: task.id_proceso,
-      statusId: task.id_estado,
+      statusId: task.estado,
       valley: task.valle ? {
         id: task.valle.id_valle,
         name: task.valle.valle_name
