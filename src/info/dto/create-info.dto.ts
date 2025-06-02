@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsUUID, IsInt } from 'class-validator';
+import { IsString, IsNotEmpty, IsUUID, IsInt, IsOptional } from 'class-validator';
 
 export class CreateInfoDto {
   @IsUUID()
@@ -6,26 +6,26 @@ export class CreateInfoDto {
   taskId: string;
 
   @IsInt()
-  @IsNotEmpty()
-  originId: number;
+  @IsOptional()
+  originId?: number;
 
   @IsInt()
-  @IsNotEmpty()
-  investmentId: number;
+  @IsOptional()
+  investmentId?: number;
 
   @IsInt()
-  @IsNotEmpty()
-  typeId: number;
+  @IsOptional()
+  typeId?: number;
 
   @IsInt()
-  @IsNotEmpty()
-  scopeId: number;
+  @IsOptional()
+  scopeId?: number;
 
   @IsInt()
-  @IsNotEmpty()
-  interactionId: number;
+  @IsOptional()
+  interactionId?: number;
 
   @IsInt()
-  @IsNotEmpty()
-  riskId: number;
+  @IsOptional()
+  riskId?: number;
 } 

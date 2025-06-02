@@ -62,6 +62,12 @@ type TaskStatus {
   name: String
 }
 
+type ComplianceStatus {
+  id: Int!
+  name: String
+  days: Int
+}
+
 type Beneficiary {
   id: ID!
   legalName: String
@@ -131,25 +137,64 @@ type Task {
   process: Process
   status: TaskStatus
   subtasks: [Subtask!]
+  compliances: [Compliance!]
 }
 
 type InfoTask {
   id: ID!
   taskId: ID!
-  originId: Int!
-  investmentId: Int!
-  typeId: Int!
-  scopeId: Int!
-  interactionId: Int!
-  riskId: Int!
+  originId: Int
+  investmentId: Int
+  typeId: Int
+  scopeId: Int
+  interactionId: Int
+  riskId: Int
   task: Task
+  origin: Origin
+  investment: Investment
+  type: Type
+  scope: Scope
+  interaction: Interaction
+  risk: Risk
 }
 
 type Compliance {
   id: ID!
-  subtaskId: ID!
-  statusId: Int!
-  applies: Boolean!
+  taskId: ID!
+  statusId: Int
+  applies: Boolean
+  task: Task
+  status: ComplianceStatus
+  registries: [Registry!]
+}
+
+type Registry {
+  id: ID!
+  complianceId: ID!
+  hes: Boolean
+  hem: Boolean
+  provider: String
+  startDate: DateTime
+  endDate: DateTime
+  compliance: Compliance
+  memos: [Memo!]
+  solpeds: [Solped!]
+}
+
+type Memo {
+  id: ID!
+  registryId: ID!
+  value: Int
+  registry: Registry
+}
+
+type Solped {
+  id: ID!
+  registryId: ID!
+  ceco: Int
+  account: Int
+  value: Int
+  registry: Registry
 }
 
 type TipoDocumento {
@@ -203,8 +248,10 @@ type Query {
   priorities: [Priority!]!
   subtaskStatuses: [SubtaskStatus!]!
   subtasksByMonthYearAndValley(monthName: String!, year: Int!, valleyId: Int!): [Subtask!]!
-  compliances(query: String): [Compliance!]!
-  compliance(id: ID!): Compliance!
+  findAll: [Compliance!]!
+  findOne(id: ID!): Compliance
+  getTaskCompliance(id: ID!): Compliance
+  getAllComplianceStatuses: [ComplianceStatus!]!
   beneficiaries: [Beneficiary!]!
   beneficiary(id: ID!): Beneficiary!
   contacts: [Contact!]!
@@ -237,9 +284,9 @@ type Mutation {
   createSubtask(input: CreateSubtaskDto!): Subtask!
   updateSubtask(id: ID!, input: UpdateSubtaskDto!): Subtask!
   removeSubtask(id: ID!): Subtask!
-  createCompliance(input: CreateComplianceDto!): Compliance!
-  updateCompliance(id: ID!, input: UpdateComplianceDto!): Compliance!
-  removeCompliance(id: ID!): Compliance!
+  create(createComplianceInput: CreateComplianceInput!): Compliance!
+  update(id: ID!, updateComplianceInput: UpdateComplianceInput!): Compliance!
+  remove(id: ID!): Compliance!
   createBeneficiary(input: CreateBeneficiaryDto!): Beneficiary!
   updateBeneficiary(id: ID!, input: UpdateBeneficiaryDto!): Beneficiary!
   removeBeneficiary(id: ID!): Beneficiary!
@@ -301,16 +348,16 @@ input UpdateSubtaskDto {
   finalDate: DateTime
 }
 
-input CreateComplianceDto {
-  id_subtarea: Int!
-  id_cumplimiento_estado: Int!
-  aplica: Int!
+input CreateComplianceInput {
+  taskId: ID!
+  statusId: Int
+  applies: Boolean
 }
 
-input UpdateComplianceDto {
-  id_subtarea: Int
-  id_cumplimiento_estado: Int
-  aplica: Int
+input UpdateComplianceInput {
+  taskId: ID
+  statusId: Int
+  applies: Boolean
 }
 
 input CreateBeneficiaryDto {
@@ -349,12 +396,12 @@ input UpdateContactDto {
 
 input CreateInfoTaskInput {
   taskId: ID!
-  originId: Int!
-  investmentId: Int!
-  typeId: Int!
-  scopeId: Int!
-  interactionId: Int!
-  riskId: Int!
+  originId: Int
+  investmentId: Int
+  typeId: Int
+  scopeId: Int
+  interactionId: Int
+  riskId: Int
 }
 
 input UpdateInfoTaskInput {

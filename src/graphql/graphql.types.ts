@@ -111,6 +111,18 @@ export class TaskStatus {
 }
 
 @ObjectType()
+export class ComplianceStatus {
+  @Field(() => Int)
+  id: number;
+
+  @Field({ nullable: true })
+  name?: string;
+
+  @Field(() => Int, { nullable: true })
+  days?: number;
+}
+
+@ObjectType()
 export class Beneficiary {
   @Field(() => ID)
   id: string;
@@ -426,6 +438,9 @@ export class Task {
 
   @Field(() => [Subtask], { nullable: true })
   subtasks?: Subtask[];
+
+  @Field(() => [Compliance], { nullable: true })
+  compliances?: Compliance[];
 }
 
 @InputType()
@@ -478,26 +493,44 @@ export class InfoTask {
   @Field(() => ID)
   taskId: string;
 
-  @Field(() => Int)
-  originId: number;
+  @Field(() => Int, { nullable: true })
+  originId?: number;
 
-  @Field(() => Int)
-  investmentId: number;
+  @Field(() => Int, { nullable: true })
+  investmentId?: number;
 
-  @Field(() => Int)
-  typeId: number;
+  @Field(() => Int, { nullable: true })
+  typeId?: number;
 
-  @Field(() => Int)
-  scopeId: number;
+  @Field(() => Int, { nullable: true })
+  scopeId?: number;
 
-  @Field(() => Int)
-  interactionId: number;
+  @Field(() => Int, { nullable: true })
+  interactionId?: number;
 
-  @Field(() => Int)
-  riskId: number;
+  @Field(() => Int, { nullable: true })
+  riskId?: number;
 
   @Field(() => Task, { nullable: true })
   task?: Task;
+
+  @Field(() => Origin, { nullable: true })
+  origin?: Origin;
+
+  @Field(() => Investment, { nullable: true })
+  investment?: Investment;
+
+  @Field(() => Type, { nullable: true })
+  type?: Type;
+
+  @Field(() => Scope, { nullable: true })
+  scope?: Scope;
+
+  @Field(() => Interaction, { nullable: true })
+  interaction?: Interaction;
+
+  @Field(() => Risk, { nullable: true })
+  risk?: Risk;
 }
 
 @InputType()
@@ -505,23 +538,23 @@ export class CreateInfoTaskInput {
   @Field(() => ID)
   taskId: string;
 
-  @Field(() => Int)
-  originId: number;
+  @Field(() => Int, { nullable: true })
+  originId?: number;
 
-  @Field(() => Int)
-  investmentId: number;
+  @Field(() => Int, { nullable: true })
+  investmentId?: number;
 
-  @Field(() => Int)
-  typeId: number;
+  @Field(() => Int, { nullable: true })
+  typeId?: number;
 
-  @Field(() => Int)
-  scopeId: number;
+  @Field(() => Int, { nullable: true })
+  scopeId?: number;
 
-  @Field(() => Int)
-  interactionId: number;
+  @Field(() => Int, { nullable: true })
+  interactionId?: number;
 
-  @Field(() => Int)
-  riskId: number;
+  @Field(() => Int, { nullable: true })
+  riskId?: number;
 }
 
 @InputType()
@@ -554,37 +587,205 @@ export class Compliance {
   id: string;
 
   @Field(() => ID)
-  subtaskId: string;
-
-  @Field(() => Int)
-  statusId: number;
-
-  @Field()
-  applies: boolean;
-}
-
-@InputType()
-export class CreateComplianceInput {
-  @Field(() => ID)
-  subtaskId: string;
-
-  @Field(() => Int)
-  statusId: number;
-
-  @Field()
-  applies: boolean;
-}
-
-@InputType()
-export class UpdateComplianceInput {
-  @Field(() => ID, { nullable: true })
-  subtaskId?: string;
+  taskId: string;
 
   @Field(() => Int, { nullable: true })
   statusId?: number;
 
   @Field({ nullable: true })
   applies?: boolean;
+
+  @Field(() => Task, { nullable: true })
+  task?: Task;
+
+  @Field(() => ComplianceStatus, { nullable: true })
+  status?: ComplianceStatus;
+
+  @Field(() => [Registry], { nullable: true })
+  registries?: Registry[];
+}
+
+@InputType()
+export class CreateComplianceInput {
+  @Field(() => ID)
+  taskId: string;
+
+  @Field(() => Int, { nullable: true })
+  statusId?: number;
+
+  @Field({ nullable: true })
+  applies?: boolean;
+}
+
+@InputType()
+export class UpdateComplianceInput {
+  @Field(() => ID, { nullable: true })
+  taskId?: string;
+
+  @Field(() => Int, { nullable: true })
+  statusId?: number;
+
+  @Field({ nullable: true })
+  applies?: boolean;
+}
+
+@ObjectType()
+export class Registry {
+  @Field(() => ID)
+  id: string;
+
+  @Field(() => ID)
+  complianceId: string;
+
+  @Field({ nullable: true })
+  hes?: boolean;
+
+  @Field({ nullable: true })
+  hem?: boolean;
+
+  @Field({ nullable: true })
+  provider?: string;
+
+  @Field({ nullable: true })
+  startDate?: Date;
+
+  @Field({ nullable: true })
+  endDate?: Date;
+
+  @Field(() => Compliance, { nullable: true })
+  compliance?: Compliance;
+
+  @Field(() => [Memo], { nullable: true })
+  memos?: Memo[];
+
+  @Field(() => [Solped], { nullable: true })
+  solpeds?: Solped[];
+}
+
+@InputType()
+export class CreateRegistryInput {
+  @Field(() => ID)
+  complianceId: string;
+
+  @Field({ nullable: true })
+  hes?: boolean;
+
+  @Field({ nullable: true })
+  hem?: boolean;
+
+  @Field({ nullable: true })
+  provider?: string;
+
+  @Field({ nullable: true })
+  startDate?: Date;
+
+  @Field({ nullable: true })
+  endDate?: Date;
+}
+
+@InputType()
+export class UpdateRegistryInput {
+  @Field(() => ID, { nullable: true })
+  complianceId?: string;
+
+  @Field({ nullable: true })
+  hes?: boolean;
+
+  @Field({ nullable: true })
+  hem?: boolean;
+
+  @Field({ nullable: true })
+  provider?: string;
+
+  @Field({ nullable: true })
+  startDate?: Date;
+
+  @Field({ nullable: true })
+  endDate?: Date;
+}
+
+@ObjectType()
+export class Memo {
+  @Field(() => ID)
+  id: string;
+
+  @Field(() => ID)
+  registryId: string;
+
+  @Field(() => Int, { nullable: true })
+  value?: number;
+
+  @Field(() => Registry, { nullable: true })
+  registry?: Registry;
+}
+
+@InputType()
+export class CreateMemoInput {
+  @Field(() => ID)
+  registryId: string;
+
+  @Field(() => Int, { nullable: true })
+  value?: number;
+}
+
+@InputType()
+export class UpdateMemoInput {
+  @Field(() => ID, { nullable: true })
+  registryId?: string;
+
+  @Field(() => Int, { nullable: true })
+  value?: number;
+}
+
+@ObjectType()
+export class Solped {
+  @Field(() => ID)
+  id: string;
+
+  @Field(() => ID)
+  registryId: string;
+
+  @Field(() => Int, { nullable: true })
+  ceco?: number;
+
+  @Field(() => Int, { nullable: true })
+  account?: number;
+
+  @Field(() => Int, { nullable: true })
+  value?: number;
+
+  @Field(() => Registry, { nullable: true })
+  registry?: Registry;
+}
+
+@InputType()
+export class CreateSolpedInput {
+  @Field(() => ID)
+  registryId: string;
+
+  @Field(() => Int, { nullable: true })
+  ceco?: number;
+
+  @Field(() => Int, { nullable: true })
+  account?: number;
+
+  @Field(() => Int, { nullable: true })
+  value?: number;
+}
+
+@InputType()
+export class UpdateSolpedInput {
+  @Field(() => ID, { nullable: true })
+  registryId?: string;
+
+  @Field(() => Int, { nullable: true })
+  ceco?: number;
+
+  @Field(() => Int, { nullable: true })
+  account?: number;
+
+  @Field(() => Int, { nullable: true })
+  value?: number;
 }
 
 @ObjectType()

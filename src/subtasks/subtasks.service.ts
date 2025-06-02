@@ -165,7 +165,6 @@ export class SubtasksService {
   async getSubtasksByMonthYearAndValley(monthName: string, year: number, valleyId: number) {
     const monthId = this.getMonthNumber(monthName);
     
-    // Primero obtenemos todas las tareas del valle especificado
     const valleyTasks = await this.prisma.tarea.findMany({
       where: { id_valle: valleyId },
       select: { id_tarea: true }
@@ -175,7 +174,6 @@ export class SubtasksService {
       return [];
     }
 
-    // Luego buscamos las subtareas que pertenezcan a esas tareas y tengan fecha de termino en el mes y año especificados
     const subtasks = await this.prisma.subtarea.findMany({
       where: {
         id_tarea: {
@@ -193,6 +191,45 @@ export class SubtasksService {
       }
     });
 
+    return subtasks.map(subtask => this.mapFromDatabase(subtask));
+  }
+
+  async getSubtasksByStatus(statusId: number) {
+    const subtasks = await this.prisma.subtarea.findMany({
+      where: { id_estado: statusId },
+      include: {
+        subtarea_estado: true,
+        prioridad: true,
+        beneficiario: true,
+        documento: true
+      }
+    });
+    return subtasks.map(subtask => this.mapFromDatabase(subtask));
+  }
+
+  async getSubtasksByPriority(priorityId: number) {
+    const subtasks = await this.prisma.subtarea.findMany({
+      where: { id_prioridad: priorityId },
+      include: {
+        subtarea_estado: true,
+        prioridad: true,
+        beneficiario: true,
+        documento: true
+      }
+    });
+    return subtasks.map(subtask => this.mapFromDatabase(subtask));
+  }
+
+  async getSubtasksByBeneficiary(beneficiaryId: string) {
+    const subtasks = await this.prisma.subtarea.findMany({
+      where: { id_beneficiario: beneficiaryId },
+      include: {
+        subtarea_estado: true,
+        prioridad: true,
+        beneficiario: true,
+        documento: true
+      }
+    });
     return subtasks.map(subtask => this.mapFromDatabase(subtask));
   }
 } 

@@ -1,10 +1,11 @@
 import { Module } from '@nestjs/common';
 import { ComplianceService } from './compliance.service';
-import { PrismaService } from '../prisma/prisma.service';
 import { ComplianceResolver } from './compliance.resolver';
+import { PrismaModule } from '../prisma/prisma.module';
 
 @Module({
-  providers: [ComplianceService, PrismaService, ComplianceResolver],
-  exports: [ComplianceService],
+  imports: [PrismaModule],
+  providers: [ComplianceResolver, ComplianceService],
+  exports: [ComplianceService]
 })
 export class ComplianceModule {} 

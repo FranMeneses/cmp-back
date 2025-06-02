@@ -1,20 +1,15 @@
-import { IsString, IsNotEmpty, IsNumber, IsOptional, IsUUID } from 'class-validator';
-import { InputType, Field, Int } from '@nestjs/graphql';
+import { IsString, IsNotEmpty, IsUUID, IsInt, IsOptional, IsBoolean } from 'class-validator';
 
-@InputType()
 export class CreateComplianceDto {
-  @Field(() => Int)
-  @IsNumber()
+  @IsUUID()
   @IsNotEmpty()
-  id_subtarea: number;
+  taskId: string;
 
-  @Field(() => Int)
-  @IsNumber()
-  @IsNotEmpty()
-  id_cumplimiento_estado: number;
+  @IsInt()
+  @IsOptional()
+  statusId?: number;
 
-  @Field(() => Int)
-  @IsNumber()
-  @IsNotEmpty()
-  aplica: number;
+  @IsBoolean()
+  @IsOptional()
+  applies?: boolean;
 } 

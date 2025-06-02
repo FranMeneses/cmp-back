@@ -12,14 +12,16 @@ export class TasksService {
   ) {}
 
   private mapToDatabase(taskDto: CreateTaskDto | UpdateTaskDto) {
-    return {
-      nombre: taskDto.name,
-      descripcion: taskDto.description,
-      id_valle: taskDto.valleyId,
-      id_faena: taskDto.faenaId,
-      id_proceso: taskDto.processId,
-      estado: taskDto.statusId
-    };
+    const data: any = {};
+    
+    if (taskDto.name !== undefined) data.nombre = taskDto.name;
+    if (taskDto.description !== undefined) data.descripcion = taskDto.description;
+    if (taskDto.valleyId !== undefined) data.id_valle = taskDto.valleyId;
+    if (taskDto.faenaId !== undefined) data.id_faena = taskDto.faenaId;
+    if (taskDto.processId !== undefined) data.proceso = taskDto.processId;
+    if (taskDto.statusId !== undefined) data.estado = taskDto.statusId;
+    
+    return data;
   }
 
   private mapFromDatabase(task: any) {
@@ -29,7 +31,7 @@ export class TasksService {
       description: task.descripcion,
       valleyId: task.id_valle,
       faenaId: task.id_faena,
-      processId: task.id_proceso,
+      processId: task.proceso,
       statusId: task.estado,
       valley: task.valle ? {
         id: task.valle.id_valle,
@@ -39,9 +41,9 @@ export class TasksService {
         id: task.faena.id_faena,
         name: task.faena.faena_name
       } : null,
-      process: task.proceso ? {
-        id: task.proceso.id_proceso,
-        name: task.proceso.proceso_name
+      process: task.proceso_rel ? {
+        id: task.proceso_rel.id_proceso,
+        name: task.proceso_rel.proceso_name
       } : null,
       status: task.tarea_estado ? {
         id: task.tarea_estado.id_tarea_estado,
@@ -83,7 +85,7 @@ export class TasksService {
         tarea_estado: true,
         valle: true,
         faena: true,
-        proceso: true
+        proceso_rel: true
       }
     });
     return this.mapFromDatabase(task);
@@ -95,7 +97,7 @@ export class TasksService {
         tarea_estado: true,
         valle: true,
         faena: true,
-        proceso: true
+        proceso_rel: true
       }
     });
     return tasks.map(task => this.mapFromDatabase(task));
@@ -108,7 +110,7 @@ export class TasksService {
         tarea_estado: true,
         valle: true,
         faena: true,
-        proceso: true
+        proceso_rel: true
       }
     });
     return task ? this.mapFromDatabase(task) : null;
@@ -122,7 +124,7 @@ export class TasksService {
         tarea_estado: true,
         valle: true,
         faena: true,
-        proceso: true
+        proceso_rel: true
       }
     });
     return this.mapFromDatabase(task);
@@ -135,7 +137,7 @@ export class TasksService {
         tarea_estado: true,
         valle: true,
         faena: true,
-        proceso: true
+        proceso_rel: true
       }
     });
     return this.mapFromDatabase(task);
@@ -542,47 +544,48 @@ export class TasksService {
 
   async getTasksByProcess(processId: number) {
     const tasks = await this.prisma.tarea.findMany({
-      where: { id_proceso: processId },
-      include: {
-        tarea_estado: true,
-        valle: true,
-        faena: true,
-        proceso: true
-      }
-    });
-    return tasks.map(task => this.mapFromDatabase(task));
-  }
-
-  //faenas por valle
-  async getTasksByProcessAndValley(processId: number, valleyId: number) {
-    const tasks = await this.prisma.tarea.findMany({
       where: { 
-        id_proceso: processId,
-        id_valle: valleyId 
+        proceso: processId
       },
       include: {
         tarea_estado: true,
         valle: true,
         faena: true,
-        proceso: true
+        proceso_rel: true
       }
     });
+    return tasks.map(task => this.mapFromDatabase(task));
+  }
+
+  async getTasksByProcessAndValley(processId: number, valleyId: number) {
+    const tasks = await this.prisma.tarea.findMany({
+      where: {
+        proceso: processId,
+        id_valle: valleyId
+      },
+      include: {
+        tarea_estado: true,
+        valle: true,
+        faena: true
+      }
+    });
+
     return tasks.map(task => this.mapFromDatabase(task));
   }
 
   async getTasksByProcessAndStatus(processId: number, statusId: number) {
     const tasks = await this.prisma.tarea.findMany({
-      where: { 
-        id_proceso: processId,
-        estado: statusId 
+      where: {
+        proceso: processId,
+        estado: statusId
       },
       include: {
         tarea_estado: true,
         valle: true,
-        faena: true,
-        proceso: true
+        faena: true
       }
     });
+
     return tasks.map(task => this.mapFromDatabase(task));
   }
 } 
