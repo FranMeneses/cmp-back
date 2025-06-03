@@ -588,4 +588,29 @@ export class TasksService {
 
     return tasks.map(task => this.mapFromDatabase(task));
   }
+
+  async getSubtasksByProcess(processId: number) {
+    const tasks = await this.prisma.tarea.findMany({
+      where: { 
+        proceso: processId
+      },
+      select: { id_tarea: true }
+    });
+
+    if (tasks.length === 0) {
+      return [];
+    }
+
+    const subtasks = await this.prisma.subtarea.findMany({
+      where: {
+        id_tarea: {
+          in: tasks.map(task => task.id_tarea)
+        }
+      }
+    });
+
+    return Promise.all(subtasks.map(subtask => 
+      this.subtasksService.findOne(subtask.id_subtarea)
+    ));
+  }
 } 

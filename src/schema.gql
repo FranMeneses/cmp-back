@@ -243,6 +243,7 @@ type Query {
   tasksByValleyAndStatus(valleyId: Int!, statusId: Int!): [Task!]!
   tasksByProcessAndValley(processId: Int!, valleyId: Int!): [Task!]!
   tasksByProcessAndStatus(processId: Int!, statusId: Int!): [Task!]!
+  subtasksByProcess(processId: Int!): [Subtask!]!
   subtasks: [Subtask!]!
   subtask(id: ID!): Subtask!
   priorities: [Priority!]!
@@ -252,6 +253,15 @@ type Query {
   findOne(id: ID!): Compliance
   getTaskCompliance(id: ID!): Compliance
   getAllComplianceStatuses: [ComplianceStatus!]!
+  findAllRegistries: [Registry!]!
+  findOneRegistry(id: ID!): Registry
+  getComplianceRegistries(complianceId: ID!): [Registry!]!
+  findAllSolpeds: [Solped!]!
+  findOneSolped(id: ID!): Solped
+  getRegistrySolped(registryId: ID!): Solped
+  findAllMemos: [Memo!]!
+  findOneMemo(id: ID!): Memo
+  getRegistryMemo(registryId: ID!): Memo
   beneficiaries: [Beneficiary!]!
   beneficiary(id: ID!): Beneficiary!
   contacts: [Contact!]!
@@ -287,6 +297,15 @@ type Mutation {
   create(createComplianceInput: CreateComplianceInput!): Compliance!
   update(id: ID!, updateComplianceInput: UpdateComplianceInput!): Compliance!
   remove(id: ID!): Compliance!
+  createRegistry(createRegistryInput: CreateRegistryInput!): Registry!
+  updateRegistry(id: ID!, updateRegistryInput: UpdateRegistryInput!): Registry!
+  removeRegistry(id: ID!): Registry!
+  createSolped(createSolpedInput: CreateSolpedInput!): Solped!
+  updateSolped(id: ID!, updateSolpedInput: UpdateSolpedInput!): Solped!
+  removeSolped(id: ID!): Solped!
+  createMemo(createMemoInput: CreateMemoInput!): Memo!
+  updateMemo(id: ID!, updateMemoInput: UpdateMemoInput!): Memo!
+  removeMemo(id: ID!): Memo!
   createBeneficiary(input: CreateBeneficiaryDto!): Beneficiary!
   updateBeneficiary(id: ID!, input: UpdateBeneficiaryDto!): Beneficiary!
   removeBeneficiary(id: ID!): Beneficiary!
@@ -358,6 +377,48 @@ input UpdateComplianceInput {
   taskId: ID
   statusId: Int
   applies: Boolean
+}
+
+input CreateRegistryInput {
+  complianceId: ID!
+  hes: Boolean
+  hem: Boolean
+  provider: String
+  startDate: DateTime
+  endDate: DateTime
+}
+
+input UpdateRegistryInput {
+  complianceId: ID
+  hes: Boolean
+  hem: Boolean
+  provider: String
+  startDate: DateTime
+  endDate: DateTime
+}
+
+input CreateSolpedInput {
+  registryId: ID!
+  ceco: Int
+  account: Int
+  value: Int
+}
+
+input UpdateSolpedInput {
+  registryId: ID
+  ceco: Int
+  account: Int
+  value: Int
+}
+
+input CreateMemoInput {
+  registryId: ID!
+  value: Int
+}
+
+input UpdateMemoInput {
+  registryId: ID
+  value: Int
 }
 
 input CreateBeneficiaryDto {

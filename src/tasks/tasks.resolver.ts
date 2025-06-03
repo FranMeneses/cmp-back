@@ -177,4 +177,9 @@ export class TasksResolver {
   ) {
     return this.tasksService.getTasksByProcessAndStatus(processId, statusId);
   }
+
+  @Query(() => [Subtask])
+  async subtasksByProcess(@Args('processId', { type: () => Int }) processId: number) {
+    return this.tasksService.getSubtasksByProcess(processId);
+  }
 }
