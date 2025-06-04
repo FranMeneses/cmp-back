@@ -159,4 +159,9 @@ export class ComplianceResolver {
   getRegistryMemo(@Args('registryId', { type: () => ID }) registryId: string) {
     return this.complianceService.getRegistryMemo(registryId);
   }
+
+  @Query(() => [Compliance])
+  getAppliedCompliances() {
+    return this.complianceService.getAppliedCompliances();
+  }
 } 

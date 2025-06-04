@@ -613,4 +613,27 @@ export class TasksService {
       this.subtasksService.findOne(subtask.id_subtarea)
     ));
   }
+
+  async getTasksByProcessWithCompliance(processId: number) {
+    const tasks = await this.prisma.tarea.findMany({
+      where: { 
+        proceso: processId
+      },
+      include: {
+        tarea_estado: true,
+        valle: true,
+        faena: true,
+        proceso_rel: true,
+        cumplimiento: {
+          where: {
+            aplica: true
+          }
+        }
+      }
+    });
+
+    return tasks
+      .filter(task => task.cumplimiento && task.cumplimiento.length > 0)
+      .map(task => this.mapFromDatabase(task));
+  }
 } 

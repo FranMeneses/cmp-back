@@ -458,4 +458,24 @@ export class ComplianceService {
     if (!memo) return null;
     return this.mapMemoFromDatabase(memo);
   }
+
+  async getAppliedCompliances() {
+    const compliances = await this.prisma.cumplimiento.findMany({
+      where: {
+        aplica: true
+      },
+      include: {
+        tarea: true,
+        cumplimiento_estado: true,
+        registro: {
+          include: {
+            memo: true,
+            solped: true
+          }
+        }
+      }
+    });
+
+    return compliances.map(compliance => this.mapFromDatabase(compliance));
+  }
 } 

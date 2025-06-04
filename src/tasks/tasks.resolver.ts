@@ -182,4 +182,9 @@ export class TasksResolver {
   async subtasksByProcess(@Args('processId', { type: () => Int }) processId: number) {
     return this.tasksService.getSubtasksByProcess(processId);
   }
+
+  @Query(() => [Task])
+  async tasksByProcessWithCompliance(@Args('processId', { type: () => Int }) processId: number) {
+    return this.tasksService.getTasksByProcessWithCompliance(processId);
+  }
 }
