@@ -9,7 +9,6 @@ export class SubtasksService {
 
   private mapToDatabase(dto: CreateSubtaskDto | UpdateSubtaskDto) {
     return {
-      numero: dto.number,
       nombre: dto.name,
       descripcion: dto.description,
       presupuesto: dto.budget,
@@ -28,7 +27,6 @@ export class SubtasksService {
     return {
       id: subtask.id_subtarea,
       taskId: subtask.id_tarea,
-      number: subtask.numero,
       name: subtask.nombre,
       description: subtask.descripcion,
       budget: subtask.presupuesto,

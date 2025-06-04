@@ -157,7 +157,6 @@ model solped {
 model subtarea {
   id_subtarea     String           @id(clustered: false, map: "PK_subtarea") @default(dbgenerated("newsequentialid()"), map: "DF__subtarea__id_sub__2FCF1A8A") @db.UniqueIdentifier
   id_tarea        String           @db.UniqueIdentifier
-  numero          Int?
   nombre          String?          @db.NVarChar(100)
   descripcion     String?          @db.NVarChar(500)
   presupuesto     Int?

@@ -280,9 +280,6 @@ export class Subtask {
   @Field(() => ID)
   taskId: string;
 
-  @Field(() => Int, { nullable: true })
-  number?: number;
-
   @Field({ nullable: true })
   name?: string;
 
@@ -328,9 +325,6 @@ export class CreateSubtaskInput {
   @Field(() => ID)
   taskId: string;
 
-  @Field(() => Int, { nullable: true })
-  number?: number;
-
   @Field({ nullable: true })
   name?: string;
 
@@ -366,9 +360,6 @@ export class CreateSubtaskInput {
 export class UpdateSubtaskInput {
   @Field(() => ID)
   taskId: string;
-
-  @Field(() => Int, { nullable: true })
-  number?: number;
 
   @Field({ nullable: true })
   name?: string;

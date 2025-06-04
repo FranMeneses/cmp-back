@@ -7,11 +7,6 @@ export class CreateSubtaskDto {
   @IsString()
   taskId: string;
 
-  @Field(() => Int, { nullable: true })
-  @IsNumber()
-  @IsOptional()
-  number?: number;
-
   @Field({ nullable: true })
   @IsString()
   @IsOptional()

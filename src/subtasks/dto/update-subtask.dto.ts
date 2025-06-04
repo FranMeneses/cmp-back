@@ -21,11 +21,6 @@ export class UpdateSubtaskDto {
   @Field(() => Int, { nullable: true })
   @IsNumber()
   @IsOptional()
-  number?: number;
-
-  @Field(() => Int, { nullable: true })
-  @IsNumber()
-  @IsOptional()
   statusId?: number;
 
   @Field(() => Int, { nullable: true })

@@ -103,7 +103,6 @@ type Priority {
 type Subtask {
   id: ID!
   taskId: ID!
-  number: Int
   name: String
   description: String
   budget: Int
@@ -287,6 +286,7 @@ type Query {
   documents(tipo_documento: Int): [Document!]!
   document(id_documento: String!): Document!
   getAllDocumentTypes: [TipoDocumento!]!
+  documentByTaskAndType(taskId: String!, documentType: Int!): Document
 }
 
 type Mutation {
@@ -341,7 +341,6 @@ input UpdateTaskDto {
 
 input CreateSubtaskDto {
   taskId: ID!
-  number: Int
   name: String
   description: String
   budget: Int
@@ -358,7 +357,6 @@ input UpdateSubtaskDto {
   name: String
   description: String
   taskId: ID
-  number: Int
   statusId: Int
   priorityId: Int
   beneficiaryId: ID
