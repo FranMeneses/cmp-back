@@ -1,4 +1,4 @@
-import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
 import { DocumentsService } from './documents.service';
 import { Document, CreateDocumentInput, TipoDocumento } from '../graphql/graphql.types';
 
@@ -33,5 +33,13 @@ export class DocumentsResolver {
   @Query(() => [TipoDocumento])
   async getAllDocumentTypes() {
     return this.documentsService.getAllDocumentTypes();
+  }
+
+  @Query(() => Document, { nullable: true })
+  async documentByTaskAndType(
+    @Args('taskId') taskId: string,
+    @Args('documentType', { type: () => Int }) documentType: number
+  ) {
+    return this.documentsService.getDocumentByTaskAndType(taskId, documentType);
   }
 } 

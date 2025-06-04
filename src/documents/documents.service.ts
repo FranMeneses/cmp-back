@@ -235,4 +235,18 @@ export class DocumentsService {
   async getAllDocumentTypes() {
     return this.prisma.tipo_documento.findMany();
   }
+
+  async getDocumentByTaskAndType(taskId: string, documentType: number) {
+    return this.prisma.documento.findFirst({
+      where: {
+        id_tarea: taskId,
+        tipo_documento: documentType
+      },
+      include: {
+        tarea: true,
+        subtarea: true,
+        tipo_doc: true
+      }
+    });
+  }
 } 
