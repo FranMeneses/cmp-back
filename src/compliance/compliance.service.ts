@@ -17,8 +17,7 @@ export class ComplianceService {
   private mapToDatabase(dto: CreateComplianceDto | UpdateComplianceDto) {
     return {
       id_tarea: dto.taskId,
-      id_cump_est: dto.statusId,
-      aplica: dto.applies
+      id_cump_est: dto.statusId
     };
   }
 
@@ -51,7 +50,9 @@ export class ComplianceService {
       hem: dto.hem,
       proveedor: dto.provider,
       fecha_inicio: dto.startDate,
-      fecha_termino: dto.endDate
+      fecha_termino: dto.endDate,
+      carta: dto.carta,
+      minuta: dto.minuta
     };
   }
 
@@ -64,16 +65,10 @@ export class ComplianceService {
       provider: registry.proveedor,
       startDate: registry.fecha_inicio,
       endDate: registry.fecha_termino,
-      memos: registry.memo?.map(memo => ({
-        id: memo.id_memo,
-        value: memo.valor
-      })) || [],
-      solpeds: registry.solped?.map(solped => ({
-        id: solped.id_solped,
-        ceco: solped.ceco,
-        account: solped.cuenta,
-        value: solped.valor
-      })) || []
+      carta: registry.carta,
+      minuta: registry.minuta,
+      memos: registry.memo?.map(memo => this.mapMemoFromDatabase(memo)) || [],
+      solpeds: registry.solped?.map(solped => this.mapSolpedFromDatabase(solped)) || []
     };
   }
 
@@ -460,22 +455,23 @@ export class ComplianceService {
   }
 
   async getAppliedCompliances() {
-    const compliances = await this.prisma.cumplimiento.findMany({
-      where: {
-        aplica: true
-      },
+    const tasks = await this.prisma.tarea.findMany({
       include: {
-        tarea: true,
-        cumplimiento_estado: true,
-        registro: {
+        cumplimiento: {
           include: {
-            memo: true,
-            solped: true
+            tarea: true,
+            cumplimiento_estado: true,
+            registro: {
+              include: {
+                memo: true,
+                solped: true
+              }
+            }
           }
         }
       }
     });
 
-    return compliances.map(compliance => this.mapFromDatabase(compliance));
+    return tasks.flatMap(task => Array.isArray(task.cumplimiento) ? task.cumplimiento.map(c => this.mapFromDatabase(c)) : []);
   }
 } 

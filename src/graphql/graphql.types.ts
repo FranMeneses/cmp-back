@@ -415,6 +415,9 @@ export class Task {
   @Field(() => Int, { nullable: true })
   statusId?: number;
 
+  @Field({ nullable: true })
+  applies?: boolean;
+
   @Field(() => Valley, { nullable: true })
   valley?: Valley;
 
@@ -453,6 +456,9 @@ export class CreateTaskInput {
 
   @Field(() => Int, { nullable: true })
   statusId?: number;
+
+  @Field({ nullable: true })
+  applies?: boolean;
 }
 
 @InputType()
@@ -474,6 +480,9 @@ export class UpdateTaskInput {
 
   @Field(() => Int, { nullable: true })
   statusId?: number;
+
+  @Field({ nullable: true })
+  applies?: boolean;
 }
 
 @ObjectType()
@@ -583,9 +592,6 @@ export class Compliance {
   @Field(() => Int, { nullable: true })
   statusId?: number;
 
-  @Field({ nullable: true })
-  applies?: boolean;
-
   @Field(() => Task, { nullable: true })
   task?: Task;
 
@@ -603,9 +609,6 @@ export class CreateComplianceInput {
 
   @Field(() => Int, { nullable: true })
   statusId?: number;
-
-  @Field({ nullable: true })
-  applies?: boolean;
 }
 
 @InputType()
@@ -615,9 +618,6 @@ export class UpdateComplianceInput {
 
   @Field(() => Int, { nullable: true })
   statusId?: number;
-
-  @Field({ nullable: true })
-  applies?: boolean;
 }
 
 @ObjectType()
@@ -642,6 +642,12 @@ export class Registry {
 
   @Field({ nullable: true })
   endDate?: Date;
+
+  @Field({ nullable: true })
+  carta?: boolean;
+
+  @Field({ nullable: true })
+  minuta?: boolean;
 
   @Field(() => Compliance, { nullable: true })
   compliance?: Compliance;
@@ -672,6 +678,12 @@ export class CreateRegistryInput {
 
   @Field({ nullable: true })
   endDate?: Date;
+
+  @Field({ nullable: true })
+  carta?: boolean;
+
+  @Field({ nullable: true })
+  minuta?: boolean;
 }
 
 @InputType()
@@ -693,6 +705,12 @@ export class UpdateRegistryInput {
 
   @Field({ nullable: true })
   endDate?: Date;
+
+  @Field({ nullable: true })
+  carta?: boolean;
+
+  @Field({ nullable: true })
+  minuta?: boolean;
 }
 
 @ObjectType()

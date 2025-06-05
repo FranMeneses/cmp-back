@@ -27,4 +27,12 @@ export class CreateRegistryDto {
   @Type(() => Date)
   @IsOptional()
   endDate?: Date;
+
+  @IsBoolean()
+  @IsOptional()
+  carta?: boolean;
+
+  @IsBoolean()
+  @IsOptional()
+  minuta?: boolean;
 } 

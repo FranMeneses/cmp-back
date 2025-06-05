@@ -39,7 +39,6 @@ model cumplimiento {
   id_cumplimiento     String               @id(clustered: false, map: "PK_cumplimiento") @default(dbgenerated("newsequentialid()"), map: "DF__cumplimie__id_cu__3F115E1A") @db.UniqueIdentifier
   id_tarea            String               @db.UniqueIdentifier
   id_cump_est         Int?                 @default(1, map: "DF__cumplimie__id_cu__40058253")
-  aplica              Boolean?
   cumplimiento_estado cumplimiento_estado? @relation(fields: [id_cump_est], references: [id_cumplimiento_estado], onDelete: Cascade, onUpdate: NoAction, map: "FK_cump_est")
   tarea               tarea                @relation(fields: [id_tarea], references: [id_tarea], onDelete: Cascade, onUpdate: NoAction, map: "FK_cumplimiento_tarea")
   registro            registro[]
@@ -134,6 +133,8 @@ model registro {
   proveedor       String?      @db.NVarChar(100)
   fecha_inicio    DateTime?    @db.Date
   fecha_termino   DateTime?    @db.Date
+  carta           Boolean?
+  minuta          Boolean?
   memo            memo[]
   cumplimiento    cumplimiento @relation(fields: [id_cumplimiento], references: [id_cumplimiento], onUpdate: NoAction, map: "FK_registro_cumplimiento")
   solped          solped[]
@@ -189,6 +190,7 @@ model tarea {
   descripcion  String?        @db.NVarChar(500)
   estado       Int?           @default(1, map: "DF__tarea__estado__1F98B2C1")
   proceso      Int?
+  aplica       Boolean?
   cumplimiento cumplimiento[]
   documento    documento[]
   info_tarea   info_tarea[]

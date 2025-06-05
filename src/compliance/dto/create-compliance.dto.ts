@@ -8,8 +8,4 @@ export class CreateComplianceDto {
   @IsInt()
   @IsOptional()
   statusId?: number;
-
-  @IsBoolean()
-  @IsOptional()
-  applies?: boolean;
 } 

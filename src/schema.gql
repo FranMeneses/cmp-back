@@ -131,6 +131,7 @@ type Task {
   faenaId: Int
   processId: Int
   statusId: Int
+  applies: Boolean
   valley: Valley
   faena: Faena
   process: Process
@@ -161,7 +162,6 @@ type Compliance {
   id: ID!
   taskId: ID!
   statusId: Int
-  applies: Boolean
   task: Task
   status: ComplianceStatus
   registries: [Registry!]
@@ -175,6 +175,8 @@ type Registry {
   provider: String
   startDate: DateTime
   endDate: DateTime
+  carta: Boolean
+  minuta: Boolean
   compliance: Compliance
   memos: [Memo!]
   solpeds: [Solped!]
@@ -328,6 +330,7 @@ input CreateTaskDto {
   faenaId: Int
   processId: Int
   statusId: Int
+  applies: Boolean
 }
 
 input UpdateTaskDto {
@@ -337,6 +340,7 @@ input UpdateTaskDto {
   faenaId: Int
   processId: Int
   statusId: Int
+  applies: Boolean
 }
 
 input CreateSubtaskDto {
@@ -370,13 +374,11 @@ input UpdateSubtaskDto {
 input CreateComplianceInput {
   taskId: ID!
   statusId: Int
-  applies: Boolean
 }
 
 input UpdateComplianceInput {
   taskId: ID
   statusId: Int
-  applies: Boolean
 }
 
 input CreateRegistryInput {
@@ -386,6 +388,8 @@ input CreateRegistryInput {
   provider: String
   startDate: DateTime
   endDate: DateTime
+  carta: Boolean
+  minuta: Boolean
 }
 
 input UpdateRegistryInput {
@@ -395,6 +399,8 @@ input UpdateRegistryInput {
   provider: String
   startDate: DateTime
   endDate: DateTime
+  carta: Boolean
+  minuta: Boolean
 }
 
 input CreateSolpedInput {

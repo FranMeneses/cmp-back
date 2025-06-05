@@ -20,6 +20,7 @@ export class TasksService {
     if (taskDto.faenaId !== undefined) data.id_faena = taskDto.faenaId;
     if (taskDto.processId !== undefined) data.proceso = taskDto.processId;
     if (taskDto.statusId !== undefined) data.estado = taskDto.statusId;
+    if (taskDto.applies !== undefined) data.aplica = taskDto.applies;
     
     return data;
   }
@@ -624,16 +625,12 @@ export class TasksService {
         valle: true,
         faena: true,
         proceso_rel: true,
-        cumplimiento: {
-          where: {
-            aplica: true
-          }
-        }
+        cumplimiento: true
       }
     });
 
     return tasks
-      .filter(task => task.cumplimiento && task.cumplimiento.length > 0)
+      .filter(task => Array.isArray(task.cumplimiento) && task.cumplimiento.length > 0)
       .map(task => this.mapFromDatabase(task));
   }
 } 
