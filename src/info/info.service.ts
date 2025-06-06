@@ -34,7 +34,7 @@ export class InfoService {
         name: info.tarea.nombre,
         description: info.tarea.descripcion,
         statusId: info.tarea.estado,
-        aplica: info.tarea.aplica
+        applies: info.tarea.aplica
       } : null,
       origin: info.origen ? {
         id: info.origen.id_origen,
