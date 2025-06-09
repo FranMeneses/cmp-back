@@ -649,6 +649,12 @@ export class Registry {
   @Field({ nullable: true })
   minuta?: boolean;
 
+  @Field({ nullable: true })
+  es_solped?: boolean;
+
+  @Field({ nullable: true })
+  es_memo?: boolean;
+
   @Field(() => Compliance, { nullable: true })
   compliance?: Compliance;
 
@@ -684,6 +690,12 @@ export class CreateRegistryInput {
 
   @Field({ nullable: true })
   minuta?: boolean;
+
+  @Field({ nullable: true })
+  es_solped?: boolean;
+
+  @Field({ nullable: true })
+  es_memo?: boolean;
 }
 
 @InputType()
@@ -711,6 +723,12 @@ export class UpdateRegistryInput {
 
   @Field({ nullable: true })
   minuta?: boolean;
+
+  @Field({ nullable: true })
+  es_solped?: boolean;
+
+  @Field({ nullable: true })
+  es_memo?: boolean;
 }
 
 @ObjectType()

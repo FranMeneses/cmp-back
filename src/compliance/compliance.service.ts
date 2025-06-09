@@ -52,7 +52,9 @@ export class ComplianceService {
       fecha_inicio: dto.startDate,
       fecha_termino: dto.endDate,
       carta: dto.carta,
-      minuta: dto.minuta
+      minuta: dto.minuta,
+      es_solped: dto.es_solped,
+      es_memo: dto.es_memo
     };
   }
 
@@ -67,6 +69,8 @@ export class ComplianceService {
       endDate: registry.fecha_termino,
       carta: registry.carta,
       minuta: registry.minuta,
+      es_solped: registry.es_solped,
+      es_memo: registry.es_memo,
       memos: registry.memo?.map(memo => this.mapMemoFromDatabase(memo)) || [],
       solpeds: registry.solped?.map(solped => this.mapSolpedFromDatabase(solped)) || []
     };

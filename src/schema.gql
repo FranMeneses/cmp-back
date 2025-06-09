@@ -177,6 +177,8 @@ type Registry {
   endDate: DateTime
   carta: Boolean
   minuta: Boolean
+  es_solped: Boolean
+  es_memo: Boolean
   compliance: Compliance
   memos: [Memo!]
   solpeds: [Solped!]
@@ -390,6 +392,8 @@ input CreateRegistryInput {
   endDate: DateTime
   carta: Boolean
   minuta: Boolean
+  es_solped: Boolean
+  es_memo: Boolean
 }
 
 input UpdateRegistryInput {
@@ -401,6 +405,8 @@ input UpdateRegistryInput {
   endDate: DateTime
   carta: Boolean
   minuta: Boolean
+  es_solped: Boolean
+  es_memo: Boolean
 }
 
 input CreateSolpedInput {

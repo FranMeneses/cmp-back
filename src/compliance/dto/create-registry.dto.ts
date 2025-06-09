@@ -35,4 +35,12 @@ export class CreateRegistryDto {
   @IsBoolean()
   @IsOptional()
   minuta?: boolean;
+
+  @IsBoolean()
+  @IsOptional()
+  es_solped?: boolean;
+
+  @IsBoolean()
+  @IsOptional()
+  es_memo?: boolean;
 } 

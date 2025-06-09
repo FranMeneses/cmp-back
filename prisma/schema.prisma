@@ -135,6 +135,8 @@ model registro {
   fecha_termino   DateTime?    @db.Date
   carta           Boolean?
   minuta          Boolean?
+  es_solped       Boolean?
+  es_memo         Boolean?
   memo            memo[]
   cumplimiento    cumplimiento @relation(fields: [id_cumplimiento], references: [id_cumplimiento], onUpdate: NoAction, map: "FK_registro_cumplimiento")
   solped          solped[]
