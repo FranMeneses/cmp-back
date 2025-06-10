@@ -234,8 +234,8 @@ type Query {
   valleySubtasks(valleyId: Int!): [Subtask!]!
   totalBudgetByMonth(monthName: String!, year: Int!): Float!
   totalExpenseByMonth(monthName: String!, year: Int!): Float!
-  totalBudgetByMonthAndValley(monthName: String!, year: Int!, valleyId: Int!): Float!
-  totalExpenseByMonthAndValley(monthName: String!, year: Int!, valleyId: Int!): Float!
+  totalBudgetByMonthAndProcess(monthName: String!, year: Int!, processId: Int!): Float!
+  totalExpenseByMonthAndProcess(monthName: String!, year: Int!, processId: Int!): Float!
   tasksByValley(valleyId: Int!): [Task!]!
   valleyInvestmentTasksCount(valleyId: Int!, investmentId: Int!): Int!
   valleys: [Valley!]!
@@ -252,7 +252,7 @@ type Query {
   subtask(id: ID!): Subtask!
   priorities: [Priority!]!
   subtaskStatuses: [SubtaskStatus!]!
-  subtasksByMonthYearAndValley(monthName: String!, year: Int!, valleyId: Int!): [Subtask!]!
+  subtasksByMonthYearAndProcess(monthName: String!, year: Int!, processId: Int!): [Subtask!]!
   findAll: [Compliance!]!
   findOne(id: ID!): Compliance
   getTaskCompliance(id: ID!): Compliance

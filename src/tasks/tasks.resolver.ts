@@ -93,21 +93,21 @@ export class TasksResolver {
   }
 
   @Query(() => Float)
-  async totalBudgetByMonthAndValley(
+  async totalBudgetByMonthAndProcess(
     @Args('monthName', { type: () => String }) monthName: string,
     @Args('year', { type: () => Int }) year: number,
-    @Args('valleyId', { type: () => Int }) valleyId: number
+    @Args('processId', { type: () => Int }) processId: number
   ) {
-    return this.tasksService.getTotalBudgetByMonthAndValley(monthName, year, valleyId);
+    return this.tasksService.getTotalBudgetByMonthAndProcess(monthName, year, processId);
   }
 
   @Query(() => Float)
-  async totalExpenseByMonthAndValley(
+  async totalExpenseByMonthAndProcess(
     @Args('monthName', { type: () => String }) monthName: string,
     @Args('year', { type: () => Int }) year: number,
-    @Args('valleyId', { type: () => Int }) valleyId: number
+    @Args('processId', { type: () => Int }) processId: number
   ) {
-    return this.tasksService.getTotalExpenseByMonthAndValley(monthName, year, valleyId);
+    return this.tasksService.getTotalExpenseByMonthAndProcess(monthName, year, processId);
   }
 
   @Query(() => [Task])

@@ -34,6 +34,7 @@ export class TasksService {
       faenaId: task.id_faena,
       processId: task.proceso,
       statusId: task.estado,
+      applies: task.aplica,
       valley: task.valle ? {
         id: task.valle.id_valle,
         name: task.valle.valle_name
@@ -274,11 +275,11 @@ export class TasksService {
     }, 0);
   }
 
-  async getTotalExpenseByMonthAndValley(monthName: string, year: number, valleyId: number) {
+  async getTotalExpenseByMonthAndProcess(monthName: string, year: number, processId: number) {
     const monthId = this.getMonthNumber(monthName);
     
     const tasks = await this.prisma.tarea.findMany({
-      where: { id_valle: valleyId },
+      where: { proceso: processId },
       select: { id_tarea: true }
     });
 
@@ -308,11 +309,11 @@ export class TasksService {
     }, 0);
   }
 
-  async getTotalBudgetByMonthAndValley(monthName: string, year: number, valleyId: number) {
+  async getTotalBudgetByMonthAndProcess(monthName: string, year: number, processId: number) {
     const monthId = this.getMonthNumber(monthName);
     
     const tasks = await this.prisma.tarea.findMany({
-      where: { id_valle: valleyId },
+      where: { proceso: processId },
       select: { id_tarea: true }
     });
 
