@@ -50,11 +50,11 @@ export class SubtasksResolver {
   }
 
   @Query(() => [Subtask])
-  async subtasksByMonthYearAndValley(
+  async subtasksByMonthYearAndProcess(
     @Args('monthName', { type: () => String }) monthName: string,
     @Args('year', { type: () => Int }) year: number,
-    @Args('valleyId', { type: () => Int }) valleyId: number
+    @Args('processId', { type: () => Int }) processId: number
   ) {
-    return this.subtasksService.getSubtasksByMonthYearAndValley(monthName, year, valleyId);
+    return this.subtasksService.getSubtasksByMonthYearAndProcess(monthName, year, processId);
   }
 } 

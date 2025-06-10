@@ -160,22 +160,22 @@ export class SubtasksService {
     return monthNumber;
   }
 
-  async getSubtasksByMonthYearAndValley(monthName: string, year: number, valleyId: number) {
+  async getSubtasksByMonthYearAndProcess(monthName: string, year: number, processId: number) {
     const monthId = this.getMonthNumber(monthName);
     
-    const valleyTasks = await this.prisma.tarea.findMany({
-      where: { id_valle: valleyId },
+    const processTasks = await this.prisma.tarea.findMany({
+      where: { proceso: processId },
       select: { id_tarea: true }
     });
 
-    if (valleyTasks.length === 0) {
+    if (processTasks.length === 0) {
       return [];
     }
 
     const subtasks = await this.prisma.subtarea.findMany({
       where: {
         id_tarea: {
-          in: valleyTasks.map(task => task.id_tarea)
+          in: processTasks.map(task => task.id_tarea)
         },
         fecha_termino: {
           not: null,
