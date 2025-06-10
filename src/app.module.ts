@@ -12,6 +12,7 @@ import { BeneficiariesModule } from './beneficiaries/beneficiaries.module';
 import { InfoModule } from './info/info.module';
 import { DocumentsModule } from './documents/documents.module';
 import { UploadScalar } from './graphql/graphql.types';
+import { EtlModule } from './etl/etl.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { UploadScalar } from './graphql/graphql.types';
     BeneficiariesModule,
     InfoModule,
     DocumentsModule,
+    EtlModule,
   ],
   providers: [AppService, UploadScalar],
 })
