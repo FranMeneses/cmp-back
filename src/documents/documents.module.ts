@@ -16,5 +16,6 @@ import { MulterModule } from '@nestjs/platform-express';
   ],
   providers: [DocumentsService, DocumentsResolver],
   controllers: [DocumentsController],
+  exports: [DocumentsService],
 })
 export class DocumentsModule {} 
