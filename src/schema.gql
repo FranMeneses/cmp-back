@@ -107,9 +107,9 @@ type Subtask {
   description: String
   budget: Int
   expense: Int
-  startDate: DateTime
-  endDate: DateTime
-  finalDate: DateTime
+  startDate: DateOnly
+  endDate: DateOnly
+  finalDate: DateOnly
   beneficiaryId: ID
   statusId: Int
   priorityId: Int
@@ -117,11 +117,6 @@ type Subtask {
   status: SubtaskStatus
   priority: Priority
 }
-
-"""
-A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
-"""
-scalar DateTime
 
 type Task {
   id: ID!
@@ -173,8 +168,8 @@ type Registry {
   hes: Boolean
   hem: Boolean
   provider: String
-  startDate: DateTime
-  endDate: DateTime
+  startDate: DateOnly
+  endDate: DateOnly
   carta: Boolean
   minuta: Boolean
   es_solped: Boolean
@@ -211,7 +206,7 @@ type Document {
   id_subtarea: String
   tipo_documento: Int!
   ruta: String
-  fecha_carga: DateTime
+  fecha_carga: DateOnly
   nombre_archivo: String
   tarea: Task
   subtarea: Subtask
@@ -220,6 +215,9 @@ type Document {
 
 """File upload scalar type"""
 scalar Upload
+
+"""Date scalar type (without time)"""
+scalar DateOnly
 
 type Query {
   tasks: [Task!]!
@@ -359,6 +357,11 @@ input CreateSubtaskDto {
   priorityId: Int
 }
 
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
 input UpdateSubtaskDto {
   name: String
   description: String
@@ -388,8 +391,8 @@ input CreateRegistryInput {
   hes: Boolean
   hem: Boolean
   provider: String
-  startDate: DateTime
-  endDate: DateTime
+  startDate: DateOnly
+  endDate: DateOnly
   carta: Boolean
   minuta: Boolean
   es_solped: Boolean
@@ -401,8 +404,8 @@ input UpdateRegistryInput {
   hes: Boolean
   hem: Boolean
   provider: String
-  startDate: DateTime
-  endDate: DateTime
+  startDate: DateOnly
+  endDate: DateOnly
   carta: Boolean
   minuta: Boolean
   es_solped: Boolean

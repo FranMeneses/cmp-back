@@ -292,13 +292,13 @@ export class Subtask {
   @Field(() => Int, { nullable: true })
   expense?: number;
 
-  @Field({ nullable: true })
+  @Field(() => DateOnlyScalar, { nullable: true })
   startDate?: Date;
 
-  @Field({ nullable: true })
+  @Field(() => DateOnlyScalar, { nullable: true })
   endDate?: Date;
 
-  @Field({ nullable: true })
+  @Field(() => DateOnlyScalar, { nullable: true })
   finalDate?: Date;
 
   @Field(() => ID, { nullable: true })
@@ -337,13 +337,13 @@ export class CreateSubtaskInput {
   @Field(() => Int, { nullable: true })
   expense?: number;
 
-  @Field({ nullable: true })
+  @Field(() => DateOnlyScalar, { nullable: true })
   startDate?: Date;
 
-  @Field({ nullable: true })
+  @Field(() => DateOnlyScalar, { nullable: true })
   endDate?: Date;
 
-  @Field({ nullable: true })
+  @Field(() => DateOnlyScalar, { nullable: true })
   finalDate?: Date;
 
   @Field(() => ID, { nullable: true })
@@ -373,13 +373,13 @@ export class UpdateSubtaskInput {
   @Field(() => Int, { nullable: true })
   expense?: number;
 
-  @Field({ nullable: true })
+  @Field(() => DateOnlyScalar, { nullable: true })
   startDate?: Date;
 
-  @Field({ nullable: true })
+  @Field(() => DateOnlyScalar, { nullable: true })
   endDate?: Date;
 
-  @Field({ nullable: true })
+  @Field(() => DateOnlyScalar, { nullable: true })
   finalDate?: Date;
 
   @Field(() => ID, { nullable: true })
@@ -637,10 +637,10 @@ export class Registry {
   @Field({ nullable: true })
   provider?: string;
 
-  @Field({ nullable: true })
+  @Field(() => DateOnlyScalar, { nullable: true })
   startDate?: Date;
 
-  @Field({ nullable: true })
+  @Field(() => DateOnlyScalar, { nullable: true })
   endDate?: Date;
 
   @Field({ nullable: true })
@@ -679,10 +679,10 @@ export class CreateRegistryInput {
   @Field({ nullable: true })
   provider?: string;
 
-  @Field({ nullable: true })
+  @Field(() => DateOnlyScalar, { nullable: true })
   startDate?: Date;
 
-  @Field({ nullable: true })
+  @Field(() => DateOnlyScalar, { nullable: true })
   endDate?: Date;
 
   @Field({ nullable: true })
@@ -712,10 +712,10 @@ export class UpdateRegistryInput {
   @Field({ nullable: true })
   provider?: string;
 
-  @Field({ nullable: true })
+  @Field(() => DateOnlyScalar, { nullable: true })
   startDate?: Date;
 
-  @Field({ nullable: true })
+  @Field(() => DateOnlyScalar, { nullable: true })
   endDate?: Date;
 
   @Field({ nullable: true })
@@ -841,7 +841,7 @@ export class Document {
   @Field(() => String, { nullable: true })
   ruta?: string;
 
-  @Field(() => Date, { nullable: true })
+  @Field(() => DateOnlyScalar, { nullable: true })
   fecha_carga?: Date;
 
   @Field(() => String, { nullable: true })
@@ -905,5 +905,39 @@ export class UploadScalar {
 
   parseLiteral(ast: any) {
     return this.graphQLUploadInstance.parseLiteral(ast);
+  }
+}
+
+@Scalar('DateOnly')
+export class DateOnlyScalar {
+  description = 'Date scalar type (without time)';
+
+  private readonly graphQLDateOnlyInstance = new GraphQLScalarType({
+    name: 'DateOnly',
+    description: 'Date scalar type (without time)',
+    parseValue(value: string) {
+      return new Date(value);
+    },
+    serialize(value: Date) {
+      return value.toISOString().split('T')[0];
+    },
+    parseLiteral(ast: any) {
+      if (ast.kind === 'StringValue') {
+        return new Date(ast.value);
+      }
+      return null;
+    },
+  });
+
+  parseValue(value: any) {
+    return this.graphQLDateOnlyInstance.parseValue(value);
+  }
+
+  serialize(value: any) {
+    return this.graphQLDateOnlyInstance.serialize(value);
+  }
+
+  parseLiteral(ast: any) {
+    return this.graphQLDateOnlyInstance.parseLiteral(ast);
   }
 }

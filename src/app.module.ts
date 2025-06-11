@@ -11,7 +11,7 @@ import { SubtasksModule } from './subtasks/subtasks.module';
 import { BeneficiariesModule } from './beneficiaries/beneficiaries.module';
 import { InfoModule } from './info/info.module';
 import { DocumentsModule } from './documents/documents.module';
-import { UploadScalar } from './graphql/graphql.types';
+import { UploadScalar, DateOnlyScalar } from './graphql/graphql.types';
 import { EtlModule } from './etl/etl.module';
 
 @Module({
@@ -35,6 +35,6 @@ import { EtlModule } from './etl/etl.module';
     DocumentsModule,
     EtlModule,
   ],
-  providers: [AppService, UploadScalar],
+  providers: [AppService, UploadScalar, DateOnlyScalar],
 })
 export class AppModule {}
