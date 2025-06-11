@@ -134,19 +134,19 @@ export class TasksResolver {
   }
 
   @Query(() => [MonthlyBudget])
-  async valleyMonthlyBudgets(
-    @Args('valleyId', { type: () => Int }) valleyId: number,
+  async processMonthlyBudgets(
+    @Args('processId', { type: () => Int }) processId: number,
     @Args('year', { type: () => Int }) year: number
   ) {
-    return this.tasksService.getValleyMonthlyBudgets(valleyId, year);
+    return this.tasksService.getProcessMonthlyBudgets(processId, year);
   }
 
   @Query(() => [MonthlyExpense])
-  async valleyMonthlyExpenses(
-    @Args('valleyId', { type: () => Int }) valleyId: number,
+  async processMonthlyExpenses(
+    @Args('processId', { type: () => Int }) processId: number,
     @Args('year', { type: () => Int }) year: number
   ) {
-    return this.tasksService.getValleyMonthlyExpenses(valleyId, year);
+    return this.tasksService.getProcessMonthlyExpenses(processId, year);
   }
 
   @Query(() => [TaskStatus])

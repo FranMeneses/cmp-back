@@ -404,7 +404,7 @@ export class TasksService {
     }));
   }
 
-  async getValleyMonthlyBudgets(valleyId: number, year: number) {
+  async getProcessMonthlyBudgets(processId: number, year: number) {
     const months = [
       'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
       'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
@@ -417,7 +417,7 @@ export class TasksService {
         const endDate = new Date(year, monthId, 0);
 
         const tasks = await this.prisma.tarea.findMany({
-          where: { id_valle: valleyId },
+          where: { proceso: processId },
           select: { id_tarea: true }
         });
 
@@ -455,7 +455,7 @@ export class TasksService {
     return monthlyBudgets;
   }
 
-  async getValleyMonthlyExpenses(valleyId: number, year: number) {
+  async getProcessMonthlyExpenses(processId: number, year: number) {
     const months = [
       'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
       'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
@@ -468,7 +468,7 @@ export class TasksService {
         const endDate = new Date(year, monthId, 0);
 
         const tasks = await this.prisma.tarea.findMany({
-          where: { id_valle: valleyId },
+          where: { proceso: processId },
           select: { id_tarea: true }
         });
 
