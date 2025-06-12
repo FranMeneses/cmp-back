@@ -3,12 +3,16 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { SubtasksService } from '../subtasks/subtasks.service';
+import { HistoryService } from '../history/history.service';
 
 @Injectable()
 export class TasksService {
+  private readonly COMPLETED_STATUS_ID = 5;
+
   constructor(
     private prisma: PrismaService,
-    private subtasksService: SubtasksService
+    private subtasksService: SubtasksService,
+    private historyService: HistoryService
   ) {}
 
   private mapToDatabase(taskDto: CreateTaskDto | UpdateTaskDto) {
@@ -129,6 +133,12 @@ export class TasksService {
         proceso_rel: true
       }
     });
+
+    // Si la tarea cambió a estado "Completada", crear registro histórico
+    if (updateTaskDto.statusId === this.COMPLETED_STATUS_ID) {
+      await this.historyService.createHistoryFromTask(id);
+    }
+
     return this.mapFromDatabase(task);
   }
 

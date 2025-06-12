@@ -238,8 +238,8 @@ type Query {
   valleyInvestmentTasksCount(valleyId: Int!, investmentId: Int!): Int!
   valleys: [Valley!]!
   faenas: [Faena!]!
-  valleyMonthlyBudgets(valleyId: Int!, year: Int!): [MonthlyBudget!]!
-  valleyMonthlyExpenses(valleyId: Int!, year: Int!): [MonthlyExpense!]!
+  processMonthlyBudgets(processId: Int!, year: Int!): [MonthlyBudget!]!
+  processMonthlyExpenses(processId: Int!, year: Int!): [MonthlyExpense!]!
   taskStatuses: [TaskStatus!]!
   tasksByValleyAndStatus(valleyId: Int!, statusId: Int!): [Task!]!
   tasksByProcessAndValley(processId: Int!, valleyId: Int!): [Task!]!

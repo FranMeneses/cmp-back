@@ -941,3 +941,162 @@ export class DateOnlyScalar {
     return this.graphQLDateOnlyInstance.parseLiteral(ast);
   }
 }
+
+@ObjectType()
+export class History {
+  @Field(() => ID)
+  id: string;
+
+  @Field({ nullable: true })
+  name?: string;
+
+  @Field(() => Int, { nullable: true })
+  processId?: number;
+
+  @Field(() => DateOnlyScalar, { nullable: true })
+  finalDate?: Date;
+
+  @Field(() => Int, { nullable: true })
+  totalExpense?: number;
+
+  @Field(() => Int, { nullable: true })
+  valleyId?: number;
+
+  @Field(() => Int, { nullable: true })
+  faenaId?: number;
+
+  @Field(() => Int, { nullable: true })
+  solpedMemoSap?: number;
+
+  @Field(() => Int, { nullable: true })
+  hesHemSap?: number;
+
+  @Field(() => Process, { nullable: true })
+  process?: Process;
+
+  @Field(() => Valley, { nullable: true })
+  valley?: Valley;
+
+  @Field(() => Faena, { nullable: true })
+  faena?: Faena;
+
+  @Field(() => [HistoryDoc], { nullable: true })
+  documents?: HistoryDoc[];
+}
+
+@ObjectType()
+export class HistoryDoc {
+  @Field(() => ID)
+  id: string;
+
+  @Field(() => ID)
+  historyId: string;
+
+  @Field({ nullable: true })
+  fileName?: string;
+
+  @Field(() => Int)
+  documentTypeId: number;
+
+  @Field({ nullable: true })
+  path?: string;
+
+  @Field(() => DateOnlyScalar, { nullable: true })
+  uploadDate?: Date;
+
+  @Field(() => History)
+  history: History;
+
+  @Field(() => TipoDocumento)
+  documentType: TipoDocumento;
+}
+
+@InputType()
+export class CreateHistoryInput {
+  @Field({ nullable: true })
+  name?: string;
+
+  @Field(() => Int, { nullable: true })
+  processId?: number;
+
+  @Field(() => DateOnlyScalar, { nullable: true })
+  finalDate?: Date;
+
+  @Field(() => Int, { nullable: true })
+  totalExpense?: number;
+
+  @Field(() => Int, { nullable: true })
+  valleyId?: number;
+
+  @Field(() => Int, { nullable: true })
+  faenaId?: number;
+
+  @Field(() => Int, { nullable: true })
+  solpedMemoSap?: number;
+
+  @Field(() => Int, { nullable: true })
+  hesHemSap?: number;
+}
+
+@InputType()
+export class UpdateHistoryInput {
+  @Field({ nullable: true })
+  name?: string;
+
+  @Field(() => Int, { nullable: true })
+  processId?: number;
+
+  @Field(() => DateOnlyScalar, { nullable: true })
+  finalDate?: Date;
+
+  @Field(() => Int, { nullable: true })
+  totalExpense?: number;
+
+  @Field(() => Int, { nullable: true })
+  valleyId?: number;
+
+  @Field(() => Int, { nullable: true })
+  faenaId?: number;
+
+  @Field(() => Int, { nullable: true })
+  solpedMemoSap?: number;
+
+  @Field(() => Int, { nullable: true })
+  hesHemSap?: number;
+}
+
+@InputType()
+export class CreateHistoryDocInput {
+  @Field(() => ID)
+  historyId: string;
+
+  @Field({ nullable: true })
+  fileName?: string;
+
+  @Field(() => Int)
+  documentTypeId: number;
+
+  @Field({ nullable: true })
+  path?: string;
+
+  @Field(() => DateOnlyScalar, { nullable: true })
+  uploadDate?: Date;
+}
+
+@InputType()
+export class UpdateHistoryDocInput {
+  @Field(() => ID, { nullable: true })
+  historyId?: string;
+
+  @Field({ nullable: true })
+  fileName?: string;
+
+  @Field(() => Int, { nullable: true })
+  documentTypeId?: number;
+
+  @Field({ nullable: true })
+  path?: string;
+
+  @Field(() => DateOnlyScalar, { nullable: true })
+  uploadDate?: Date;
+}

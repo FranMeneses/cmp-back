@@ -65,9 +65,10 @@ model documento {
 }
 
 model faena {
-  id_faena   Int     @id(map: "PK_faena") @default(autoincrement())
-  faena_name String? @db.NVarChar(50)
-  tarea      tarea[]
+  id_faena   Int         @id @default(autoincrement()) @map("id_faena")
+  faena_name String?     @map("faena_name")
+  tareas     tarea[]
+  historiales historial[]
 }
 
 model info_tarea {
@@ -120,9 +121,10 @@ model prioridad {
 }
 
 model proceso {
-  id_proceso   Int     @id(map: "PK_proceso") @default(autoincrement())
-  proceso_name String  @db.NVarChar(50)
-  tareas       tarea[] @relation("tarea_procesoToproceso")
+  id_proceso   Int        @id @default(autoincrement()) @map("id_proceso")
+  proceso_name String     @map("proceso_name")
+  tareas       tarea[]    @relation("tarea_procesoToproceso")
+  historiales  historial[]
 }
 
 model registro {
@@ -137,6 +139,8 @@ model registro {
   minuta          Boolean?
   es_solped       Boolean?
   es_memo         Boolean?
+  SOLPED_MEMO_SAP Int?
+  HES_HEM_SAP     Int?
   memo            memo[]
   cumplimiento    cumplimiento @relation(fields: [id_cumplimiento], references: [id_cumplimiento], onUpdate: NoAction, map: "FK_registro_cumplimiento")
   solped          solped[]
@@ -216,13 +220,46 @@ model tipo {
 }
 
 model tipo_documento {
-  id_tipo_documento Int         @id(map: "PK_tipo_documento") @default(autoincrement())
-  tipo_documento    String?     @db.NVarChar(50)
-  documentos        documento[] @relation("documento_tipo_documento")
+  id_tipo_documento Int          @id @default(autoincrement()) @map("id_tipo_documento")
+  tipo_documento    String?      @map("tipo_documento")
+  documentos        documento[]  @relation("documento_tipo_documento")
+  historial_docs    historial_doc[]
 }
 
 model valle {
-  id_valle   Int     @id(map: "PK_valle") @default(autoincrement())
-  valle_name String? @db.NVarChar(50)
-  tarea      tarea[]
+  id_valle   Int         @id @default(autoincrement()) @map("id_valle")
+  valle_name String?     @map("valle_name")
+  tareas     tarea[]
+  historiales historial[]
+}
+
+model historial {
+  id_historial    String          @id @default(uuid()) @map("id_historial")
+  nombre          String?         @map("nombre")
+  id_proceso      Int?           @map("id_proceso")
+  fecha_final     DateTime?       @map("fecha_final")
+  gasto_total     Int?           @map("gasto_total")
+  id_valle        Int?           @map("id_valle")
+  id_faena        Int?           @map("id_faena")
+  SOLPED_MEMO_SAP Int?           @map("SOLPED_MEMO_SAP")
+  HES_HEM_SAP     Int?           @map("HES_HEM_SAP")
+  proceso         proceso?        @relation(fields: [id_proceso], references: [id_proceso])
+  valle           valle?         @relation(fields: [id_valle], references: [id_valle])
+  faena           faena?         @relation(fields: [id_faena], references: [id_faena])
+  historial_doc   historial_doc[]
+
+  @@map("historial")
+}
+
+model historial_doc {
+  id_his_doc     String         @id @default(uuid()) @map("id_his_doc")
+  id_historial   String?        @map("id_historial")
+  nombre_archivo String?        @map("nombre_archivo")
+  tipo_documento Int            @map("tipo_documento")
+  ruta           String?        @map("ruta")
+  fecha_carga    DateTime?      @map("fecha_carga")
+  historial      historial?     @relation(fields: [id_historial], references: [id_historial])
+  tipo_doc       tipo_documento @relation(fields: [tipo_documento], references: [id_tipo_documento])
+
+  @@map("historial_doc")
 }
