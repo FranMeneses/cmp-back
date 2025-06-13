@@ -3,7 +3,6 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { SubtasksService } from '../subtasks/subtasks.service';
-import { HistoryService } from '../history/history.service';
 
 @Injectable()
 export class TasksService {
@@ -11,8 +10,7 @@ export class TasksService {
 
   constructor(
     private prisma: PrismaService,
-    private subtasksService: SubtasksService,
-    private historyService: HistoryService
+    private subtasksService: SubtasksService
   ) {}
 
   private mapToDatabase(taskDto: CreateTaskDto | UpdateTaskDto) {
@@ -136,10 +134,44 @@ export class TasksService {
 
     // Si la tarea cambió a estado "Completada", crear registro histórico
     if (updateTaskDto.statusId === this.COMPLETED_STATUS_ID) {
-      await this.historyService.createHistoryFromTask(id);
+      await this.createHistoryFromTask(id);
     }
 
     return this.mapFromDatabase(task);
+  }
+
+  private async createHistoryFromTask(taskId: string): Promise<any> {
+    // Get the task with all its related data
+    const task = await this.prisma.tarea.findUnique({
+      where: { id_tarea: taskId },
+      include: {
+        tarea_estado: true,
+        valle: true,
+        faena: true,
+        proceso_rel: true
+      }
+    });
+
+    if (!task) {
+      throw new Error('Task not found');
+    }
+
+    // Get total expense from subtasks
+    const totalExpense = await this.getTotalExpense(taskId);
+
+    // Create history record
+    const history = await this.prisma.historial.create({
+      data: {
+        nombre: task.nombre,
+        id_proceso: task.proceso,
+        fecha_final: new Date(), // Fecha en que se completó la tarea
+        gasto_total: totalExpense,
+        id_valle: task.id_valle,
+        id_faena: task.id_faena
+      }
+    });
+
+    return history;
   }
 
   async remove(id: string) {

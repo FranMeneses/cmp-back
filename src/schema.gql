@@ -213,6 +213,33 @@ type Document {
   tipo_doc: TipoDocumento!
 }
 
+type History {
+  id: ID!
+  name: String
+  processId: Int
+  finalDate: DateOnly
+  totalExpense: Int
+  valleyId: Int
+  faenaId: Int
+  solpedMemoSap: Int
+  hesHemSap: Int
+  process: Process
+  valley: Valley
+  faena: Faena
+  documents: [HistoryDoc!]
+}
+
+type HistoryDoc {
+  id: ID!
+  historyId: ID!
+  fileName: String
+  documentTypeId: Int!
+  path: String
+  uploadDate: DateOnly
+  history: History!
+  documentType: TipoDocumento!
+}
+
 """File upload scalar type"""
 scalar Upload
 
