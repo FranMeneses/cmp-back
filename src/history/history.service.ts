@@ -18,10 +18,30 @@ export class HistoryService {
       faenaId: history.id_faena,
       solpedMemoSap: history.SOLPED_MEMO_SAP,
       hesHemSap: history.HES_HEM_SAP,
-      process: history.proceso,
-      valley: history.valle,
-      faena: history.faena,
-      documents: history.historial_doc,
+      process: history.proceso ? {
+        id: history.proceso.id_proceso,
+        name: history.proceso.proceso_name
+      } : null,
+      valley: history.valle ? {
+        id: history.valle.id_valle,
+        name: history.valle.valle_name
+      } : null,
+      faena: history.faena ? {
+        id: history.faena.id_faena,
+        name: history.faena.faena_name
+      } : null,
+      documents: history.historial_doc?.map(doc => ({
+        id: doc.id_his_doc,
+        historyId: doc.id_historial,
+        fileName: doc.nombre_archivo,
+        documentTypeId: doc.tipo_documento,
+        path: doc.ruta,
+        uploadDate: doc.fecha_carga,
+        documentType: doc.tipo_doc ? {
+          id: doc.tipo_doc.id_tipo_documento,
+          tipo_documento: doc.tipo_doc.tipo_documento
+        } : null
+      })) || []
     };
   }
 
@@ -31,7 +51,14 @@ export class HistoryService {
         proceso: true,
         valle: true,
         faena: true,
-        historial_doc: true
+        historial_doc: {
+          include: {
+            tipo_doc: true
+          }
+        }
+      },
+      orderBy: {
+        fecha_final: 'desc'
       }
     });
     return histories.map(this.mapToGraphql);
@@ -44,9 +71,73 @@ export class HistoryService {
         proceso: true,
         valle: true,
         faena: true,
-        historial_doc: true
+        historial_doc: {
+          include: {
+            tipo_doc: true
+          }
+        }
       }
     });
     return history ? this.mapToGraphql(history) : null;
+  }
+
+  async findByProcess(processId: number) {
+    const histories = await this.prisma.historial.findMany({
+      where: { id_proceso: processId },
+      include: {
+        proceso: true,
+        valle: true,
+        faena: true,
+        historial_doc: {
+          include: {
+            tipo_doc: true
+          }
+        }
+      },
+      orderBy: {
+        fecha_final: 'desc'
+      }
+    });
+    return histories.map(this.mapToGraphql);
+  }
+
+  async findByValley(valleyId: number) {
+    const histories = await this.prisma.historial.findMany({
+      where: { id_valle: valleyId },
+      include: {
+        proceso: true,
+        valle: true,
+        faena: true,
+        historial_doc: {
+          include: {
+            tipo_doc: true
+          }
+        }
+      },
+      orderBy: {
+        fecha_final: 'desc'
+      }
+    });
+    return histories.map(this.mapToGraphql);
+  }
+
+  async findByFaena(faenaId: number) {
+    const histories = await this.prisma.historial.findMany({
+      where: { id_faena: faenaId },
+      include: {
+        proceso: true,
+        valle: true,
+        faena: true,
+        historial_doc: {
+          include: {
+            tipo_doc: true
+          }
+        }
+      },
+      orderBy: {
+        fecha_final: 'desc'
+      }
+    });
+    return histories.map(this.mapToGraphql);
   }
 } 

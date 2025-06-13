@@ -148,7 +148,18 @@ export class TasksService {
         tarea_estado: true,
         valle: true,
         faena: true,
-        proceso_rel: true
+        proceso_rel: true,
+        cumplimiento: {
+          include: {
+            registro: {
+              include: {
+                solped: true,
+                memo: true
+              }
+            }
+          }
+        },
+        documento: true
       }
     });
 
@@ -158,16 +169,41 @@ export class TasksService {
 
     // Get total expense from subtasks
     const totalExpense = await this.getTotalExpense(taskId);
+    
+    let solpedMemoSap = 0;
+    let hesHemSap = 0;
 
-    // Create history record
+    // Get the last registry from the compliance process
+    const cumplimiento = task.cumplimiento[0];
+    if (cumplimiento && cumplimiento.registro.length > 0) {
+      const ultimoRegistro = cumplimiento.registro[cumplimiento.registro.length - 1];
+      
+      solpedMemoSap = ultimoRegistro.SOLPED_MEMO_SAP || 0;
+      hesHemSap = ultimoRegistro.HES_HEM_SAP || 0;
+    }
+
+    // Create history record with its documents
     const history = await this.prisma.historial.create({
       data: {
         nombre: task.nombre,
         id_proceso: task.proceso,
-        fecha_final: new Date(), // Fecha en que se completó la tarea
+        fecha_final: new Date(),
         gasto_total: totalExpense,
         id_valle: task.id_valle,
-        id_faena: task.id_faena
+        id_faena: task.id_faena,
+        SOLPED_MEMO_SAP: solpedMemoSap,
+        HES_HEM_SAP: hesHemSap,
+        historial_doc: {
+          create: task.documento.map(doc => ({
+            nombre_archivo: doc.nombre_archivo,
+            tipo_documento: doc.tipo_documento,
+            ruta: doc.ruta,
+            fecha_carga: doc.fecha_carga
+          }))
+        }
+      },
+      include: {
+        historial_doc: true
       }
     });
 

@@ -1,4 +1,4 @@
-import { Resolver, Query, Args, ID } from '@nestjs/graphql';
+import { Resolver, Query, Args, ID, Int } from '@nestjs/graphql';
 import { HistoryService } from './history.service';
 import { History } from '../graphql/graphql.types';
 
@@ -14,5 +14,20 @@ export class HistoryResolver {
   @Query(() => History, { nullable: true })
   async history(@Args('id', { type: () => ID }) id: string): Promise<History | null> {
     return this.historyService.findOne(id);
+  }
+
+  @Query(() => [History])
+  async historiesByProcess(@Args('processId', { type: () => Int }) processId: number): Promise<History[]> {
+    return this.historyService.findByProcess(processId);
+  }
+
+  @Query(() => [History])
+  async historiesByValley(@Args('valleyId', { type: () => Int }) valleyId: number): Promise<History[]> {
+    return this.historyService.findByValley(valleyId);
+  }
+
+  @Query(() => [History])
+  async historiesByFaena(@Args('faenaId', { type: () => Int }) faenaId: number): Promise<History[]> {
+    return this.historyService.findByFaena(faenaId);
   }
 } 
