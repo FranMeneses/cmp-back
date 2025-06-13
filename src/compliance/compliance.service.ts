@@ -195,18 +195,27 @@ export class ComplianceService {
   }
 
   async remove(id: string) {
-    const compliance = await this.prisma.cumplimiento.delete({
+    const compliance = await this.prisma.cumplimiento.findUnique({
       where: { id_cumplimiento: id },
       include: {
-        tarea: true,
-        cumplimiento_estado: true,
-        registro: {
-          include: {
-            memo: true,
-            solped: true
-          }
-        }
+        registro: true
       }
+    });
+
+    if (!compliance) {
+      throw new Error('Compliance not found');
+    }
+
+    await this.prisma.$transaction(async (prisma) => {
+      // 1. Eliminar registros (esto eliminará en cascada los solpeds y memos)
+      for (const registro of compliance.registro) {
+        await this.removeRegistry(registro.id_registro);
+      }
+
+      // 2. Finalmente, eliminar el cumplimiento
+      await prisma.cumplimiento.delete({
+        where: { id_cumplimiento: id }
+      });
     });
 
     return this.mapFromDatabase(compliance);
@@ -291,12 +300,37 @@ export class ComplianceService {
   }
 
   async removeRegistry(id: string) {
-    const registry = await this.prisma.registro.delete({
+    const registry = await this.prisma.registro.findUnique({
       where: { id_registro: id },
       include: {
-        memo: true,
-        solped: true
+        solped: true,
+        memo: true
       }
+    });
+
+    if (!registry) {
+      throw new Error('Registry not found');
+    }
+
+    await this.prisma.$transaction(async (prisma) => {
+      // 1. Eliminar solpeds
+      if (registry.solped.length > 0) {
+        await prisma.solped.deleteMany({
+          where: { id_registro: id }
+        });
+      }
+
+      // 2. Eliminar memos
+      if (registry.memo.length > 0) {
+        await prisma.memo.deleteMany({
+          where: { id_registro: id }
+        });
+      }
+
+      // 3. Finalmente, eliminar el registro
+      await prisma.registro.delete({
+        where: { id_registro: id }
+      });
     });
 
     return this.mapRegistryFromDatabase(registry);

@@ -3,6 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { SubtasksService } from '../subtasks/subtasks.service';
+import { ComplianceService } from '../compliance/compliance.service';
 
 @Injectable()
 export class TasksService {
@@ -10,7 +11,8 @@ export class TasksService {
 
   constructor(
     private prisma: PrismaService,
-    private subtasksService: SubtasksService
+    private subtasksService: SubtasksService,
+    private complianceService: ComplianceService
   ) {}
 
   private mapToDatabase(taskDto: CreateTaskDto | UpdateTaskDto) {
@@ -211,15 +213,49 @@ export class TasksService {
   }
 
   async remove(id: string) {
-    const task = await this.prisma.tarea.delete({
+    const task = await this.prisma.tarea.findUnique({
       where: { id_tarea: id },
       include: {
         tarea_estado: true,
         valle: true,
         faena: true,
-        proceso_rel: true
+        proceso_rel: true,
+        subtarea: true,
+        cumplimiento: true,
+        documento: true
       }
     });
+
+    if (!task) {
+      throw new Error('Task not found');
+    }
+
+    await this.prisma.$transaction(async (prisma) => {
+      // 1. Eliminar documentos
+      if (task.documento.length > 0) {
+        await prisma.documento.deleteMany({
+          where: { id_tarea: id }
+        });
+      }
+
+      // 2. Eliminar cumplimientos (esto eliminará en cascada los registros, solpeds y memos)
+      for (const cumplimiento of task.cumplimiento) {
+        await this.complianceService.remove(cumplimiento.id_cumplimiento);
+      }
+
+      // 3. Eliminar subtareas
+      if (task.subtarea.length > 0) {
+        await prisma.subtarea.deleteMany({
+          where: { id_tarea: id }
+        });
+      }
+
+      // 4. Finalmente, eliminar la tarea
+      await prisma.tarea.delete({
+        where: { id_tarea: id }
+      });
+    });
+
     return this.mapFromDatabase(task);
   }
 
