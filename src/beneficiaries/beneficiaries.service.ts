@@ -141,7 +141,7 @@ export class BeneficiariesService {
   }
 
   async remove(id: string) {
-    const beneficiary = await this.prisma.beneficiario.delete({
+    const beneficiary = await this.prisma.beneficiario.findUnique({
       where: { id_beneficiario: id },
       include: {
         contacto: true,
@@ -152,6 +152,32 @@ export class BeneficiariesService {
         }
       }
     });
+
+    if (!beneficiary) {
+      throw new Error('Beneficiary not found');
+    }
+
+    await this.prisma.$transaction(async (prisma) => {
+      // 1. Eliminar contactos
+      if (beneficiary.contacto.length > 0) {
+        await prisma.contacto.deleteMany({
+          where: { id_beneficiario: id }
+        });
+      }
+
+      // 2. Eliminar subtareas
+      if (beneficiary.subtarea.length > 0) {
+        await prisma.subtarea.deleteMany({
+          where: { id_beneficiario: id }
+        });
+      }
+
+      // 3. Finalmente, eliminar el beneficiario
+      await prisma.beneficiario.delete({
+        where: { id_beneficiario: id }
+      });
+    });
+
     return this.mapFromDatabase(beneficiary);
   }
 
