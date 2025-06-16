@@ -1,0 +1,44 @@
+name: Trigger auto deployment for appback
+
+# When this action will be executed
+on:
+  # Automatically trigger it when detected changes in repo
+  push:
+    branches: 
+      [ main ]
+    paths:
+    - '**'
+    - '.github/workflows/appback-AutoDeployTrigger-14859e1d-8ffb-4e74-b60f-810acd9158d6.yml'
+
+  # Allow manual trigger 
+  workflow_dispatch:
+      
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout to the branch
+        uses: actions/checkout@v2
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.APPBACK_AZURE_CREDENTIALS }}
+
+      - name: Build and push container image to registry
+        uses: azure/container-apps-deploy-action@v2
+        with:
+          appSourcePath: ${{ github.workspace }}
+          _dockerfilePathKey_: _dockerfilePath_
+          registryUrl: cmpbackend.azurecr.io
+          registryUsername: ${{ secrets.APPBACK_REGISTRY_USERNAME }}
+          registryPassword: ${{ secrets.APPBACK_REGISTRY_PASSWORD }}
+          containerAppName: appback
+          resourceGroup: grupo-cmp
+          imageToBuild: cmpbackend.azurecr.io/appback:${{ github.sha }}
+          
+            
+
+     
+
