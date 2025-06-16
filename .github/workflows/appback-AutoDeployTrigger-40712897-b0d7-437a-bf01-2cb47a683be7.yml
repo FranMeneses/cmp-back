@@ -60,5 +60,32 @@ jobs:
             DATABASE_URL=${{ secrets.DATABASE_URL }}
             AZURE_STORAGE_CONNECTION_STRING=${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
             AZURE_STORAGE_SAS_TOKEN=${{ secrets.AZURE_STORAGE_SAS_TOKEN }}
+          container_name: appback
+          target_port: 4000
+          ingress: external
+          min_replicas: 1
+          max_replicas: 1
+          cpu: 0.5
+          memory: 1Gi
+          startup_command: npm run start:prod
+          startup_timeout: 300
+          liveness_probe: |
+            {
+              "httpGet": {
+                "path": "/graphql",
+                "port": 4000
+              },
+              "initialDelaySeconds": 30,
+              "periodSeconds": 10
+            }
+          readiness_probe: |
+            {
+              "httpGet": {
+                "path": "/graphql",
+                "port": 4000
+              },
+              "initialDelaySeconds": 5,
+              "periodSeconds": 5
+            }
 
 

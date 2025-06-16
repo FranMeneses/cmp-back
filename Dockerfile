@@ -42,5 +42,10 @@ EXPOSE 4000
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost:4000/graphql || exit 1
 
+# Add a script to check if the application is ready
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
 # Command to run the application
+ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["npm", "run", "start:prod"] 
