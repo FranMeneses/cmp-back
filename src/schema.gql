@@ -316,6 +316,11 @@ type Query {
   document(id_documento: String!): Document!
   getAllDocumentTypes: [TipoDocumento!]!
   documentByTaskAndType(taskId: String!, documentType: Int!): Document
+  histories: [History!]!
+  history(id: ID!): History
+  historiesByProcess(processId: Int!): [History!]!
+  historiesByValley(valleyId: Int!): [History!]!
+  historiesByFaena(faenaId: Int!): [History!]!
 }
 
 type Mutation {

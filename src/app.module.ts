@@ -13,6 +13,7 @@ import { InfoModule } from './info/info.module';
 import { DocumentsModule } from './documents/documents.module';
 import { UploadScalar, DateOnlyScalar } from './graphql/graphql.types';
 import { EtlModule } from './etl/etl.module';
+import { HistoryModule } from './history/history.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { EtlModule } from './etl/etl.module';
     InfoModule,
     DocumentsModule,
     EtlModule,
+    HistoryModule,
   ],
   providers: [AppService, UploadScalar, DateOnlyScalar],
 })
