@@ -4,6 +4,13 @@ set -e
 # Si DATABASE_URL no está definida, intentar construirla desde las variables de Azure
 if [ -z "$DATABASE_URL" ]; then
   if [ -n "$AZURE_SQL_USERNAME" ] && [ -n "$AZURE_SQL_PASSWORD" ] && [ -n "$AZURE_SQL_HOST" ] && [ -n "$AZURE_SQL_PORT" ] && [ -n "$AZURE_SQL_DATABASE" ] && [ -n "$AZURE_SQL_AUTHENTICATION" ]; then
+    echo "Debug - Valores para DATABASE_URL (sin contraseña):"
+    echo "AZURE_SQL_USERNAME: $AZURE_SQL_USERNAME"
+    echo "AZURE_SQL_HOST: $AZURE_SQL_HOST"
+    echo "AZURE_SQL_PORT: $AZURE_SQL_PORT"
+    echo "AZURE_SQL_DATABASE: $AZURE_SQL_DATABASE"
+    echo "AZURE_SQL_AUTHENTICATION: $AZURE_SQL_AUTHENTICATION"
+    
     export DATABASE_URL="sqlserver://$AZURE_SQL_USERNAME:$AZURE_SQL_PASSWORD@$AZURE_SQL_HOST:$AZURE_SQL_PORT;database=$AZURE_SQL_DATABASE;authentication=$AZURE_SQL_AUTHENTICATION"
     echo "DATABASE_URL construida dinámicamente."
   else
