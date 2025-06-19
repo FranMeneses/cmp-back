@@ -1,36 +1,36 @@
 name: Trigger auto deployment for app-back
-
+ 
 # When this action will be executed
 on:
   # Automatically trigger it when detected changes in repo
   push:
-    branches: 
+    branches:
       [ main ]
     paths:
     - '**'
     - '.github/workflows/app-back-AutoDeployTrigger-9009d9b9-349e-435b-a7e8-0301e19b21be.yml'
-
-  # Allow manual trigger 
+ 
+  # Allow manual trigger
   workflow_dispatch:      
-
+ 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    permissions: 
+    permissions:
       id-token: write #This is required for requesting the OIDC JWT Token
       contents: read #Required when GH token is used to authenticate with private repo
-
+ 
     steps:
       - name: Checkout to the branch
         uses: actions/checkout@v2
-
+ 
       - name: Azure Login
         uses: azure/login@v1
         with:
           client-id: ${{ secrets.APPBACK_AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.APPBACK_AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.APPBACK_AZURE_SUBSCRIPTION_ID }}
-
+ 
       - name: Build and push container image to registry
         uses: azure/container-apps-deploy-action@v2
         with:
@@ -42,6 +42,12 @@ jobs:
           containerAppName: app-back
           resourceGroup: grupo-cmp
           imageToBuild: cmpbackend.azurecr.io/app-back:${{ github.sha }}
+          environmentVariables: |
+            AZURE_STORAGE_BLOB_RESOURCEENDPOINT=${{ secrets.AZURE_STORAGE_BLOB_RESOURCEENDPOINT }}
+            AZURE_SQL_HOST=${{ secrets.AZURE_SQL_HOST }}
+            AZURE_SQL_PORT=${{ secrets.AZURE_SQL_PORT }}
+            AZURE_SQL_DATABASE=${{ secrets.AZURE_SQL_DATABASE }}
+            AZURE_SQL_AUTHENTICATION=${{ secrets.AZURE_SQL_AUTHENTICATION }}
           _buildArgumentsKey_: |
             _buildArgumentsValues_
 
