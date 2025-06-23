@@ -3,8 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlserver"
-  url      = env("DATABASE_URL")
+  provider  = "sqlserver"
+  url       = env("DATABASE_URL")
   directUrl = env("DATABASE_URL")
 }
 
@@ -15,19 +15,20 @@ model alcance {
 }
 
 model beneficiario {
-  id_beneficiario       String     @id(clustered: false, map: "PK_beneficiario") @default(dbgenerated("newsequentialid()"), map: "DF__beneficia__id_be__160F4887") @db.UniqueIdentifier
-  nombre_legal          String?    @db.NVarChar(50)
-  rut                   String?    @db.NVarChar(50)
-  direccion             String?    @db.NVarChar(50)
-  tipo_entidad          String?    @db.NVarChar(50)
-  representante         String?    @db.NVarChar(50)
+  id_beneficiario       String      @id(clustered: false, map: "PK_beneficiario") @default(dbgenerated("newsequentialid()"), map: "DF__beneficia__id_be__73BA3083") @db.UniqueIdentifier
+  nombre_legal          String?     @db.NVarChar(50)
+  rut                   String?     @db.NVarChar(50)
+  direccion             String?     @db.NVarChar(50)
+  tipo_entidad          String?     @db.NVarChar(50)
+  representante         String?     @db.NVarChar(50)
   personalidad_juridica Boolean?
   contacto              contacto[]
-  subtarea              subtarea[]
+  historiales           historial[] @relation("historial_beneficiarioTobeneficiario")
+  tareas                tarea[]     @relation("tarea_beneficiarioTobeneficiario")
 }
 
 model contacto {
-  id_contacto     String       @id(clustered: false, map: "PK_contacto") @default(dbgenerated("newsequentialid()"), map: "DF__contacto__id_con__18EBB532") @db.UniqueIdentifier
+  id_contacto     String       @id(clustered: false, map: "PK_contacto") @default(dbgenerated("newsequentialid()"), map: "DF__contacto__id_con__76969D2E") @db.UniqueIdentifier
   id_beneficiario String       @db.UniqueIdentifier
   nombre          String?      @db.NVarChar(50)
   cargo           String?      @db.NVarChar(50)
@@ -37,9 +38,9 @@ model contacto {
 }
 
 model cumplimiento {
-  id_cumplimiento     String               @id(clustered: false, map: "PK_cumplimiento") @default(dbgenerated("newsequentialid()"), map: "DF__cumplimie__id_cu__3F115E1A") @db.UniqueIdentifier
+  id_cumplimiento     String               @id(clustered: false, map: "PK_cumplimiento") @default(dbgenerated("newsequentialid()"), map: "DF__cumplimie__id_cu__46B27FE2") @db.UniqueIdentifier
   id_tarea            String               @db.UniqueIdentifier
-  id_cump_est         Int?                 @default(1, map: "DF__cumplimie__id_cu__40058253")
+  id_cump_est         Int?                 @default(1, map: "DF__cumplimie__id_cu__47A6A41B")
   cumplimiento_estado cumplimiento_estado? @relation(fields: [id_cump_est], references: [id_cumplimiento_estado], onDelete: Cascade, onUpdate: NoAction, map: "FK_cump_est")
   tarea               tarea                @relation(fields: [id_tarea], references: [id_tarea], onDelete: Cascade, onUpdate: NoAction, map: "FK_cumplimiento_tarea")
   registro            registro[]
@@ -53,27 +54,25 @@ model cumplimiento_estado {
 }
 
 model documento {
-  id_documento   String         @id(clustered: false, map: "PK_documento") @default(dbgenerated("newsequentialid()"), map: "DF__documento__id_do__395884C4") @db.UniqueIdentifier
+  id_documento   String         @id(clustered: false, map: "PK_documento") @default(dbgenerated("newsequentialid()"), map: "DF__documento__id_do__57DD0BE4") @db.UniqueIdentifier
   id_tarea       String?        @db.UniqueIdentifier
-  id_subtarea    String?        @db.UniqueIdentifier
   nombre_archivo String?        @db.NVarChar(255)
   tipo_documento Int
   ruta           String?        @db.NVarChar(500)
   fecha_carga    DateTime?      @db.Date
-  subtarea       subtarea?      @relation(fields: [id_subtarea], references: [id_subtarea], onDelete: NoAction, onUpdate: NoAction, map: "FK_documento_subtarea")
   tarea          tarea?         @relation(fields: [id_tarea], references: [id_tarea], onDelete: NoAction, onUpdate: NoAction, map: "FK_documento_tarea")
   tipo_doc       tipo_documento @relation("documento_tipo_documento", fields: [tipo_documento], references: [id_tipo_documento], onDelete: Cascade, onUpdate: NoAction, map: "FK_documento_tipo_documento")
 }
 
 model faena {
-  id_faena   Int         @id @default(autoincrement()) @map("id_faena")
-  faena_name String?     @map("faena_name")
-  tareas     tarea[]
+  id_faena    Int         @id(map: "PK_faena") @default(autoincrement()) @map("id_faena")
+  faena_name  String?     @map("faena_name") @db.NVarChar(50)
   historiales historial[]
+  tareas      tarea[]
 }
 
 model info_tarea {
-  id_info_tarea  String       @id(clustered: false, map: "PK_info_tarea") @default(dbgenerated("newsequentialid()"), map: "DF__info_tare__id_in__2645B050") @db.UniqueIdentifier
+  id_info_tarea  String       @id(clustered: false, map: "PK_info_tarea") @default(dbgenerated("newsequentialid()"), map: "DF__info_tare__id_in__30C33EC3") @db.UniqueIdentifier
   id_tarea       String       @db.UniqueIdentifier
   id_origen      Int?
   id_inversion   Int?
@@ -103,7 +102,7 @@ model inversion {
 }
 
 model memo {
-  id_memo     String   @id(clustered: false, map: "PK_memo") @default(dbgenerated("newsequentialid()"), map: "DF__memo__id_memo__489AC854") @db.UniqueIdentifier
+  id_memo     String   @id(clustered: false, map: "PK_memo") @default(dbgenerated("newsequentialid()"), map: "DF__memo__id_memo__503BEA1C") @db.UniqueIdentifier
   id_registro String   @db.UniqueIdentifier
   valor       Int?
   registro    registro @relation(fields: [id_registro], references: [id_registro], onUpdate: NoAction, map: "FK_memo_registro")
@@ -122,14 +121,14 @@ model prioridad {
 }
 
 model proceso {
-  id_proceso   Int        @id @default(autoincrement()) @map("id_proceso")
-  proceso_name String     @map("proceso_name")
-  tareas       tarea[]    @relation("tarea_procesoToproceso")
+  id_proceso   Int         @id(map: "PK_proceso") @default(autoincrement()) @map("id_proceso")
+  proceso_name String      @map("proceso_name") @db.NVarChar(50)
   historiales  historial[]
+  tareas       tarea[]     @relation("tarea_procesoToproceso")
 }
 
 model registro {
-  id_registro     String       @id(clustered: false, map: "PK_registro") @default(dbgenerated("newsequentialid()"), map: "DF__registro__id_reg__44CA3770") @db.UniqueIdentifier
+  id_registro     String       @id(clustered: false, map: "PK_registro") @default(dbgenerated("newsequentialid()"), map: "DF__registro__id_reg__4C6B5938") @db.UniqueIdentifier
   id_cumplimiento String       @db.UniqueIdentifier
   hes             Boolean?
   hem             Boolean?
@@ -154,7 +153,7 @@ model riesgo {
 }
 
 model solped {
-  id_solped   String   @id(clustered: false, map: "PK_solped") @default(dbgenerated("newsequentialid()"), map: "DF__solped__id_solpe__4C6B5938") @db.UniqueIdentifier
+  id_solped   String   @id(clustered: false, map: "PK_solped") @default(dbgenerated("newsequentialid()"), map: "DF__solped__id_solpe__540C7B00") @db.UniqueIdentifier
   id_registro String   @db.UniqueIdentifier
   ceco        Int?
   cuenta      Int?
@@ -163,7 +162,7 @@ model solped {
 }
 
 model subtarea {
-  id_subtarea     String           @id(clustered: false, map: "PK_subtarea") @default(dbgenerated("newsequentialid()"), map: "DF__subtarea__id_sub__2FCF1A8A") @db.UniqueIdentifier
+  id_subtarea     String           @id(clustered: false, map: "PK_subtarea") @default(dbgenerated("newsequentialid()"), map: "DF__subtarea__id_sub__3A4CA8FD") @db.UniqueIdentifier
   id_tarea        String           @db.UniqueIdentifier
   nombre          String?          @db.NVarChar(100)
   descripcion     String?          @db.NVarChar(500)
@@ -172,11 +171,8 @@ model subtarea {
   fecha_inicio    DateTime?        @db.Date
   fecha_termino   DateTime?        @db.Date
   fecha_final     DateTime?        @db.Date
-  id_beneficiario String?          @db.UniqueIdentifier
-  id_estado       Int?             @default(1, map: "DF__subtarea__id_est__30C33EC3")
+  id_estado       Int?             @default(1, map: "DF__subtarea__id_est__3B40CD36")
   id_prioridad    Int?
-  documento       documento[]
-  beneficiario    beneficiario?    @relation(fields: [id_beneficiario], references: [id_beneficiario], onDelete: Cascade, onUpdate: NoAction, map: "FK_subtarea_beneficiario")
   subtarea_estado subtarea_estado? @relation(fields: [id_estado], references: [id_subtarea_estado], onDelete: Cascade, onUpdate: NoAction, map: "FK_subtarea_estado")
   prioridad       prioridad?       @relation(fields: [id_prioridad], references: [id_prioridad], onDelete: Cascade, onUpdate: NoAction, map: "FK_subtarea_prioridad")
   tarea           tarea            @relation(fields: [id_tarea], references: [id_tarea], onDelete: Cascade, onUpdate: NoAction, map: "FK_subtarea_tarea")
@@ -190,22 +186,24 @@ model subtarea_estado {
 }
 
 model tarea {
-  id_tarea     String         @id(clustered: false, map: "PK_tarea") @default(dbgenerated("newsequentialid()"), map: "DF__tarea__id_tarea__1EA48E88") @db.UniqueIdentifier
-  id_valle     Int?
-  id_faena     Int?
-  nombre       String?        @db.NVarChar(100)
-  descripcion  String?        @db.NVarChar(500)
-  estado       Int?           @default(1, map: "DF__tarea__estado__1F98B2C1")
-  proceso      Int?
-  aplica       Boolean?
-  cumplimiento cumplimiento[]
-  documento    documento[]
-  info_tarea   info_tarea[]
-  subtarea     subtarea[]
-  tarea_estado tarea_estado?  @relation(fields: [estado], references: [id_tarea_estado], onDelete: Cascade, onUpdate: NoAction, map: "FK_tarea_estado")
-  faena        faena?         @relation(fields: [id_faena], references: [id_faena], onDelete: Cascade, onUpdate: NoAction, map: "FK_tarea_faena")
-  proceso_rel  proceso?       @relation("tarea_procesoToproceso", fields: [proceso], references: [id_proceso], onDelete: Cascade, onUpdate: NoAction, map: "FK_tarea_proceso")
-  valle        valle?         @relation(fields: [id_valle], references: [id_valle], onDelete: Cascade, onUpdate: NoAction, map: "FK_tarea_valle")
+  id_tarea                                      String         @id(clustered: false, map: "PK_tarea") @default(dbgenerated("newsequentialid()"), map: "DF__tarea__id_tarea__282DF8C2") @db.UniqueIdentifier
+  id_valle                                      Int?
+  id_faena                                      Int?
+  nombre                                        String?        @db.NVarChar(100)
+  descripcion                                   String?        @db.NVarChar(500)
+  estado                                        Int?           @default(1, map: "DF__tarea__estado__29221CFB")
+  proceso                                       Int?
+  aplica                                        Boolean?
+  beneficiario                                  String?        @db.UniqueIdentifier
+  cumplimiento                                  cumplimiento[]
+  documento                                     documento[]
+  info_tarea                                    info_tarea[]
+  subtarea                                      subtarea[]
+  beneficiario_rel                              beneficiario?  @relation("tarea_beneficiarioTobeneficiario", fields: [beneficiario], references: [id_beneficiario], onDelete: NoAction, onUpdate: NoAction, map: "FK_tarea_beneficiario")
+  tarea_estado                                  tarea_estado?  @relation(fields: [estado], references: [id_tarea_estado], onDelete: Cascade, onUpdate: NoAction, map: "FK_tarea_estado")
+  faena                                         faena?         @relation(fields: [id_faena], references: [id_faena], onDelete: Cascade, onUpdate: NoAction, map: "FK_tarea_faena")
+  proceso_rel                                   proceso?       @relation("tarea_procesoToproceso", fields: [proceso], references: [id_proceso], onDelete: Cascade, onUpdate: NoAction, map: "FK_tarea_proceso")
+  valle                                         valle?         @relation(fields: [id_valle], references: [id_valle], onDelete: Cascade, onUpdate: NoAction, map: "FK_tarea_valle")
 }
 
 model tarea_estado {
@@ -221,46 +219,48 @@ model tipo {
 }
 
 model tipo_documento {
-  id_tipo_documento Int          @id @default(autoincrement()) @map("id_tipo_documento")
-  tipo_documento    String?      @map("tipo_documento")
-  documentos        documento[]  @relation("documento_tipo_documento")
+  id_tipo_documento Int             @id(map: "PK_tipo_documento") @default(autoincrement()) @map("id_tipo_documento")
+  tipo_documento    String?         @map("tipo_documento") @db.NVarChar(50)
+  documentos        documento[]     @relation("documento_tipo_documento")
   historial_docs    historial_doc[]
 }
 
 model valle {
-  id_valle   Int         @id @default(autoincrement()) @map("id_valle")
-  valle_name String?     @map("valle_name")
-  tareas     tarea[]
+  id_valle    Int         @id(map: "PK_valle") @default(autoincrement()) @map("id_valle")
+  valle_name  String?     @map("valle_name") @db.NVarChar(50)
   historiales historial[]
+  tareas      tarea[]
 }
 
 model historial {
-  id_historial    String          @id @default(uuid()) @map("id_historial")
-  nombre          String?         @map("nombre")
-  id_proceso      Int?           @map("id_proceso")
-  fecha_final     DateTime?       @map("fecha_final")
-  gasto_total     Int?           @map("gasto_total")
-  id_valle        Int?           @map("id_valle")
-  id_faena        Int?           @map("id_faena")
-  SOLPED_MEMO_SAP Int?           @map("SOLPED_MEMO_SAP")
-  HES_HEM_SAP     Int?           @map("HES_HEM_SAP")
-  proceso         proceso?        @relation(fields: [id_proceso], references: [id_proceso])
-  valle           valle?         @relation(fields: [id_valle], references: [id_valle])
-  faena           faena?         @relation(fields: [id_faena], references: [id_faena])
-  historial_doc   historial_doc[]
+  id_historial                                      String          @id(clustered: false, map: "PK_historial") @default(dbgenerated("newsequentialid()"), map: "DF__historial__id_hi__625A9A57") @map("id_historial") @db.UniqueIdentifier
+  nombre                                            String?         @map("nombre") @db.NVarChar(50)
+  id_proceso                                        Int?            @map("id_proceso")
+  fecha_final                                       DateTime?       @map("fecha_final") @db.Date
+  gasto_total                                       Int?            @map("gasto_total")
+  id_valle                                          Int?            @map("id_valle")
+  id_faena                                          Int?            @map("id_faena")
+  SOLPED_MEMO_SAP                                   Int?            @map("SOLPED_MEMO_SAP")
+  HES_HEM_SAP                                       Int?            @map("HES_HEM_SAP")
+  beneficiario                                      String?         @db.UniqueIdentifier
+  beneficiario_rel                                  beneficiario?   @relation("historial_beneficiarioTobeneficiario", fields: [beneficiario], references: [id_beneficiario], onDelete: NoAction, onUpdate: NoAction, map: "FK_his_beneficiario")
+  faena                                             faena?          @relation(fields: [id_faena], references: [id_faena], onDelete: NoAction, onUpdate: NoAction, map: "FK_his_faena")
+  proceso                                           proceso?        @relation(fields: [id_proceso], references: [id_proceso], onDelete: NoAction, onUpdate: NoAction, map: "FK_his_proceso")
+  valle                                             valle?          @relation(fields: [id_valle], references: [id_valle], onDelete: NoAction, onUpdate: NoAction, map: "FK_his_valle")
+  historial_doc                                     historial_doc[]
 
   @@map("historial")
 }
 
 model historial_doc {
-  id_his_doc     String         @id @default(uuid()) @map("id_his_doc")
-  id_historial   String?        @map("id_historial")
-  nombre_archivo String?        @map("nombre_archivo")
+  id_his_doc     String         @id(clustered: false, map: "PK_his_doc") @default(dbgenerated("newsequentialid()"), map: "DF__historial__id_hi__690797E6") @map("id_his_doc") @db.UniqueIdentifier
+  id_historial   String?        @map("id_historial") @db.UniqueIdentifier
+  nombre_archivo String?        @map("nombre_archivo") @db.NVarChar(255)
   tipo_documento Int            @map("tipo_documento")
-  ruta           String?        @map("ruta")
-  fecha_carga    DateTime?      @map("fecha_carga")
-  historial      historial?     @relation(fields: [id_historial], references: [id_historial])
-  tipo_doc       tipo_documento @relation(fields: [tipo_documento], references: [id_tipo_documento])
+  ruta           String?        @map("ruta") @db.NVarChar(500)
+  fecha_carga    DateTime?      @map("fecha_carga") @db.Date
+  historial      historial?     @relation(fields: [id_historial], references: [id_historial], onDelete: NoAction, onUpdate: NoAction, map: "FK_his_doc_historial")
+  tipo_doc       tipo_documento @relation(fields: [tipo_documento], references: [id_tipo_documento], onUpdate: NoAction, map: "FK_his_doc_tipo_documento")
 
   @@map("historial_doc")
 }

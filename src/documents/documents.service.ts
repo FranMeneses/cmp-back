@@ -73,13 +73,11 @@ export class DocumentsService {
         tipo_documento: input.tipo_documento,
         ruta: input.ruta,
         id_tarea: input.id_tarea || null,
-        id_subtarea: input.id_subtarea || null,
         nombre_archivo: input.nombre_archivo || null,
         fecha_carga: new Date()
       },
       include: {
         tarea: true,
-        subtarea: true,
         tipo_doc: true
       }
     });
@@ -193,7 +191,6 @@ export class DocumentsService {
       where: { id_documento },
       include: {
         tarea: true,
-        subtarea: true,
         tipo_doc: true
       }
     });
@@ -204,7 +201,6 @@ export class DocumentsService {
       where: tipo_documento ? { tipo_documento } : undefined,
       include: {
         tarea: true,
-        subtarea: true,
         tipo_doc: true
       }
     });
@@ -244,7 +240,6 @@ export class DocumentsService {
       },
       include: {
         tarea: true,
-        subtarea: true,
         tipo_doc: true
       }
     });

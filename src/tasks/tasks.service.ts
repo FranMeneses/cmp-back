@@ -25,6 +25,7 @@ export class TasksService {
     if (taskDto.processId !== undefined) data.proceso = taskDto.processId;
     if (taskDto.statusId !== undefined) data.estado = taskDto.statusId;
     if (taskDto.applies !== undefined) data.aplica = taskDto.applies;
+    if (taskDto.beneficiaryId !== undefined) data.beneficiario = taskDto.beneficiaryId;
     
     return data;
   }
@@ -39,6 +40,7 @@ export class TasksService {
       processId: task.proceso,
       statusId: task.estado,
       applies: task.aplica,
+      beneficiaryId: task.beneficiario,
       valley: task.valle ? {
         id: task.valle.id_valle,
         name: task.valle.valle_name
@@ -54,6 +56,15 @@ export class TasksService {
       status: task.tarea_estado ? {
         id: task.tarea_estado.id_tarea_estado,
         name: task.tarea_estado.estado
+      } : null,
+      beneficiary: task.beneficiario_rel ? {
+        id: task.beneficiario_rel.id_beneficiario,
+        legalName: task.beneficiario_rel.nombre_legal,
+        rut: task.beneficiario_rel.rut,
+        address: task.beneficiario_rel.direccion,
+        entityType: task.beneficiario_rel.tipo_entidad,
+        representative: task.beneficiario_rel.representante,
+        hasLegalPersonality: task.beneficiario_rel.personalidad_juridica
       } : null
     };
   }
@@ -91,7 +102,8 @@ export class TasksService {
         tarea_estado: true,
         valle: true,
         faena: true,
-        proceso_rel: true
+        proceso_rel: true,
+        beneficiario_rel: true
       }
     });
     return this.mapFromDatabase(task);
@@ -103,7 +115,8 @@ export class TasksService {
         tarea_estado: true,
         valle: true,
         faena: true,
-        proceso_rel: true
+        proceso_rel: true,
+        beneficiario_rel: true
       }
     });
     return tasks.map(task => this.mapFromDatabase(task));
@@ -116,7 +129,8 @@ export class TasksService {
         tarea_estado: true,
         valle: true,
         faena: true,
-        proceso_rel: true
+        proceso_rel: true,
+        beneficiario_rel: true
       }
     });
     return task ? this.mapFromDatabase(task) : null;
@@ -130,7 +144,8 @@ export class TasksService {
         tarea_estado: true,
         valle: true,
         faena: true,
-        proceso_rel: true
+        proceso_rel: true,
+        beneficiario_rel: true
       }
     });
 
@@ -151,6 +166,7 @@ export class TasksService {
         valle: true,
         faena: true,
         proceso_rel: true,
+        beneficiario_rel: true,
         cumplimiento: {
           include: {
             registro: {
@@ -193,6 +209,7 @@ export class TasksService {
         gasto_total: totalExpense,
         id_valle: task.id_valle,
         id_faena: task.id_faena,
+        beneficiario: task.beneficiario,
         SOLPED_MEMO_SAP: solpedMemoSap,
         HES_HEM_SAP: hesHemSap,
         historial_doc: {
@@ -205,7 +222,8 @@ export class TasksService {
         }
       },
       include: {
-        historial_doc: true
+        historial_doc: true,
+        beneficiario_rel: true
       }
     });
 
@@ -220,6 +238,7 @@ export class TasksService {
         valle: true,
         faena: true,
         proceso_rel: true,
+        beneficiario_rel: true,
         subtarea: true,
         cumplimiento: true,
         documento: true
@@ -463,7 +482,8 @@ export class TasksService {
       include: {
         tarea_estado: true,
         valle: true,
-        faena: true
+        faena: true,
+        beneficiario_rel: true
       }
     });
 
@@ -643,7 +663,8 @@ export class TasksService {
       include: {
         tarea_estado: true,
         valle: true,
-        faena: true
+        faena: true,
+        beneficiario_rel: true
       }
     });
 
@@ -667,7 +688,8 @@ export class TasksService {
         tarea_estado: true,
         valle: true,
         faena: true,
-        proceso_rel: true
+        proceso_rel: true,
+        beneficiario_rel: true
       }
     });
     return tasks.map(task => this.mapFromDatabase(task));
@@ -682,7 +704,8 @@ export class TasksService {
       include: {
         tarea_estado: true,
         valle: true,
-        faena: true
+        faena: true,
+        beneficiario_rel: true
       }
     });
 
@@ -698,7 +721,8 @@ export class TasksService {
       include: {
         tarea_estado: true,
         valle: true,
-        faena: true
+        faena: true,
+        beneficiario_rel: true
       }
     });
 
@@ -740,6 +764,7 @@ export class TasksService {
         valle: true,
         faena: true,
         proceso_rel: true,
+        beneficiario_rel: true,
         cumplimiento: true
       }
     });

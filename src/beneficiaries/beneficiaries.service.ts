@@ -36,14 +36,13 @@ export class BeneficiariesService {
         email: contact.mail,
         phone: contact.phone
       })) || [],
-      subtasks: beneficiary.subtarea?.map(subtask => ({
-        id: subtask.id_subtarea,
-        name: subtask.nombre,
-        description: subtask.descripcion,
-        status: subtask.subtarea_estado ? {
-          id: subtask.subtarea_estado.id_subtarea_estado,
-          name: subtask.subtarea_estado.estado,
-          percentage: subtask.subtarea_estado.porcentaje
+      tasks: beneficiary.tareas?.map(task => ({
+        id: task.id_tarea,
+        name: task.nombre,
+        description: task.descripcion,
+        status: task.tarea_estado ? {
+          id: task.tarea_estado.id_tarea_estado,
+          name: task.tarea_estado.estado
         } : null
       })) || []
     };
@@ -85,9 +84,9 @@ export class BeneficiariesService {
       data: this.mapToDatabase(createBeneficiaryDto),
       include: {
         contacto: true,
-        subtarea: {
+        tareas: {
           include: {
-            subtarea_estado: true
+            tarea_estado: true
           }
         }
       }
@@ -99,9 +98,9 @@ export class BeneficiariesService {
     const beneficiaries = await this.prisma.beneficiario.findMany({
       include: {
         contacto: true,
-        subtarea: {
+        tareas: {
           include: {
-            subtarea_estado: true
+            tarea_estado: true
           }
         }
       }
@@ -114,9 +113,9 @@ export class BeneficiariesService {
       where: { id_beneficiario: id },
       include: {
         contacto: true,
-        subtarea: {
+        tareas: {
           include: {
-            subtarea_estado: true
+            tarea_estado: true
           }
         }
       }
@@ -130,9 +129,9 @@ export class BeneficiariesService {
       data: this.mapToDatabase(updateBeneficiaryDto),
       include: {
         contacto: true,
-        subtarea: {
+        tareas: {
           include: {
-            subtarea_estado: true
+            tarea_estado: true
           }
         }
       }
@@ -145,9 +144,9 @@ export class BeneficiariesService {
       where: { id_beneficiario: id },
       include: {
         contacto: true,
-        subtarea: {
+        tareas: {
           include: {
-            subtarea_estado: true
+            tarea_estado: true
           }
         }
       }
@@ -165,14 +164,7 @@ export class BeneficiariesService {
         });
       }
 
-      // 2. Eliminar subtareas
-      if (beneficiary.subtarea.length > 0) {
-        await prisma.subtarea.deleteMany({
-          where: { id_beneficiario: id }
-        });
-      }
-
-      // 3. Finalmente, eliminar el beneficiario
+      // 2. Finalmente, eliminar el beneficiario
       await prisma.beneficiario.delete({
         where: { id_beneficiario: id }
       });

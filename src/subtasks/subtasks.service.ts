@@ -16,7 +16,6 @@ export class SubtasksService {
       fecha_inicio: dto.startDate,
       fecha_termino: dto.endDate,
       fecha_final: dto.finalDate,
-      id_beneficiario: dto.beneficiaryId,
       id_estado: dto.statusId,
       id_prioridad: dto.priorityId,
       id_tarea: dto.taskId
@@ -34,7 +33,6 @@ export class SubtasksService {
       startDate: subtask.fecha_inicio,
       endDate: subtask.fecha_termino,
       finalDate: subtask.fecha_final,
-      beneficiaryId: subtask.id_beneficiario,
       statusId: subtask.id_estado,
       priorityId: subtask.id_prioridad,
       status: subtask.subtarea_estado ? {
@@ -197,9 +195,7 @@ export class SubtasksService {
       where: { id_estado: statusId },
       include: {
         subtarea_estado: true,
-        prioridad: true,
-        beneficiario: true,
-        documento: true
+        prioridad: true
       }
     });
     return subtasks.map(subtask => this.mapFromDatabase(subtask));
@@ -210,22 +206,7 @@ export class SubtasksService {
       where: { id_prioridad: priorityId },
       include: {
         subtarea_estado: true,
-        prioridad: true,
-        beneficiario: true,
-        documento: true
-      }
-    });
-    return subtasks.map(subtask => this.mapFromDatabase(subtask));
-  }
-
-  async getSubtasksByBeneficiary(beneficiaryId: string) {
-    const subtasks = await this.prisma.subtarea.findMany({
-      where: { id_beneficiario: beneficiaryId },
-      include: {
-        subtarea_estado: true,
-        prioridad: true,
-        beneficiario: true,
-        documento: true
+        prioridad: true
       }
     });
     return subtasks.map(subtask => this.mapFromDatabase(subtask));

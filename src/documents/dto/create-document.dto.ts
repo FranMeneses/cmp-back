@@ -15,10 +15,5 @@ export class CreateDocumentDto {
   @Field(() => String, { nullable: true })
   @IsString()
   @IsOptional()
-  id_subtarea?: string;
-
-  @Field(() => String, { nullable: true })
-  @IsString()
-  @IsOptional()
   nombre_archivo?: string;
 } 

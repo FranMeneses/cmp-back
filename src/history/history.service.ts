@@ -16,6 +16,7 @@ export class HistoryService {
       totalExpense: history.gasto_total,
       valleyId: history.id_valle,
       faenaId: history.id_faena,
+      beneficiaryId: history.beneficiario,
       solpedMemoSap: history.SOLPED_MEMO_SAP,
       hesHemSap: history.HES_HEM_SAP,
       process: history.proceso ? {
@@ -29,6 +30,15 @@ export class HistoryService {
       faena: history.faena ? {
         id: history.faena.id_faena,
         name: history.faena.faena_name
+      } : null,
+      beneficiary: history.beneficiario_rel ? {
+        id: history.beneficiario_rel.id_beneficiario,
+        legalName: history.beneficiario_rel.nombre_legal,
+        rut: history.beneficiario_rel.rut,
+        address: history.beneficiario_rel.direccion,
+        entityType: history.beneficiario_rel.tipo_entidad,
+        representative: history.beneficiario_rel.representante,
+        hasLegalPersonality: history.beneficiario_rel.personalidad_juridica
       } : null,
       documents: history.historial_doc?.map(doc => ({
         id: doc.id_his_doc,
@@ -51,6 +61,7 @@ export class HistoryService {
         proceso: true,
         valle: true,
         faena: true,
+        beneficiario_rel: true,
         historial_doc: {
           include: {
             tipo_doc: true
@@ -71,6 +82,7 @@ export class HistoryService {
         proceso: true,
         valle: true,
         faena: true,
+        beneficiario_rel: true,
         historial_doc: {
           include: {
             tipo_doc: true
@@ -88,6 +100,7 @@ export class HistoryService {
         proceso: true,
         valle: true,
         faena: true,
+        beneficiario_rel: true,
         historial_doc: {
           include: {
             tipo_doc: true
@@ -108,6 +121,7 @@ export class HistoryService {
         proceso: true,
         valle: true,
         faena: true,
+        beneficiario_rel: true,
         historial_doc: {
           include: {
             tipo_doc: true
@@ -128,6 +142,28 @@ export class HistoryService {
         proceso: true,
         valle: true,
         faena: true,
+        beneficiario_rel: true,
+        historial_doc: {
+          include: {
+            tipo_doc: true
+          }
+        }
+      },
+      orderBy: {
+        fecha_final: 'desc'
+      }
+    });
+    return histories.map(this.mapToGraphql);
+  }
+
+  async findByBeneficiary(beneficiaryId: string) {
+    const histories = await this.prisma.historial.findMany({
+      where: { beneficiario: beneficiaryId },
+      include: {
+        proceso: true,
+        valle: true,
+        faena: true,
+        beneficiario_rel: true,
         historial_doc: {
           include: {
             tipo_doc: true

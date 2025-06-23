@@ -37,4 +37,9 @@ export class UpdateTaskDto {
   @IsBoolean()
   @IsOptional()
   applies?: boolean;
+
+  @Field({ nullable: true })
+  @IsUUID()
+  @IsOptional()
+  beneficiaryId?: string;
 } 

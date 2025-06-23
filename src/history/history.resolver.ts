@@ -30,4 +30,9 @@ export class HistoryResolver {
   async historiesByFaena(@Args('faenaId', { type: () => Int }) faenaId: number): Promise<History[]> {
     return this.historyService.findByFaena(faenaId);
   }
+
+  @Query(() => [History])
+  async historiesByBeneficiary(@Args('beneficiaryId', { type: () => ID }) beneficiaryId: string): Promise<History[]> {
+    return this.historyService.findByBeneficiary(beneficiaryId);
+  }
 } 

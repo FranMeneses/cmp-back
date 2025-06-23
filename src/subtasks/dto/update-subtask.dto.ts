@@ -28,11 +28,6 @@ export class UpdateSubtaskDto {
   @IsOptional()
   priorityId?: number;
 
-  @Field(() => ID, { nullable: true })
-  @IsString()
-  @IsOptional()
-  beneficiaryId?: string;
-
   @Field(() => Int, { nullable: true })
   @IsNumber()
   @IsOptional()

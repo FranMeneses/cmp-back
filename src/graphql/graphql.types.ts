@@ -148,8 +148,8 @@ export class Beneficiary {
   @Field(() => [Contact], { nullable: true })
   contacts?: Contact[];
 
-  @Field(() => [Subtask], { nullable: true })
-  subtasks?: Subtask[];
+  @Field(() => [Task], { nullable: true })
+  tasks?: Task[];
 }
 
 @ObjectType()
@@ -301,17 +301,11 @@ export class Subtask {
   @Field(() => DateOnlyScalar, { nullable: true })
   finalDate?: Date;
 
-  @Field(() => ID, { nullable: true })
-  beneficiaryId?: string;
-
   @Field(() => Int, { nullable: true })
   statusId?: number;
 
   @Field(() => Int, { nullable: true })
   priorityId?: number;
-
-  @Field(() => Beneficiary, { nullable: true })
-  beneficiary?: Beneficiary;
 
   @Field(() => SubtaskStatus, { nullable: true })
   status?: SubtaskStatus;
@@ -346,9 +340,6 @@ export class CreateSubtaskInput {
   @Field(() => DateOnlyScalar, { nullable: true })
   finalDate?: Date;
 
-  @Field(() => ID, { nullable: true })
-  beneficiaryId?: string;
-
   @Field(() => Int, { nullable: true })
   statusId?: number;
 
@@ -381,9 +372,6 @@ export class UpdateSubtaskInput {
 
   @Field(() => DateOnlyScalar, { nullable: true })
   finalDate?: Date;
-
-  @Field(() => ID, { nullable: true })
-  beneficiaryId?: string;
 
   @Field(() => Int, { nullable: true })
   statusId?: number;
@@ -418,6 +406,9 @@ export class Task {
   @Field({ nullable: true })
   applies?: boolean;
 
+  @Field(() => ID, { nullable: true })
+  beneficiaryId?: string;
+
   @Field(() => Valley, { nullable: true })
   valley?: Valley;
 
@@ -429,6 +420,9 @@ export class Task {
 
   @Field(() => TaskStatus, { nullable: true })
   status?: TaskStatus;
+
+  @Field(() => Beneficiary, { nullable: true })
+  beneficiary?: Beneficiary;
 
   @Field(() => [Subtask], { nullable: true })
   subtasks?: Subtask[];
@@ -459,6 +453,9 @@ export class CreateTaskInput {
 
   @Field({ nullable: true })
   applies?: boolean;
+
+  @Field(() => ID, { nullable: true })
+  beneficiaryId?: string;
 }
 
 @InputType()
@@ -483,6 +480,9 @@ export class UpdateTaskInput {
 
   @Field({ nullable: true })
   applies?: boolean;
+
+  @Field(() => ID, { nullable: true })
+  beneficiaryId?: string;
 }
 
 @ObjectType()
@@ -832,9 +832,6 @@ export class Document {
   @Field(() => String, { nullable: true })
   id_tarea?: string;
 
-  @Field(() => String, { nullable: true })
-  id_subtarea?: string;
-
   @Field(() => Int)
   tipo_documento: number;
 
@@ -849,9 +846,6 @@ export class Document {
 
   @Field(() => Task, { nullable: true })
   tarea?: Task;
-
-  @Field(() => Subtask, { nullable: true })
-  subtarea?: Subtask;
 
   @Field(() => TipoDocumento)
   tipo_doc: TipoDocumento;
@@ -869,9 +863,6 @@ export class CreateDocumentInput {
   id_tarea?: string;
 
   @Field(() => String, { nullable: true })
-  id_subtarea?: string;
-
-  @Field(() => String, { nullable: true })
   nombre_archivo?: string;
 }
 
@@ -882,9 +873,6 @@ export class UpdateDocumentInput {
 
   @Field(() => String, { nullable: true })
   id_tarea?: string;
-
-  @Field(() => String, { nullable: true })
-  id_subtarea?: string;
 
   @Field(() => String, { nullable: true })
   nombre_archivo?: string;
@@ -971,6 +959,9 @@ export class History {
   @Field(() => Int, { nullable: true })
   hesHemSap?: number;
 
+  @Field(() => ID, { nullable: true })
+  beneficiaryId?: string;
+
   @Field(() => Process, { nullable: true })
   process?: Process;
 
@@ -979,6 +970,9 @@ export class History {
 
   @Field(() => Faena, { nullable: true })
   faena?: Faena;
+
+  @Field(() => Beneficiary, { nullable: true })
+  beneficiary?: Beneficiary;
 
   @Field(() => [HistoryDoc], { nullable: true })
   documents?: HistoryDoc[];
@@ -1036,6 +1030,9 @@ export class CreateHistoryInput {
 
   @Field(() => Int, { nullable: true })
   hesHemSap?: number;
+
+  @Field(() => ID, { nullable: true })
+  beneficiaryId?: string;
 }
 
 @InputType()
@@ -1063,6 +1060,9 @@ export class UpdateHistoryInput {
 
   @Field(() => Int, { nullable: true })
   hesHemSap?: number;
+
+  @Field(() => ID, { nullable: true })
+  beneficiaryId?: string;
 }
 
 @InputType()

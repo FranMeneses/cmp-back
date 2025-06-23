@@ -42,11 +42,6 @@ export class CreateSubtaskDto {
   @IsOptional()
   finalDate?: Date;
 
-  @Field(() => ID, { nullable: true })
-  @IsString()
-  @IsOptional()
-  beneficiaryId?: string;
-
   @Field(() => Int, { nullable: true })
   @IsNumber()
   @IsOptional()
