@@ -3,14 +3,10 @@ import { PrismaClient } from '@prisma/client';
 import * as sql from 'mssql';
 
 @Injectable()
-export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
+export class PrismaService implements OnModuleInit, OnModuleDestroy {
   private nativePool: sql.ConnectionPool | null = null;
+  private prismaClient: PrismaClient | null = null;
   private connectionString: string = '';
-
-  constructor() {
-    // No inicializar Prisma hasta tener la conexión
-    super();
-  }
 
   async onModuleInit() {
     try {
@@ -28,13 +24,17 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
       await this.initializePrisma();
       console.log('Prisma initialized successfully');
       
+      // Paso 3: Convertir este servicio en PrismaClient
+      this.copyPrismaMethodsToService();
+      console.log('Service converted to PrismaClient proxy');
+      
     } catch (error) {
       console.error('Error in hybrid connection setup:', error);
       
       // Fallback: intentar conexión tradicional con Prisma
       console.log('Attempting fallback connection...');
       try {
-        await this.$connect();
+        await this.createFallbackConnection();
         console.log('Fallback connection successful');
       } catch (fallbackError) {
         console.error('Fallback connection also failed:', fallbackError);
@@ -75,16 +75,13 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
   }
 
   private async initializePrisma(): Promise<void> {
-    // Con la conexión nativa establecida, ahora podemos usar Prisma
-    // Prisma va a usar la misma autenticación que ya establecimos
-    
     // Construir URL para Prisma que use Managed Identity
     this.connectionString = `sqlserver://servercmp.database.windows.net:1433;database=basedatoscmp;authentication=ActiveDirectoryMsi;encrypt=true;trustServerCertificate=false`;
     
     console.log('Connecting Prisma with Managed Identity URL...');
     
-    // Crear nuevo cliente Prisma con la configuración correcta
-    const newPrismaClient = new PrismaClient({
+    // Crear cliente Prisma con la configuración correcta
+    this.prismaClient = new PrismaClient({
       datasources: {
         db: {
           url: this.connectionString,
@@ -94,13 +91,43 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
       errorFormat: 'pretty',
     });
 
-    await newPrismaClient.$connect();
-    
-    // Reemplazar este servicio con el nuevo cliente
-    Object.setPrototypeOf(this, newPrismaClient);
-    Object.assign(this, newPrismaClient);
-    
+    await this.prismaClient.$connect();
     console.log('Prisma successfully connected with Managed Identity');
+  }
+
+  private async createFallbackConnection(): Promise<void> {
+    console.log('Creating fallback Prisma connection...');
+    this.prismaClient = new PrismaClient({
+      log: ['query', 'info', 'warn', 'error'],
+      errorFormat: 'pretty',
+    });
+    
+    await this.prismaClient.$connect();
+    this.copyPrismaMethodsToService();
+  }
+
+  private copyPrismaMethodsToService(): void {
+    if (!this.prismaClient) return;
+
+    // Copiar todos los métodos de Prisma al servicio
+    const prismaPrototype = Object.getPrototypeOf(this.prismaClient);
+    const propertyNames = Object.getOwnPropertyNames(prismaPrototype);
+    
+    for (const propertyName of propertyNames) {
+      if (propertyName !== 'constructor') {
+        (this as any)[propertyName] = (this.prismaClient as any)[propertyName].bind(this.prismaClient);
+      }
+    }
+
+    // Copiar las propiedades del modelo (beneficiario, tarea, etc.)
+    Object.keys(this.prismaClient).forEach(key => {
+      (this as any)[key] = (this.prismaClient as any)[key];
+    });
+
+    // Métodos críticos
+    (this as any).$connect = this.prismaClient.$connect.bind(this.prismaClient);
+    (this as any).$disconnect = this.prismaClient.$disconnect.bind(this.prismaClient);
+    (this as any).$transaction = this.prismaClient.$transaction.bind(this.prismaClient);
   }
 
   async onModuleDestroy() {
@@ -108,8 +135,10 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
       console.log('Closing connections...');
       
       // Cerrar Prisma
-      await this.$disconnect();
-      console.log('Prisma disconnected');
+      if (this.prismaClient) {
+        await this.prismaClient.$disconnect();
+        console.log('Prisma disconnected');
+      }
       
       // Cerrar pool nativo
       if (this.nativePool) {
