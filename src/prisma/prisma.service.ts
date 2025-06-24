@@ -1,164 +1,156 @@
-import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
+import { DefaultAzureCredential } from '@azure/identity';
 import * as sql from 'mssql';
 
 @Injectable()
-export class PrismaService implements OnModuleInit, OnModuleDestroy {
-  private nativePool: sql.ConnectionPool | null = null;
-  private prismaClient: PrismaClient | null = null;
-  private connectionString: string = '';
+export class PrismaService implements OnModuleInit {
+  private readonly logger = new Logger(PrismaService.name);
+  private prismaClient: PrismaClient;
+  private isConnected = false;
+
+  // Proxy all PrismaClient properties
+  get beneficiario() { return this.ensureConnected().beneficiario; }
+  get contacto() { return this.ensureConnected().contacto; }
+  get cumplimiento() { return this.ensureConnected().cumplimiento; }
+  get cumplimiento_estado() { return this.ensureConnected().cumplimiento_estado; }
+  get registro() { return this.ensureConnected().registro; }
+  get solped() { return this.ensureConnected().solped; }
+  get memo() { return this.ensureConnected().memo; }
+  get tarea() { return this.ensureConnected().tarea; }
+  get documento() { return this.ensureConnected().documento; }
+  get tipo_documento() { return this.ensureConnected().tipo_documento; }
+  get historial() { return this.ensureConnected().historial; }
+  get info_tarea() { return this.ensureConnected().info_tarea; }
+  get origen() { return this.ensureConnected().origen; }
+  get inversion() { return this.ensureConnected().inversion; }
+  get tipo() { return this.ensureConnected().tipo; }
+  get alcance() { return this.ensureConnected().alcance; }
+  get interaccion() { return this.ensureConnected().interaccion; }
+  get riesgo() { return this.ensureConnected().riesgo; }
+  get subtarea() { return this.ensureConnected().subtarea; }
+  get prioridad() { return this.ensureConnected().prioridad; }
+  get subtarea_estado() { return this.ensureConnected().subtarea_estado; }
+  get valle() { return this.ensureConnected().valle; }
+  get faena() { return this.ensureConnected().faena; }
+  get tarea_estado() { return this.ensureConnected().tarea_estado; }
+  get proceso() { return this.ensureConnected().proceso; }
+
+  // Proxy transaction method
+  get $transaction() { 
+    return this.ensureConnected().$transaction.bind(this.ensureConnected()); 
+  }
+
+  // Proxy other important methods
+  get $connect() { 
+    return this.ensureConnected().$connect.bind(this.ensureConnected()); 
+  }
+
+  get $disconnect() { 
+    return this.ensureConnected().$disconnect.bind(this.ensureConnected()); 
+  }
+
+  get $queryRaw() { 
+    return this.ensureConnected().$queryRaw.bind(this.ensureConnected()); 
+  }
+
+  get $executeRaw() { 
+    return this.ensureConnected().$executeRaw.bind(this.ensureConnected()); 
+  }
+
+  private ensureConnected(): PrismaClient {
+    if (!this.isConnected || !this.prismaClient) {
+      throw new Error('Prisma client not initialized. Call onModuleInit first.');
+    }
+    return this.prismaClient;
+  }
 
   async onModuleInit() {
+    this.logger.log('Initializing Prisma connection with Managed Identity...');
+    
     try {
-      console.log('Setting up hybrid SQL connection...');
-      console.log('DATABASE_URL configured:', !!process.env.DATABASE_URL);
-      console.log('AZURE_CLIENT_ID configured:', !!process.env.AZURE_CLIENT_ID);
-      
-      // Paso 1: Establecer conexión con driver nativo usando Managed Identity
-      console.log('Connecting with native mssql driver and Managed Identity...');
-      await this.connectWithNativeDriver();
-      console.log('Native connection established successfully');
-      
-      // Paso 2: Usar Prisma con la conexión establecida
-      console.log('Initializing Prisma with authenticated connection...');
-      await this.initializePrisma();
-      console.log('Prisma initialized successfully');
-      
-      // Paso 3: Convertir este servicio en PrismaClient
-      this.copyPrismaMethodsToService();
-      console.log('Service converted to PrismaClient proxy');
-      
+      // Try to establish connection with managed identity
+      await this.connectWithManagedIdentity();
+      this.logger.log('Successfully connected to database with Managed Identity');
     } catch (error) {
-      console.error('Error in hybrid connection setup:', error);
+      this.logger.error('Failed to connect with Managed Identity, falling back to connection string', error.message);
       
-      // Fallback: intentar conexión tradicional con Prisma
-      console.log('Attempting fallback connection...');
+      // Fallback to regular connection string
       try {
-        await this.createFallbackConnection();
-        console.log('Fallback connection successful');
+        this.prismaClient = new PrismaClient();
+        await this.prismaClient.$connect();
+        this.isConnected = true;
+        this.logger.log('Successfully connected with connection string fallback');
       } catch (fallbackError) {
-        console.error('Fallback connection also failed:', fallbackError);
+        this.logger.error('Failed to connect with fallback method', fallbackError.message);
         throw fallbackError;
       }
     }
   }
 
-  private async connectWithNativeDriver(): Promise<void> {
-    const config: sql.config = {
-      server: 'servercmp.database.windows.net',
-      database: 'basedatoscmp',
-      authentication: {
-        type: 'azure-active-directory-msi-vm' as any, // Container Apps usa este tipo
-      },
-      options: {
-        encrypt: true,
-        trustServerCertificate: false,
-      },
-      pool: {
-        max: 10,
-        min: 0,
-        idleTimeoutMillis: 30000,
-      },
-    };
-
-    console.log('Creating connection pool with Managed Identity...');
-    this.nativePool = new sql.ConnectionPool(config);
-    
-    // Conectar y verificar
-    await this.nativePool.connect();
-    console.log('Native connection pool created and connected');
-    
-    // Hacer una query de prueba para confirmar que funciona
-    const request = this.nativePool.request();
-    const result = await request.query('SELECT @@VERSION as version');
-    console.log('Connection verified with SQL Server version:', result.recordset[0].version.substring(0, 50) + '...');
-  }
-
-  private async initializePrisma(): Promise<void> {
-    // Construir URL para Prisma que use Managed Identity
-    this.connectionString = `sqlserver://servercmp.database.windows.net:1433;database=basedatoscmp;authentication=ActiveDirectoryMsi;encrypt=true;trustServerCertificate=false`;
-    
-    console.log('Connecting Prisma with Managed Identity URL...');
-    
-    // Crear cliente Prisma con la configuración correcta
-    this.prismaClient = new PrismaClient({
-      datasources: {
-        db: {
-          url: this.connectionString,
-        },
-      },
-      log: ['query', 'info', 'warn', 'error'],
-      errorFormat: 'pretty',
-    });
-
-    await this.prismaClient.$connect();
-    console.log('Prisma successfully connected with Managed Identity');
-  }
-
-  private async createFallbackConnection(): Promise<void> {
-    console.log('Creating fallback Prisma connection...');
-    this.prismaClient = new PrismaClient({
-      log: ['query', 'info', 'warn', 'error'],
-      errorFormat: 'pretty',
-    });
-    
-    await this.prismaClient.$connect();
-    this.copyPrismaMethodsToService();
-  }
-
-  private copyPrismaMethodsToService(): void {
-    if (!this.prismaClient) return;
-
-    // Copiar todos los métodos de Prisma al servicio
-    const prismaPrototype = Object.getPrototypeOf(this.prismaClient);
-    const propertyNames = Object.getOwnPropertyNames(prismaPrototype);
-    
-    for (const propertyName of propertyNames) {
-      if (propertyName !== 'constructor') {
-        (this as any)[propertyName] = (this.prismaClient as any)[propertyName].bind(this.prismaClient);
-      }
-    }
-
-    // Copiar las propiedades del modelo (beneficiario, tarea, etc.)
-    Object.keys(this.prismaClient).forEach(key => {
-      (this as any)[key] = (this.prismaClient as any)[key];
-    });
-
-    // Métodos críticos
-    (this as any).$connect = this.prismaClient.$connect.bind(this.prismaClient);
-    (this as any).$disconnect = this.prismaClient.$disconnect.bind(this.prismaClient);
-    (this as any).$transaction = this.prismaClient.$transaction.bind(this.prismaClient);
-  }
-
-  async onModuleDestroy() {
+  private async connectWithManagedIdentity(): Promise<void> {
     try {
-      console.log('Closing connections...');
+      // Get access token using Managed Identity
+      const credential = new DefaultAzureCredential();
+      const tokenResponse = await credential.getToken('https://database.windows.net/');
       
-      // Cerrar Prisma
-      if (this.prismaClient) {
-        await this.prismaClient.$disconnect();
-        console.log('Prisma disconnected');
+      if (!tokenResponse || !tokenResponse.token) {
+        throw new Error('Failed to get access token from Managed Identity');
       }
+
+      this.logger.log('Successfully obtained access token from Managed Identity');
+
+      // Test connection with mssql first
+      const config: sql.config = {
+        server: 'servercmp.database.windows.net',
+        database: 'basedatoscmp',
+        authentication: {
+          type: 'azure-active-directory-access-token',
+          options: {
+            token: tokenResponse.token,
+          },
+        },
+        options: {
+          encrypt: true,
+          trustServerCertificate: false,
+        },
+      };
+
+      const pool = new sql.ConnectionPool(config);
+      await pool.connect();
+      this.logger.log('Successfully tested connection with mssql driver');
+      await pool.close();
+
+      // Create DATABASE_URL with access token
+      const databaseUrl = `sqlserver://servercmp.database.windows.net:1433;database=basedatoscmp;authentication=Active Directory Default;encrypt=true;trustServerCertificate=false`;
       
-      // Cerrar pool nativo
-      if (this.nativePool) {
-        await this.nativePool.close();
-        console.log('Native connection pool closed');
-      }
-      
+      // Override DATABASE_URL environment variable
+      process.env.DATABASE_URL = databaseUrl;
+
+      // Create Prisma client
+      this.prismaClient = new PrismaClient({
+        datasources: {
+          db: {
+            url: databaseUrl,
+          },
+        },
+      });
+
+      // Test Prisma connection
+      await this.prismaClient.$connect();
+      this.isConnected = true;
+
+      this.logger.log('Prisma client successfully initialized with Managed Identity');
+
     } catch (error) {
-      console.error('Error closing connections:', error);
+      this.logger.error('Error in connectWithManagedIdentity:', error.message);
       throw error;
     }
   }
 
-  // Método para ejecutar queries nativas si es necesario
-  async executeNativeQuery(query: string): Promise<any> {
-    if (!this.nativePool) {
-      throw new Error('Native connection not available');
+  async onModuleDestroy() {
+    if (this.prismaClient) {
+      await this.prismaClient.$disconnect();
     }
-    
-    const request = this.nativePool.request();
-    return await request.query(query);
   }
 } 
