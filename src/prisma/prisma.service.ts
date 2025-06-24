@@ -1,6 +1,5 @@
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
-import { DefaultAzureCredential } from '@azure/identity';
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
@@ -21,15 +20,16 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
       console.log('Attempting to connect to database with Managed Identity...');
       console.log('DATABASE_URL configured:', !!process.env.DATABASE_URL);
       console.log('AZURE_CLIENT_ID configured:', !!process.env.AZURE_CLIENT_ID);
+      console.log('MSI_ENDPOINT configured:', !!process.env.MSI_ENDPOINT);
+      console.log('IDENTITY_ENDPOINT configured:', !!process.env.IDENTITY_ENDPOINT);
       
-      // Intentar obtener token de acceso usando Managed Identity
-      console.log('Getting access token...');
-      const credential = new DefaultAzureCredential();
-      const tokenResponse = await credential.getToken('https://database.windows.net/');
+      // Intentar obtener token usando Container Apps MSI endpoint
+      console.log('Getting access token via MSI endpoint...');
+      const token = await this.getAccessTokenViaMSI();
       console.log('Successfully obtained access token for SQL Database');
       
       // Construir cadena de conexión con el token
-      const connectionString = `sqlserver://servercmp.database.windows.net:1433;database=basedatoscmp;authentication=ActiveDirectoryAccessToken;accessToken=${tokenResponse.token};encrypt=true;trustServerCertificate=false`;
+      const connectionString = `sqlserver://servercmp.database.windows.net:1433;database=basedatoscmp;authentication=ActiveDirectoryAccessToken;accessToken=${token};encrypt=true;trustServerCertificate=false`;
       console.log('Connection string built with token');
       
       // Crear nuevo cliente con token y reemplazar el actual
@@ -66,6 +66,41 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
         throw fallbackError;
       }
     }
+  }
+
+  private async getAccessTokenViaMSI(): Promise<string> {
+    const msiEndpoint = process.env.MSI_ENDPOINT || process.env.IDENTITY_ENDPOINT;
+    const msiSecret = process.env.MSI_SECRET || process.env.IDENTITY_HEADER;
+    
+    if (!msiEndpoint) {
+      throw new Error('MSI endpoint not available');
+    }
+
+    const resource = 'https://database.windows.net/';
+    const apiVersion = '2019-08-01';
+    const clientId = process.env.AZURE_CLIENT_ID;
+    
+    let url = `${msiEndpoint}?resource=${encodeURIComponent(resource)}&api-version=${apiVersion}`;
+    if (clientId) {
+      url += `&client_id=${encodeURIComponent(clientId)}`;
+    }
+
+    const headers: Record<string, string> = {};
+    if (msiSecret) {
+      headers['X-IDENTITY-HEADER'] = msiSecret;
+    }
+
+    console.log('Making MSI request to:', url.replace(msiSecret || '', '***'));
+    
+    const response = await fetch(url, { headers });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`MSI request failed: ${response.status} - ${errorText}`);
+    }
+
+    const result = await response.json();
+    return result.access_token;
   }
 
   async onModuleDestroy() {
