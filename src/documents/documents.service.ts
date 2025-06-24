@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { BlobServiceClient, ContainerClient } from '@azure/storage-blob';
+import { DefaultAzureCredential } from '@azure/identity';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateDocumentInput } from '../graphql/graphql.types';
@@ -12,12 +13,17 @@ export class DocumentsService {
     private configService: ConfigService,
     private prisma: PrismaService,
   ) {
-    const connectionString = this.configService.get<string>('AZURE_STORAGE_CONNECTION_STRING');
-    if (!connectionString) {
-      throw new Error('Azure Storage connection string is not configured');
+    const accountName = this.configService.get<string>('AZURE_STORAGE_ACCOUNT_NAME');
+    const containerName = this.configService.get<string>('AZURE_STORAGE_CONTAINER_NAME') || 'cmpdocs';
+    if (!accountName) {
+      throw new Error('Azure Storage account name is not configured');
     }
-    const blobServiceClient = BlobServiceClient.fromConnectionString(connectionString);
-    this.containerClient = blobServiceClient.getContainerClient('cmpdocs');
+    // Managed Identity: use DefaultAzureCredential
+    const blobServiceClient = new BlobServiceClient(
+      `https://${accountName}.blob.core.windows.net`,
+      new DefaultAzureCredential()
+    );
+    this.containerClient = blobServiceClient.getContainerClient(containerName);
   }
 
   /**
