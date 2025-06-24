@@ -1,66 +1,41 @@
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
+import * as sql from 'mssql';
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
-  private initialized = false;
+  private nativePool: sql.ConnectionPool | null = null;
+  private connectionString: string = '';
 
   constructor() {
-    // Crear instancia mínima sin conectar
-    super({
-      log: ['query', 'info', 'warn', 'error'],
-      errorFormat: 'pretty',
-    });
+    // No inicializar Prisma hasta tener la conexión
+    super();
   }
 
   async onModuleInit() {
-    if (this.initialized) return;
-    
     try {
-      console.log('Attempting to connect to database with Managed Identity...');
+      console.log('Setting up hybrid SQL connection...');
       console.log('DATABASE_URL configured:', !!process.env.DATABASE_URL);
       console.log('AZURE_CLIENT_ID configured:', !!process.env.AZURE_CLIENT_ID);
-      console.log('MSI_ENDPOINT configured:', !!process.env.MSI_ENDPOINT);
-      console.log('IDENTITY_ENDPOINT configured:', !!process.env.IDENTITY_ENDPOINT);
       
-      // Intentar obtener token usando Container Apps MSI endpoint
-      console.log('Getting access token via MSI endpoint...');
-      const token = await this.getAccessTokenViaMSI();
-      console.log('Successfully obtained access token for SQL Database');
+      // Paso 1: Establecer conexión con driver nativo usando Managed Identity
+      console.log('Connecting with native mssql driver and Managed Identity...');
+      await this.connectWithNativeDriver();
+      console.log('Native connection established successfully');
       
-      // Construir cadena de conexión con el token
-      const connectionString = `sqlserver://servercmp.database.windows.net:1433;database=basedatoscmp;authentication=ActiveDirectoryAccessToken;accessToken=${token};encrypt=true;trustServerCertificate=false`;
-      console.log('Connection string built with token');
-      
-      // Crear nuevo cliente con token y reemplazar el actual
-      const newClient = new PrismaClient({
-        datasources: {
-          db: {
-            url: connectionString,
-          },
-        },
-        log: ['query', 'info', 'warn', 'error'],
-        errorFormat: 'pretty',
-      });
-      
-      await newClient.$connect();
-      console.log('Database connection established successfully with Managed Identity token');
-      
-      // Reemplazar la configuración interna del cliente actual
-      Object.setPrototypeOf(this, newClient);
-      Object.assign(this, newClient);
-      
-      this.initialized = true;
+      // Paso 2: Usar Prisma con la conexión establecida
+      console.log('Initializing Prisma with authenticated connection...');
+      await this.initializePrisma();
+      console.log('Prisma initialized successfully');
       
     } catch (error) {
-      console.error('Error with Managed Identity approach:', error);
+      console.error('Error in hybrid connection setup:', error);
       
-      // Fallback al método original si falla el token
-      console.log('Falling back to original connection method...');
+      // Fallback: intentar conexión tradicional con Prisma
+      console.log('Attempting fallback connection...');
       try {
         await this.$connect();
-        console.log('Database connection established with fallback method');
-        this.initialized = true;
+        console.log('Fallback connection successful');
       } catch (fallbackError) {
         console.error('Fallback connection also failed:', fallbackError);
         throw fallbackError;
@@ -68,50 +43,93 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     }
   }
 
-  private async getAccessTokenViaMSI(): Promise<string> {
-    const msiEndpoint = process.env.MSI_ENDPOINT || process.env.IDENTITY_ENDPOINT;
-    const msiSecret = process.env.MSI_SECRET || process.env.IDENTITY_HEADER;
-    
-    if (!msiEndpoint) {
-      throw new Error('MSI endpoint not available');
-    }
+  private async connectWithNativeDriver(): Promise<void> {
+    const config: sql.config = {
+      server: 'servercmp.database.windows.net',
+      database: 'basedatoscmp',
+      authentication: {
+        type: 'azure-active-directory-msi-vm' as any, // Container Apps usa este tipo
+      },
+      options: {
+        encrypt: true,
+        trustServerCertificate: false,
+      },
+      pool: {
+        max: 10,
+        min: 0,
+        idleTimeoutMillis: 30000,
+      },
+    };
 
-    const resource = 'https://database.windows.net/';
-    const apiVersion = '2019-08-01';
-    const clientId = process.env.AZURE_CLIENT_ID;
+    console.log('Creating connection pool with Managed Identity...');
+    this.nativePool = new sql.ConnectionPool(config);
     
-    let url = `${msiEndpoint}?resource=${encodeURIComponent(resource)}&api-version=${apiVersion}`;
-    if (clientId) {
-      url += `&client_id=${encodeURIComponent(clientId)}`;
-    }
-
-    const headers: Record<string, string> = {};
-    if (msiSecret) {
-      headers['X-IDENTITY-HEADER'] = msiSecret;
-    }
-
-    console.log('Making MSI request to:', url.replace(msiSecret || '', '***'));
+    // Conectar y verificar
+    await this.nativePool.connect();
+    console.log('Native connection pool created and connected');
     
-    const response = await fetch(url, { headers });
-    
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`MSI request failed: ${response.status} - ${errorText}`);
-    }
+    // Hacer una query de prueba para confirmar que funciona
+    const request = this.nativePool.request();
+    const result = await request.query('SELECT @@VERSION as version');
+    console.log('Connection verified with SQL Server version:', result.recordset[0].version.substring(0, 50) + '...');
+  }
 
-    const result = await response.json();
-    return result.access_token;
+  private async initializePrisma(): Promise<void> {
+    // Con la conexión nativa establecida, ahora podemos usar Prisma
+    // Prisma va a usar la misma autenticación que ya establecimos
+    
+    // Construir URL para Prisma que use Managed Identity
+    this.connectionString = `sqlserver://servercmp.database.windows.net:1433;database=basedatoscmp;authentication=ActiveDirectoryMsi;encrypt=true;trustServerCertificate=false`;
+    
+    console.log('Connecting Prisma with Managed Identity URL...');
+    
+    // Crear nuevo cliente Prisma con la configuración correcta
+    const newPrismaClient = new PrismaClient({
+      datasources: {
+        db: {
+          url: this.connectionString,
+        },
+      },
+      log: ['query', 'info', 'warn', 'error'],
+      errorFormat: 'pretty',
+    });
+
+    await newPrismaClient.$connect();
+    
+    // Reemplazar este servicio con el nuevo cliente
+    Object.setPrototypeOf(this, newPrismaClient);
+    Object.assign(this, newPrismaClient);
+    
+    console.log('Prisma successfully connected with Managed Identity');
   }
 
   async onModuleDestroy() {
     try {
-      if (this.initialized) {
-        await this.$disconnect();
-        console.log('Database connection closed successfully');
+      console.log('Closing connections...');
+      
+      // Cerrar Prisma
+      await this.$disconnect();
+      console.log('Prisma disconnected');
+      
+      // Cerrar pool nativo
+      if (this.nativePool) {
+        await this.nativePool.close();
+        console.log('Native connection pool closed');
       }
+      
     } catch (error) {
-      console.error('Error disconnecting from the database:', error);
+      console.error('Error closing connections:', error);
       throw error;
     }
+  }
+
+  // Método para ejecutar queries nativas si es necesario
+  async executeNativeQuery(query: string): Promise<any> {
+    if (!this.nativePool) {
+      throw new Error('Native connection not available');
+    }
+    
+    const request = this.nativePool.request();
+    return await request.query(query);
   }
 } 
