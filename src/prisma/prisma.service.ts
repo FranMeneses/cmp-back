@@ -17,10 +17,15 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
 
   async onModuleInit() {
     try {
+      console.log('Attempting to connect to database with Managed Identity...');
+      console.log('DATABASE_URL configured:', !!process.env.DATABASE_URL);
+      console.log('AZURE_CLIENT_ID configured:', !!process.env.AZURE_CLIENT_ID);
+      
       await this.$connect();
       console.log('Database connection established successfully with Managed Identity');
     } catch (error) {
       console.error('Error connecting to the database:', error);
+      console.error('DATABASE_URL pattern:', process.env.DATABASE_URL?.substring(0, 50) + '...');
       throw error;
     }
   }
