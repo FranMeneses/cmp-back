@@ -321,6 +321,7 @@ type Query {
   historiesByProcess(processId: Int!): [History!]!
   historiesByValley(valleyId: Int!): [History!]!
   historiesByFaena(faenaId: Int!): [History!]!
+  historiesByBeneficiary(beneficiaryId: ID!): [History!]!
 }
 
 type Mutation {
