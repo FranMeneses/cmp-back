@@ -1,6 +1,6 @@
 import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
-import { DefaultAzureCredential } from '@azure/identity';
+import { ManagedIdentityCredential } from '@azure/identity';
 import * as sql from 'mssql';
 
 @Injectable()
@@ -90,8 +90,8 @@ export class PrismaService implements OnModuleInit {
 
   private async connectWithManagedIdentity(): Promise<void> {
     try {
-      // Get access token using Managed Identity
-      const credential = new DefaultAzureCredential();
+      // Use ManagedIdentityCredential specifically for Container Apps System Assigned Identity
+      const credential = new ManagedIdentityCredential();
       const tokenResponse = await credential.getToken('https://database.windows.net/');
       
       if (!tokenResponse || !tokenResponse.token) {
