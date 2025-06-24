@@ -35,14 +35,11 @@ jobs:
         uses: azure/container-apps-deploy-action@v2
         with:
           appSourcePath: ${{ github.workspace }}
-          _dockerfilePathKey_: _dockerfilePath_
           registryUrl: backcont.azurecr.io
           registryUsername: ${{ secrets.CMPAPPBACK_REGISTRY_USERNAME }}
           registryPassword: ${{ secrets.CMPAPPBACK_REGISTRY_PASSWORD }}
           containerAppName: cmpappback
           resourceGroup: grupocmp
           imageToBuild: backcont.azurecr.io/cmpappback:${{ github.sha }}
-          _buildArgumentsKey_: |
-            _buildArgumentsValues_
 
 
