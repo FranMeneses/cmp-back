@@ -10,8 +10,8 @@ RUN apk add --no-cache openssl
 COPY package*.json ./
 COPY prisma ./prisma/
 
-# Install dependencies
-RUN npm ci --legacy-peer-deps && npm cache clean --force
+# Install all dependencies (including dev dependencies for building)
+RUN npm ci --legacy-peer-deps
 
 # Copy source code
 COPY . .
@@ -31,8 +31,8 @@ RUN apk add --no-cache openssl wget
 COPY package*.json ./
 COPY prisma ./prisma/
 
-# Install production dependencies only
-RUN npm ci --only=production --legacy-peer-deps && npm cache clean --force
+# Install ALL dependencies first (we'll clean up later if needed)
+RUN npm ci --legacy-peer-deps
 
 # Copy built application from builder stage
 COPY --from=builder /app/dist ./dist
