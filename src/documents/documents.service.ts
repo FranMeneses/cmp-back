@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { BlobServiceClient, ContainerClient } from '@azure/storage-blob';
 import { DefaultAzureCredential } from '@azure/identity';
 import { ConfigService } from '@nestjs/config';
@@ -8,6 +8,7 @@ import { CreateDocumentInput } from '../graphql/graphql.types';
 @Injectable()
 export class DocumentsService {
   private containerClient: ContainerClient;
+  private readonly logger = new Logger(DocumentsService.name);
 
   constructor(
     private configService: ConfigService,
@@ -15,25 +16,21 @@ export class DocumentsService {
   ) {
     const accountName = this.configService.get<string>('AZURE_STORAGE_ACCOUNT_NAME');
     const containerName = this.configService.get<string>('AZURE_STORAGE_CONTAINER_NAME') || 'cmpdocs';
-    const nodeEnv = this.configService.get<string>('NODE_ENV');
     
-    // Solo inicializar Azure Storage si estamos en producción o si las variables están configuradas
-    if (accountName && (nodeEnv === 'production' || nodeEnv === 'staging')) {
-      // Managed Identity: use DefaultAzureCredential
-      const blobServiceClient = new BlobServiceClient(
-        `https://${accountName}.blob.core.windows.net`,
-        new DefaultAzureCredential()
-      );
-      this.containerClient = blobServiceClient.getContainerClient(containerName);
-    } else if (accountName) {
-      // Para desarrollo local con credenciales
-      const blobServiceClient = new BlobServiceClient(
-        `https://${accountName}.blob.core.windows.net`,
-        new DefaultAzureCredential()
-      );
-      this.containerClient = blobServiceClient.getContainerClient(containerName);
+    if (accountName) {
+      try {
+        const blobServiceClient = new BlobServiceClient(
+          `https://${accountName}.blob.core.windows.net`,
+          new DefaultAzureCredential()
+        );
+        this.containerClient = blobServiceClient.getContainerClient(containerName);
+        this.logger.log('Azure Storage client initialized successfully');
+      } catch (error) {
+        this.logger.error('Failed to initialize Azure Storage client', error.message);
+        this.containerClient = null;
+      }
     } else {
-      console.warn('Azure Storage not configured - some document operations may not work');
+      this.logger.warn('Azure Storage not configured - document operations will not work');
       this.containerClient = null;
     }
   }
@@ -50,13 +47,11 @@ export class DocumentsService {
       throw new Error('File is null or undefined');
     }
     
-    if (file.buffer) {
-    } else {
+    if (!file.buffer) {
       throw new Error('File buffer is undefined. Make sure Multer is configured to use memory storage.');
     }
 
     try {
-      // Usar el nombre original del archivo con timestamp para evitar conflictos
       const timestamp = Date.now();
       const fileExtension = file.originalname.split('.').pop();
       const fileNameWithoutExt = file.originalname.replace(/\.[^/.]+$/, "");
@@ -73,6 +68,8 @@ export class DocumentsService {
 
       await blockBlobClient.upload(file.buffer, file.buffer.length, uploadOptions);
       
+      this.logger.log(`File uploaded successfully: ${blobName}`);
+      
       return {
         ruta: blockBlobClient.url,
         filename: file.originalname,
@@ -80,6 +77,7 @@ export class DocumentsService {
         size: file.size
       };
     } catch (error) {
+      this.logger.error('Failed to upload file to Azure Storage', error.message);
       throw error;
     }
   }
@@ -127,8 +125,7 @@ export class DocumentsService {
     }
 
     try {
-      console.log(`Downloading document ${id_documento}`);
-      console.log(`Document ruta: ${doc.ruta}`);
+      this.logger.debug(`Downloading document ${id_documento}`);
       
       const url = new URL(doc.ruta);
       const encodedBlobName = url.pathname.split('/').pop();
@@ -138,65 +135,48 @@ export class DocumentsService {
       }
       
       const blobName = decodeURIComponent(encodedBlobName);
-
-      console.log(`Encoded blobName: ${encodedBlobName}`);
-      console.log(`Decoded blobName: ${blobName}`);
+      this.logger.debug(`Attempting to download blob: ${blobName}`);
 
       const blockBlobClient = this.containerClient.getBlockBlobClient(blobName);
       
-      // Verificar que el blob existe
-      console.log(`Checking if blob exists: ${blobName}`);
       const exists = await blockBlobClient.exists();
-      console.log(`Blob exists: ${exists}`);
-      
       if (!exists) {
         throw new Error(`File not found in Azure Storage for document ${id_documento}. BlobName: ${blobName}`);
       }
 
-      // Obtener el buffer del archivo
       const downloadResponse = await blockBlobClient.download();
       
       if (!downloadResponse.readableStreamBody) {
         throw new Error(`Unable to download file for document ${id_documento}`);
       }
 
-      // Convertir stream a buffer
       const chunks: Buffer[] = [];
       for await (const chunk of downloadResponse.readableStreamBody) {
         chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
       }
       const buffer = Buffer.concat(chunks);
 
-      // Determinar el nombre del archivo con extensión
       let filename: string;
-      
-      console.log(`Document nombre_archivo from DB: ${doc.nombre_archivo}`);
-      console.log(`BlobName for filename extraction: ${blobName}`);
       
       if (doc.nombre_archivo) {
         filename = doc.nombre_archivo;
-        console.log(`Using nombre_archivo from DB: ${filename}`);
+        this.logger.debug(`Using filename from database: ${filename}`);
         
         if (!filename.includes('.')) {
           const blobExtension = blobName.split('.').pop();
           if (blobExtension) {
             filename = `${filename}.${blobExtension}`;
-            console.log(`Added extension to filename: ${filename}`);
           }
         }
       } else {
-        console.log(`No nombre_archivo in DB, extracting from blobName`);
         const blobExtension = blobName.split('.').pop();
-        const nameWithoutExt = blobName.replace(/\.[^/.]+$/, ""); // Remover extensión
-        const nameWithoutTimestamp = nameWithoutExt.replace(/_\d+$/, ""); // Remover timestamp
+        const nameWithoutExt = blobName.replace(/\.[^/.]+$/, "");
+        const nameWithoutTimestamp = nameWithoutExt.replace(/_\d+$/, "");
         filename = `${nameWithoutTimestamp}.${blobExtension}`;
-        console.log(`Extracted filename: ${filename}`);
-        console.log(`  - blobExtension: ${blobExtension}`);
-        console.log(`  - nameWithoutExt: ${nameWithoutExt}`);
-        console.log(`  - nameWithoutTimestamp: ${nameWithoutTimestamp}`);
+        this.logger.debug(`Extracted filename from blob: ${filename}`);
       }
 
-      console.log(`Final filename: ${filename}`);
+      this.logger.log(`File downloaded successfully: ${filename}`);
 
       return {
         buffer,
@@ -205,7 +185,7 @@ export class DocumentsService {
         size: downloadResponse.contentLength || buffer.length
       };
     } catch (error) {
-      console.error(`Download error for document ${id_documento}:`, error);
+      this.logger.error(`Download error for document ${id_documento}`, error.message);
       throw new Error(`Failed to download file: ${error.message}`);
     }
   }
@@ -240,12 +220,19 @@ export class DocumentsService {
     }
 
     if (this.containerClient && doc.ruta) {
-      const url = new URL(doc.ruta);
-      const blobName = url.pathname.split('/').pop();
+      try {
+        const url = new URL(doc.ruta);
+        const encodedBlobName = url.pathname.split('/').pop();
 
-      if (blobName) {
-        const blockBlobClient = this.containerClient.getBlockBlobClient(blobName);
-        await blockBlobClient.delete();
+        if (encodedBlobName) {
+          const blobName = decodeURIComponent(encodedBlobName);
+          const blockBlobClient = this.containerClient.getBlockBlobClient(blobName);
+          await blockBlobClient.delete();
+          this.logger.log(`Blob deleted successfully: ${blobName}`);
+        }
+      } catch (error) {
+        this.logger.error(`Failed to delete blob for document ${id_documento}`, error.message);
+        // Continue with database deletion even if blob deletion fails
       }
     }
 

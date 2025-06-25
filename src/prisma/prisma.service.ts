@@ -64,9 +64,7 @@ export class PrismaService implements OnModuleInit {
   }
 
   async onModuleInit() {
-    const nodeEnv = process.env.NODE_ENV;
-    
-    this.logger.log(`Initializing Prisma connection in ${nodeEnv} mode...`);
+    this.logger.log('Initializing Prisma connection...');
     
     try {
       this.prismaClient = new PrismaClient();
@@ -79,11 +77,10 @@ export class PrismaService implements OnModuleInit {
     }
   }
 
-
-
   async onModuleDestroy() {
     if (this.prismaClient) {
       await this.prismaClient.$disconnect();
+      this.logger.log('Database connection closed');
     }
   }
 } 

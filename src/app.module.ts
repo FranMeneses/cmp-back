@@ -17,14 +17,17 @@ import { HistoryModule } from './history/history.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: process.env.NODE_ENV === 'production' ? undefined : '.env',
+    }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
       buildSchemaOptions: {
         numberScalarMode: 'integer',
       },
-      playground: true,
+      playground: process.env.NODE_ENV !== 'production',
       introspection: true,
     }),
     PrismaModule,

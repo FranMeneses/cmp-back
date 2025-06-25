@@ -4,10 +4,14 @@ import { DocumentsService } from './documents.service';
 import { Express } from 'express';
 import { memoryStorage } from 'multer';
 import { Response } from 'express';
+import { ConfigService } from '@nestjs/config';
 
 @Controller('documents')
 export class DocumentsController {
-  constructor(private readonly documentsService: DocumentsService) {}
+  constructor(
+    private readonly documentsService: DocumentsService,
+    private readonly configService: ConfigService
+  ) {}
 
   @Post('upload')
   @UseInterceptors(FileInterceptor('file', {
@@ -33,14 +37,15 @@ export class DocumentsController {
     try {
       const fileData = await this.documentsService.downloadFile(id);
       const safeFilename = fileData.filename.replace(/[^\w\s.-]/gi, '_');
-      const encodedFilename = encodeURIComponent(fileData.filename);
+      
+      const allowedOrigin = this.configService.get<string>('FRONTEND_URL') || '*';
       
       res.set({
         'Content-Type': fileData.contentType,
         'Content-Disposition': `attachment; filename="${safeFilename}"`,
         'Content-Length': fileData.size.toString(),
         'Access-Control-Expose-Headers': 'Content-Disposition, Content-Length',
-        'Access-Control-Allow-Origin': 'http://localhost:3000',
+        'Access-Control-Allow-Origin': allowedOrigin,
         'Access-Control-Allow-Credentials': 'true',
         'Cache-Control': 'no-cache',
       });
