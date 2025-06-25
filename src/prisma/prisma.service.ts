@@ -1,7 +1,5 @@
 import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
-import { ManagedIdentityCredential } from '@azure/identity';
-import * as sql from 'mssql';
 
 @Injectable()
 export class PrismaService implements OnModuleInit {
@@ -66,121 +64,22 @@ export class PrismaService implements OnModuleInit {
   }
 
   async onModuleInit() {
-    this.logger.log('Initializing Prisma connection with Managed Identity...');
+    const nodeEnv = process.env.NODE_ENV;
+    
+    this.logger.log(`Initializing Prisma connection in ${nodeEnv} mode...`);
     
     try {
-      // Try to establish connection with managed identity
-      await this.connectWithManagedIdentity();
-      this.logger.log('Successfully connected to database with Managed Identity');
-    } catch (error) {
-      this.logger.error('Failed to connect with Managed Identity, falling back to connection string', error.message);
-      
-      // Fallback to regular connection string
-      try {
-        this.prismaClient = new PrismaClient();
-        await this.prismaClient.$connect();
-        this.isConnected = true;
-        this.logger.log('Successfully connected with connection string fallback');
-      } catch (fallbackError) {
-        this.logger.error('Failed to connect with fallback method', fallbackError.message);
-        throw fallbackError;
-      }
-    }
-  }
-
-  private async connectWithManagedIdentity(): Promise<void> {
-    try {
-      this.logger.log('Starting Managed Identity authentication process...');
-      
-      // First, let's try to get token using the Container Apps MSI endpoint directly
-      this.logger.log('Attempting to get token from MSI endpoint...');
-      
-      const tokenUrl = 'http://169.254.169.254/metadata/identity/oauth2/token';
-      const params = new URLSearchParams({
-        'api-version': '2018-02-01',
-        'resource': 'https://database.windows.net/'
-      });
-
-      const response = await fetch(`${tokenUrl}?${params}`, {
-        method: 'GET',
-        headers: {
-          'Metadata': 'true'
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error(`MSI endpoint returned ${response.status}: ${response.statusText}`);
-      }
-
-      const tokenData = await response.json();
-      const accessToken = tokenData.access_token;
-
-      if (!accessToken) {
-        throw new Error('No access token received from MSI endpoint');
-      }
-
-      this.logger.log('Successfully obtained access token from MSI endpoint');
-
-      // Test connection with mssql first using the token
-      this.logger.log('Testing connection with mssql driver...');
-      const config: sql.config = {
-        server: 'servercmp.database.windows.net',
-        database: 'basedatoscmp',
-        authentication: {
-          type: 'azure-active-directory-access-token',
-          options: {
-            token: accessToken,
-          },
-        },
-        options: {
-          encrypt: true,
-          trustServerCertificate: false,
-        },
-      };
-
-      const pool = new sql.ConnectionPool(config);
-      await pool.connect();
-      this.logger.log('Successfully tested connection with mssql driver');
-      
-      // Test a simple query
-      const request = pool.request();
-      const result = await request.query('SELECT 1 as test');
-      this.logger.log('Test query successful:', result.recordset);
-      
-      await pool.close();
-
-      // For Prisma, we still need to use the connection string approach
-      // since Prisma doesn't support direct token injection
-      this.logger.log('Initializing Prisma with Active Directory Default authentication...');
-      
-      const databaseUrl = `sqlserver://servercmp.database.windows.net:1433;database=basedatoscmp;authentication=Active Directory Default;encrypt=true;trustServerCertificate=false`;
-      
-      // Override DATABASE_URL environment variable
-      process.env.DATABASE_URL = databaseUrl;
-
-      // Create Prisma client
-      this.prismaClient = new PrismaClient({
-        datasources: {
-          db: {
-            url: databaseUrl,
-          },
-        },
-        log: ['query', 'info', 'warn', 'error'], // Enable detailed logging
-      });
-
-      // Test Prisma connection
-      this.logger.log('Testing Prisma connection...');
+      this.prismaClient = new PrismaClient();
       await this.prismaClient.$connect();
       this.isConnected = true;
-
-      this.logger.log('Prisma client successfully initialized with Managed Identity');
-
+      this.logger.log('Successfully connected to database');
     } catch (error) {
-      this.logger.error('Error in connectWithManagedIdentity:', error.message);
-      this.logger.error('Error stack:', error.stack);
+      this.logger.error('Failed to connect to database', error.message);
       throw error;
     }
   }
+
+
 
   async onModuleDestroy() {
     if (this.prismaClient) {

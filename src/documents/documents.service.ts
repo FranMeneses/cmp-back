@@ -15,22 +15,36 @@ export class DocumentsService {
   ) {
     const accountName = this.configService.get<string>('AZURE_STORAGE_ACCOUNT_NAME');
     const containerName = this.configService.get<string>('AZURE_STORAGE_CONTAINER_NAME') || 'cmpdocs';
-    if (!accountName) {
-      throw new Error('Azure Storage account name is not configured');
+    const nodeEnv = this.configService.get<string>('NODE_ENV');
+    
+    // Solo inicializar Azure Storage si estamos en producción o si las variables están configuradas
+    if (accountName && (nodeEnv === 'production' || nodeEnv === 'staging')) {
+      // Managed Identity: use DefaultAzureCredential
+      const blobServiceClient = new BlobServiceClient(
+        `https://${accountName}.blob.core.windows.net`,
+        new DefaultAzureCredential()
+      );
+      this.containerClient = blobServiceClient.getContainerClient(containerName);
+    } else if (accountName) {
+      // Para desarrollo local con credenciales
+      const blobServiceClient = new BlobServiceClient(
+        `https://${accountName}.blob.core.windows.net`,
+        new DefaultAzureCredential()
+      );
+      this.containerClient = blobServiceClient.getContainerClient(containerName);
+    } else {
+      console.warn('Azure Storage not configured - some document operations may not work');
+      this.containerClient = null;
     }
-    // Managed Identity: use DefaultAzureCredential
-    const blobServiceClient = new BlobServiceClient(
-      `https://${accountName}.blob.core.windows.net`,
-      new DefaultAzureCredential()
-    );
-    this.containerClient = blobServiceClient.getContainerClient(containerName);
   }
 
   /**
    * Sube un archivo a Azure Blob Storage sin guardar metadata en la base de datos
    */
   async uploadBlobOnly(file: Express.Multer.File) {
-
+    if (!this.containerClient) {
+      throw new Error('Azure Storage is not configured. Cannot upload files.');
+    }
     
     if (!file) {
       throw new Error('File is null or undefined');
@@ -93,6 +107,10 @@ export class DocumentsService {
    * Descarga un archivo desde Azure Blob Storage
    */
   async downloadFile(id_documento: string) {
+    if (!this.containerClient) {
+      throw new Error('Azure Storage is not configured. Cannot download files.');
+    }
+    
     const doc = await this.prisma.documento.findUnique({
       where: { id_documento },
       include: {
@@ -221,12 +239,14 @@ export class DocumentsService {
       throw new Error(`Document with ID ${id_documento} not found`);
     }
 
-    const url = new URL(doc.ruta);
-    const blobName = url.pathname.split('/').pop();
+    if (this.containerClient && doc.ruta) {
+      const url = new URL(doc.ruta);
+      const blobName = url.pathname.split('/').pop();
 
-    if (blobName) {
-      const blockBlobClient = this.containerClient.getBlockBlobClient(blobName);
-      await blockBlobClient.delete();
+      if (blobName) {
+        const blockBlobClient = this.containerClient.getBlockBlobClient(blobName);
+        await blockBlobClient.delete();
+      }
     }
 
     return this.prisma.documento.delete({

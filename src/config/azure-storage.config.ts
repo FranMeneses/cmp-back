@@ -1,5 +1,5 @@
 export const azureStorageConfig = {
-  accountName: 'azureblobcmp',
+  accountName: 'blobcmp', // Corregido para coincidir con tu storage account real
   containerName: 'cmpdocs',
   useManagedIdentity: true,
 }; 
