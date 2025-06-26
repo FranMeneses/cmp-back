@@ -34,7 +34,17 @@ export class InfoService {
         name: info.tarea.nombre,
         description: info.tarea.descripcion,
         statusId: info.tarea.estado,
-        applies: info.tarea.aplica
+        applies: info.tarea.aplica,
+        beneficiaryId: info.tarea.beneficiario,
+        beneficiary: info.tarea.beneficiario_rel ? {
+          id: info.tarea.beneficiario_rel.id_beneficiario,
+          legalName: info.tarea.beneficiario_rel.nombre_legal,
+          rut: info.tarea.beneficiario_rel.rut,
+          address: info.tarea.beneficiario_rel.direccion,
+          entityType: info.tarea.beneficiario_rel.tipo_entidad,
+          representative: info.tarea.beneficiario_rel.representante,
+          hasLegalPersonality: info.tarea.beneficiario_rel.personalidad_juridica
+        } : null
       } : null,
       origin: info.origen ? {
         id: info.origen.id_origen,
@@ -75,7 +85,11 @@ export class InfoService {
     const info = await this.prisma.info_tarea.create({
       data: this.mapToDatabase(createInfoDto),
       include: {
-        tarea: true,
+        tarea: {
+          include: {
+            beneficiario_rel: true
+          }
+        },
         origen: true,
         inversion: true,
         tipo: true,
@@ -91,7 +105,11 @@ export class InfoService {
   async findAll() {
     const infos = await this.prisma.info_tarea.findMany({
       include: {
-        tarea: true,
+        tarea: {
+          include: {
+            beneficiario_rel: true
+          }
+        },
         origen: true,
         inversion: true,
         tipo: true,
@@ -108,7 +126,11 @@ export class InfoService {
     const info = await this.prisma.info_tarea.findUnique({
       where: { id_info_tarea: id },
       include: {
-        tarea: true,
+        tarea: {
+          include: {
+            beneficiario_rel: true
+          }
+        },
         origen: true,
         inversion: true,
         tipo: true,
@@ -127,7 +149,11 @@ export class InfoService {
       where: { id_info_tarea: id },
       data: this.mapToDatabase(updateInfoDto),
       include: {
-        tarea: true,
+        tarea: {
+          include: {
+            beneficiario_rel: true
+          }
+        },
         origen: true,
         inversion: true,
         tipo: true,
@@ -144,7 +170,11 @@ export class InfoService {
     const info = await this.prisma.info_tarea.delete({
       where: { id_info_tarea: id },
       include: {
-        tarea: true,
+        tarea: {
+          include: {
+            beneficiario_rel: true
+          }
+        },
         origen: true,
         inversion: true,
         tipo: true,
@@ -161,7 +191,11 @@ export class InfoService {
     const infoTask = await this.prisma.info_tarea.findFirst({
       where: { id_tarea: id },
       include: {
-        tarea: true,
+        tarea: {
+          include: {
+            beneficiario_rel: true
+          }
+        },
         origen: true,
         inversion: true,
         tipo: true,
