@@ -655,6 +655,12 @@ export class Registry {
   @Field({ nullable: true })
   es_memo?: boolean;
 
+  @Field(() => Int, { nullable: true })
+  solpedMemoSap?: number;
+
+  @Field(() => Int, { nullable: true })
+  hesHemSap?: number;
+
   @Field(() => Compliance, { nullable: true })
   compliance?: Compliance;
 
@@ -696,6 +702,12 @@ export class CreateRegistryInput {
 
   @Field({ nullable: true })
   es_memo?: boolean;
+
+  @Field(() => Int, { nullable: true })
+  solpedMemoSap?: number;
+
+  @Field(() => Int, { nullable: true })
+  hesHemSap?: number;
 }
 
 @InputType()
@@ -729,6 +741,12 @@ export class UpdateRegistryInput {
 
   @Field({ nullable: true })
   es_memo?: boolean;
+
+  @Field(() => Int, { nullable: true })
+  solpedMemoSap?: number;
+
+  @Field(() => Int, { nullable: true })
+  hesHemSap?: number;
 }
 
 @ObjectType()

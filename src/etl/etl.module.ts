@@ -7,6 +7,7 @@ import { TasksModule } from '../tasks/tasks.module';
 import { SubtasksModule } from '../subtasks/subtasks.module';
 import { InfoModule } from '../info/info.module';
 import { DocumentsModule } from '../documents/documents.module';
+import { ComplianceModule } from '../compliance/compliance.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { DocumentsModule } from '../documents/documents.module';
     SubtasksModule,
     InfoModule,
     DocumentsModule,
+    ComplianceModule,
   ],
   controllers: [EtlController],
   providers: [EtlService],

@@ -54,7 +54,9 @@ export class ComplianceService {
       carta: dto.carta,
       minuta: dto.minuta,
       es_solped: dto.es_solped,
-      es_memo: dto.es_memo
+      es_memo: dto.es_memo,
+      SOLPED_MEMO_SAP: dto.solpedMemoSap,
+      HES_HEM_SAP: dto.hesHemSap
     };
   }
 
@@ -71,6 +73,8 @@ export class ComplianceService {
       minuta: registry.minuta,
       es_solped: registry.es_solped,
       es_memo: registry.es_memo,
+      solpedMemoSap: registry.SOLPED_MEMO_SAP,
+      hesHemSap: registry.HES_HEM_SAP,
       memos: registry.memo?.map(memo => this.mapMemoFromDatabase(memo)) || [],
       solpeds: registry.solped?.map(solped => this.mapSolpedFromDatabase(solped)) || []
     };

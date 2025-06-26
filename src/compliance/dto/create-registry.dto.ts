@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsUUID, IsOptional, IsBoolean, IsDate } from 'class-validator';
+import { IsString, IsNotEmpty, IsUUID, IsOptional, IsBoolean, IsDate, IsNumber } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class CreateRegistryDto {
@@ -43,4 +43,12 @@ export class CreateRegistryDto {
   @IsBoolean()
   @IsOptional()
   es_memo?: boolean;
+
+  @IsNumber()
+  @IsOptional()
+  solpedMemoSap?: number;
+
+  @IsNumber()
+  @IsOptional()
+  hesHemSap?: number;
 } 
