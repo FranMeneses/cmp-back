@@ -14,6 +14,8 @@ import { DocumentsModule } from './documents/documents.module';
 import { UploadScalar, DateOnlyScalar } from './graphql/graphql.types';
 import { EtlModule } from './etl/etl.module';
 import { HistoryModule } from './history/history.module';
+import { UsersModule } from './users/users.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -39,6 +41,8 @@ import { HistoryModule } from './history/history.module';
     DocumentsModule,
     EtlModule,
     HistoryModule,
+    UsersModule,
+    AuthModule,
   ],
   providers: [AppService, UploadScalar, DateOnlyScalar],
 })

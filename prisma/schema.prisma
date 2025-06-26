@@ -1,7 +1,7 @@
 generator client {
-  provider = "prisma-client-js"
-  engineType = "library"
+  provider        = "prisma-client-js"
   previewFeatures = ["driverAdapters"]
+  engineType      = "library"
 }
 
 datasource db {
@@ -188,24 +188,24 @@ model subtarea_estado {
 }
 
 model tarea {
-  id_tarea                                      String         @id(clustered: false, map: "PK_tarea") @default(dbgenerated("newsequentialid()"), map: "DF__tarea__id_tarea__282DF8C2") @db.UniqueIdentifier
-  id_valle                                      Int?
-  id_faena                                      Int?
-  nombre                                        String?        @db.NVarChar(100)
-  descripcion                                   String?        @db.NVarChar(500)
-  estado                                        Int?           @default(1, map: "DF__tarea__estado__29221CFB")
-  proceso                                       Int?
-  aplica                                        Boolean?
-  beneficiario                                  String?        @db.UniqueIdentifier
-  cumplimiento                                  cumplimiento[]
-  documento                                     documento[]
-  info_tarea                                    info_tarea[]
-  subtarea                                      subtarea[]
-  beneficiario_rel                              beneficiario?  @relation("tarea_beneficiarioTobeneficiario", fields: [beneficiario], references: [id_beneficiario], onDelete: NoAction, onUpdate: NoAction, map: "FK_tarea_beneficiario")
-  tarea_estado                                  tarea_estado?  @relation(fields: [estado], references: [id_tarea_estado], onDelete: Cascade, onUpdate: NoAction, map: "FK_tarea_estado")
-  faena                                         faena?         @relation(fields: [id_faena], references: [id_faena], onDelete: Cascade, onUpdate: NoAction, map: "FK_tarea_faena")
-  proceso_rel                                   proceso?       @relation("tarea_procesoToproceso", fields: [proceso], references: [id_proceso], onDelete: Cascade, onUpdate: NoAction, map: "FK_tarea_proceso")
-  valle                                         valle?         @relation(fields: [id_valle], references: [id_valle], onDelete: Cascade, onUpdate: NoAction, map: "FK_tarea_valle")
+  id_tarea         String         @id(clustered: false, map: "PK_tarea") @default(dbgenerated("newsequentialid()"), map: "DF__tarea__id_tarea__282DF8C2") @db.UniqueIdentifier
+  id_valle         Int?
+  id_faena         Int?
+  nombre           String?        @db.NVarChar(100)
+  descripcion      String?        @db.NVarChar(500)
+  estado           Int?           @default(1, map: "DF__tarea__estado__29221CFB")
+  proceso          Int?
+  aplica           Boolean?
+  beneficiario     String?        @db.UniqueIdentifier
+  cumplimiento     cumplimiento[]
+  documento        documento[]
+  info_tarea       info_tarea[]
+  subtarea         subtarea[]
+  beneficiario_rel beneficiario?  @relation("tarea_beneficiarioTobeneficiario", fields: [beneficiario], references: [id_beneficiario], onDelete: NoAction, onUpdate: NoAction, map: "FK_tarea_beneficiario")
+  tarea_estado     tarea_estado?  @relation(fields: [estado], references: [id_tarea_estado], onDelete: Cascade, onUpdate: NoAction, map: "FK_tarea_estado")
+  faena            faena?         @relation(fields: [id_faena], references: [id_faena], onDelete: Cascade, onUpdate: NoAction, map: "FK_tarea_faena")
+  proceso_rel      proceso?       @relation("tarea_procesoToproceso", fields: [proceso], references: [id_proceso], onDelete: Cascade, onUpdate: NoAction, map: "FK_tarea_proceso")
+  valle            valle?         @relation(fields: [id_valle], references: [id_valle], onDelete: Cascade, onUpdate: NoAction, map: "FK_tarea_valle")
 }
 
 model tarea_estado {
@@ -235,21 +235,21 @@ model valle {
 }
 
 model historial {
-  id_historial                                      String          @id(clustered: false, map: "PK_historial") @default(dbgenerated("newsequentialid()"), map: "DF__historial__id_hi__625A9A57") @map("id_historial") @db.UniqueIdentifier
-  nombre                                            String?         @map("nombre") @db.NVarChar(50)
-  id_proceso                                        Int?            @map("id_proceso")
-  fecha_final                                       DateTime?       @map("fecha_final") @db.Date
-  gasto_total                                       Int?            @map("gasto_total")
-  id_valle                                          Int?            @map("id_valle")
-  id_faena                                          Int?            @map("id_faena")
-  SOLPED_MEMO_SAP                                   Int?            @map("SOLPED_MEMO_SAP")
-  HES_HEM_SAP                                       Int?            @map("HES_HEM_SAP")
-  beneficiario                                      String?         @db.UniqueIdentifier
-  beneficiario_rel                                  beneficiario?   @relation("historial_beneficiarioTobeneficiario", fields: [beneficiario], references: [id_beneficiario], onDelete: NoAction, onUpdate: NoAction, map: "FK_his_beneficiario")
-  faena                                             faena?          @relation(fields: [id_faena], references: [id_faena], onDelete: NoAction, onUpdate: NoAction, map: "FK_his_faena")
-  proceso                                           proceso?        @relation(fields: [id_proceso], references: [id_proceso], onDelete: NoAction, onUpdate: NoAction, map: "FK_his_proceso")
-  valle                                             valle?          @relation(fields: [id_valle], references: [id_valle], onDelete: NoAction, onUpdate: NoAction, map: "FK_his_valle")
-  historial_doc                                     historial_doc[]
+  id_historial     String          @id(clustered: false, map: "PK_historial") @default(dbgenerated("newsequentialid()"), map: "DF__historial__id_hi__625A9A57") @map("id_historial") @db.UniqueIdentifier
+  nombre           String?         @map("nombre") @db.NVarChar(50)
+  id_proceso       Int?            @map("id_proceso")
+  fecha_final      DateTime?       @map("fecha_final") @db.Date
+  gasto_total      Int?            @map("gasto_total")
+  id_valle         Int?            @map("id_valle")
+  id_faena         Int?            @map("id_faena")
+  SOLPED_MEMO_SAP  Int?            @map("SOLPED_MEMO_SAP")
+  HES_HEM_SAP      Int?            @map("HES_HEM_SAP")
+  beneficiario     String?         @db.UniqueIdentifier
+  beneficiario_rel beneficiario?   @relation("historial_beneficiarioTobeneficiario", fields: [beneficiario], references: [id_beneficiario], onDelete: NoAction, onUpdate: NoAction, map: "FK_his_beneficiario")
+  faena            faena?          @relation(fields: [id_faena], references: [id_faena], onDelete: NoAction, onUpdate: NoAction, map: "FK_his_faena")
+  proceso          proceso?        @relation(fields: [id_proceso], references: [id_proceso], onDelete: NoAction, onUpdate: NoAction, map: "FK_his_proceso")
+  valle            valle?          @relation(fields: [id_valle], references: [id_valle], onDelete: NoAction, onUpdate: NoAction, map: "FK_his_valle")
+  historial_doc    historial_doc[]
 
   @@map("historial")
 }
@@ -265,4 +265,24 @@ model historial_doc {
   tipo_doc       tipo_documento @relation(fields: [tipo_documento], references: [id_tipo_documento], onUpdate: NoAction, map: "FK_his_doc_tipo_documento")
 
   @@map("historial_doc")
+}
+
+model rol {
+  id_rol  Int       @id(clustered: false, map: "PK_rol") @default(autoincrement())
+  nombre  String    @db.NVarChar(50)
+  usuario usuario[]
+}
+
+model usuario {
+  id_usuario    String    @id(clustered: false, map: "PK_usuario") @default(dbgenerated("newsequentialid()"), map: "DF__usuario__id_usua__7849DB76") @db.UniqueIdentifier
+  email         String    @unique(map: "UQ__usuario__AB6E6164A1FD1FE7") @db.NVarChar(255)
+  password_hash String    @db.NVarChar(255)
+  full_name     String    @db.NVarChar(255)
+  id_rol        Int
+  organization  String?   @db.NVarChar(255)
+  is_active     Boolean?  @default(true, map: "DF__usuario__is_acti__793DFFAF")
+  created_at    DateTime? @default(now(), map: "DF__usuario__created__7A3223E8") @db.DateTime
+  updated_at    DateTime? @default(now(), map: "DF__usuario__updated__7B264821") @db.DateTime
+  last_login    DateTime? @db.DateTime
+  rol           rol       @relation(fields: [id_rol], references: [id_rol], onDelete: Cascade, onUpdate: NoAction, map: "FK_usuario_rol")
 }

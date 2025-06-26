@@ -33,6 +33,8 @@ export class PrismaService implements OnModuleInit {
   get faena() { return this.ensureConnected().faena; }
   get tarea_estado() { return this.ensureConnected().tarea_estado; }
   get proceso() { return this.ensureConnected().proceso; }
+  get usuario() { return this.ensureConnected().usuario; }
+  get rol() { return this.ensureConnected().rol; }
 
   // Proxy transaction method
   get $transaction() { 

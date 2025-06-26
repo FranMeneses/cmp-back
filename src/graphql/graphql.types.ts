@@ -1,6 +1,7 @@
 import { Field, ID, ObjectType, InputType, Int, Float, Scalar } from '@nestjs/graphql';
 import { GraphQLScalarType } from 'graphql';
 import { GraphQLUpload, FileUpload } from 'graphql-upload/GraphQLUpload.js';
+import { IsEmail, IsNotEmpty, IsString, IsInt, IsOptional, MinLength, IsBoolean } from 'class-validator';
 
 @ObjectType()
 export class Valley {
@@ -1117,4 +1118,131 @@ export class UpdateHistoryDocInput {
 
   @Field(() => DateOnlyScalar, { nullable: true })
   uploadDate?: Date;
+}
+
+@ObjectType()
+export class Rol {
+  @Field(() => Int)
+  id_rol: number;
+
+  @Field()
+  nombre: string;
+}
+
+@ObjectType()
+export class User {
+  @Field(() => ID)
+  id_usuario: string;
+
+  @Field()
+  email: string;
+
+  @Field()
+  full_name: string;
+
+  @Field(() => Int)
+  id_rol: number;
+
+  @Field({ nullable: true })
+  organization?: string;
+
+  @Field()
+  is_active: boolean;
+
+  @Field()
+  created_at: Date;
+
+  @Field()
+  updated_at: Date;
+
+  @Field({ nullable: true })
+  last_login?: Date;
+
+  @Field(() => Rol)
+  rol: Rol;
+}
+
+@InputType()
+export class CreateUserInput {
+  @Field()
+  @IsEmail()
+  @IsNotEmpty()
+  email: string;
+
+  @Field()
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(8, { message: 'La contraseña debe tener al menos 8 caracteres' })
+  password: string;
+
+  @Field()
+  @IsString()
+  @IsNotEmpty()
+  full_name: string;
+
+  @Field(() => Int, { nullable: true })
+  @IsInt()
+  @IsOptional()
+  id_rol?: number;
+
+  @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
+  organization?: string;
+}
+
+@InputType()
+export class UpdateUserInput {
+  @Field({ nullable: true })
+  @IsEmail()
+  @IsOptional()
+  email?: string;
+
+  @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
+  @MinLength(8, { message: 'La contraseña debe tener al menos 8 caracteres' })
+  password?: string;
+
+  @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
+  full_name?: string;
+
+  @Field(() => Int, { nullable: true })
+  @IsInt()
+  @IsOptional()
+  id_rol?: number;
+
+  @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
+  organization?: string;
+
+  @Field({ nullable: true })
+  @IsBoolean()
+  @IsOptional()
+  is_active?: boolean;
+}
+
+@InputType()
+export class LoginInput {
+  @Field()
+  @IsEmail()
+  @IsNotEmpty()
+  email: string;
+
+  @Field()
+  @IsString()
+  @IsNotEmpty()
+  password: string;
+}
+
+@ObjectType()
+export class AuthResponse {
+  @Field()
+  access_token: string;
+
+  @Field(() => User)
+  user: User;
 }
