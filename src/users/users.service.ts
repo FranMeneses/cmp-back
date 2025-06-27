@@ -1,12 +1,16 @@
-import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
+import { Injectable, ConflictException, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserInput, UpdateUserInput } from '../graphql/graphql.types';
 import * as bcrypt from 'bcryptjs';
 import { User, Rol } from '../graphql/graphql.types';
+import { EmailValidationService } from '../auth/email-validation.service';
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private emailValidationService: EmailValidationService,
+  ) {}
 
   async create(createUserDto: CreateUserInput): Promise<User> {
     // Verificar si el email ya existe
@@ -16,6 +20,13 @@ export class UsersService {
 
     if (existingUser) {
       throw new ConflictException('El email ya está registrado');
+    }
+
+    // Validar que el email sea real usando Azure Logic Apps
+    const isEmailValid = await this.emailValidationService.validateEmail(createUserDto.email);
+    
+    if (!isEmailValid) {
+      throw new BadRequestException('El email proporcionado no es válido o no existe');
     }
 
     // Determinar el rol del nuevo usuario
