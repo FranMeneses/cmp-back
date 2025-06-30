@@ -270,6 +270,16 @@ type AuthResponse {
   user: User!
 }
 
+type PasswordResetResponse {
+  success: Boolean!
+  message: String!
+}
+
+type TokenValidationResponse {
+  valid: Boolean!
+  message: String
+}
+
 """File upload scalar type"""
 scalar Upload
 
@@ -355,6 +365,7 @@ type Query {
   users: [User!]!
   user(id: ID!): User!
   roles: [Rol!]!
+  validateResetToken(token: String!): TokenValidationResponse!
 }
 
 type Mutation {
@@ -394,6 +405,8 @@ type Mutation {
   activateUser(id: ID!): User!
   register(registerInput: CreateUserInput!): AuthResponse!
   login(loginInput: LoginInput!): AuthResponse!
+  requestPasswordReset(input: RequestPasswordResetInput!): PasswordResetResponse!
+  resetPassword(input: ResetPasswordInput!): PasswordResetResponse!
 }
 
 input CreateTaskDto {
@@ -589,4 +602,14 @@ input UpdateUserInput {
 input LoginInput {
   email: String!
   password: String!
+}
+
+input RequestPasswordResetInput {
+  email: String!
+  frontendUrl: String!
+}
+
+input ResetPasswordInput {
+  token: String!
+  newPassword: String!
 }

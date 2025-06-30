@@ -35,6 +35,7 @@ export class PrismaService implements OnModuleInit {
   get proceso() { return this.ensureConnected().proceso; }
   get usuario() { return this.ensureConnected().usuario; }
   get rol() { return this.ensureConnected().rol; }
+  get password_reset_token() { return this.ensureConnected().password_reset_token; }
 
   // Proxy transaction method
   get $transaction() { 

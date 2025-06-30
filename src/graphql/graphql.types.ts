@@ -1246,3 +1246,49 @@ export class AuthResponse {
   @Field(() => User)
   user: User;
 }
+
+// Password Reset Types
+@InputType()
+export class RequestPasswordResetInput {
+  @Field()
+  @IsEmail()
+  @IsNotEmpty()
+  email: string;
+
+  @Field()
+  @IsString()
+  @IsNotEmpty()
+  frontendUrl: string;
+}
+
+@InputType()
+export class ResetPasswordInput {
+  @Field()
+  @IsString()
+  @IsNotEmpty()
+  token: string;
+
+  @Field()
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(8, { message: 'La contraseña debe tener al menos 8 caracteres' })
+  newPassword: string;
+}
+
+@ObjectType()
+export class PasswordResetResponse {
+  @Field()
+  success: boolean;
+
+  @Field()
+  message: string;
+}
+
+@ObjectType()
+export class TokenValidationResponse {
+  @Field()
+  valid: boolean;
+
+  @Field({ nullable: true })
+  message?: string;
+}
