@@ -2,7 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import * as bcrypt from 'bcryptjs';
-import { LoginInput, AuthResponse } from '../graphql/graphql.types';
+import { LoginInput, AuthResponse, CreateUserInput } from '../graphql/graphql.types';
 
 @Injectable()
 export class AuthService {
@@ -79,6 +79,29 @@ export class AuthService {
       full_name: user.full_name,
       id_rol: user.id_rol,
       rol: user.rol,
+    };
+  }
+
+  async register(registerInput: CreateUserInput): Promise<AuthResponse> {
+    // Crear el usuario sin especificar rol (se asignará automáticamente)
+    const userInput = {
+      ...registerInput,
+      id_rol: undefined, // Forzar que sea undefined para usar lógica automática
+    };
+    
+    const user = await this.usersService.create(userInput);
+    
+    // Autenticar automáticamente al usuario recién registrado
+    const payload = { 
+      email: user.email, 
+      sub: user.id_usuario,
+      rol: user.rol.nombre,
+      id_rol: user.id_rol
+    };
+
+    return {
+      access_token: this.jwtService.sign(payload),
+      user: user,
     };
   }
 } 

@@ -174,6 +174,8 @@ type Registry {
   minuta: Boolean
   es_solped: Boolean
   es_memo: Boolean
+  solpedMemoSap: Int
+  hesHemSap: Int
   compliance: Compliance
   memos: [Memo!]
   solpeds: [Solped!]
@@ -238,6 +240,34 @@ type HistoryDoc {
   uploadDate: DateOnly
   history: History!
   documentType: TipoDocumento!
+}
+
+type Rol {
+  id_rol: Int!
+  nombre: String!
+}
+
+type User {
+  id_usuario: ID!
+  email: String!
+  full_name: String!
+  id_rol: Int!
+  organization: String
+  is_active: Boolean!
+  created_at: DateTime!
+  updated_at: DateTime!
+  last_login: DateTime
+  rol: Rol!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type AuthResponse {
+  access_token: String!
+  user: User!
 }
 
 """File upload scalar type"""
@@ -322,6 +352,9 @@ type Query {
   historiesByValley(valleyId: Int!): [History!]!
   historiesByFaena(faenaId: Int!): [History!]!
   historiesByBeneficiary(beneficiaryId: ID!): [History!]!
+  users: [User!]!
+  user(id: ID!): User!
+  roles: [Rol!]!
 }
 
 type Mutation {
@@ -354,6 +387,13 @@ type Mutation {
   removeInfoTask(id: ID!): InfoTask!
   createDocument(input: CreateDocumentInput!): Document!
   deleteDocument(id_documento: String!): Boolean!
+  createUser(createUserInput: CreateUserInput!): User!
+  updateUser(id: ID!, updateUserInput: UpdateUserInput!): User!
+  removeUser(id: ID!): Boolean!
+  deactivateUser(id: ID!): User!
+  activateUser(id: ID!): User!
+  register(registerInput: CreateUserInput!): AuthResponse!
+  login(loginInput: LoginInput!): AuthResponse!
 }
 
 input CreateTaskDto {
@@ -391,11 +431,6 @@ input CreateSubtaskDto {
   priorityId: Int
 }
 
-"""
-A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
-"""
-scalar DateTime
-
 input UpdateSubtaskDto {
   name: String
   description: String
@@ -430,6 +465,8 @@ input CreateRegistryInput {
   minuta: Boolean
   es_solped: Boolean
   es_memo: Boolean
+  solpedMemoSap: Int
+  hesHemSap: Int
 }
 
 input UpdateRegistryInput {
@@ -443,6 +480,8 @@ input UpdateRegistryInput {
   minuta: Boolean
   es_solped: Boolean
   es_memo: Boolean
+  solpedMemoSap: Int
+  hesHemSap: Int
 }
 
 input CreateSolpedInput {
@@ -528,4 +567,26 @@ input CreateDocumentInput {
   ruta: String!
   id_tarea: String
   nombre_archivo: String
+}
+
+input CreateUserInput {
+  email: String!
+  password: String!
+  full_name: String!
+  id_rol: Int
+  organization: String
+}
+
+input UpdateUserInput {
+  email: String
+  password: String
+  full_name: String
+  id_rol: Int
+  organization: String
+  is_active: Boolean
+}
+
+input LoginInput {
+  email: String!
+  password: String!
 }

@@ -12,19 +12,11 @@ export class UsersResolver {
   constructor(private readonly usersService: UsersService) {}
 
   @Mutation(() => User)
-  @UseGuards(OptionalJwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('Admin', 'Gerente') // Solo Admin y Gerente pueden crear usuarios administrativamente
   async createUser(
     @Args('createUserInput') createUserInput: CreateUserInput,
-    @Context() context: any,
   ) {
-    // Verificar si ya existen usuarios en el sistema
-    const users = await this.usersService.findAll();
-    
-    // Si ya hay usuarios y no hay usuario autenticado, rechazar
-    if (users.length > 0 && !context.req.user) {
-      throw new Error('Acceso denegado. Necesita estar autenticado para crear usuarios.');
-    }
-
     return this.usersService.create(createUserInput);
   }
 
