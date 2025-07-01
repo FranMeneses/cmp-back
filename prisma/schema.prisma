@@ -43,6 +43,7 @@ model cumplimiento {
   id_cumplimiento     String               @id(clustered: false, map: "PK_cumplimiento") @default(dbgenerated("newsequentialid()"), map: "DF__cumplimie__id_cu__46B27FE2") @db.UniqueIdentifier
   id_tarea            String               @db.UniqueIdentifier
   id_cump_est         Int?                 @default(1, map: "DF__cumplimie__id_cu__47A6A41B")
+  updated_at          DateTime?            @default(now(), map: "DF__cumplimie__updat__0A688BB1") @db.DateTime
   cumplimiento_estado cumplimiento_estado? @relation(fields: [id_cump_est], references: [id_cumplimiento_estado], onDelete: Cascade, onUpdate: NoAction, map: "FK_cump_est")
   tarea               tarea                @relation(fields: [id_tarea], references: [id_tarea], onDelete: Cascade, onUpdate: NoAction, map: "FK_cumplimiento_tarea")
   registro            registro[]
@@ -200,6 +201,7 @@ model tarea {
   cumplimiento     cumplimiento[]
   documento        documento[]
   info_tarea       info_tarea[]
+  notificacion     notificacion[]
   subtarea         subtarea[]
   beneficiario_rel beneficiario?  @relation("tarea_beneficiarioTobeneficiario", fields: [beneficiario], references: [id_beneficiario], onDelete: NoAction, onUpdate: NoAction, map: "FK_tarea_beneficiario")
   tarea_estado     tarea_estado?  @relation(fields: [estado], references: [id_tarea_estado], onDelete: Cascade, onUpdate: NoAction, map: "FK_tarea_estado")
@@ -284,6 +286,7 @@ model usuario {
   created_at           DateTime?              @default(now(), map: "DF__usuario__created__7A3223E8") @db.DateTime
   updated_at           DateTime?              @default(now(), map: "DF__usuario__updated__7B264821") @db.DateTime
   last_login           DateTime?              @db.DateTime
+  notificacion         notificacion[]
   password_reset_token password_reset_token[]
   rol                  rol                    @relation(fields: [id_rol], references: [id_rol], onDelete: Cascade, onUpdate: NoAction, map: "FK_usuario_rol")
 }
@@ -299,4 +302,19 @@ model password_reset_token {
 
   @@index([id_usuario], map: "IX_password_reset_token_id_usuario")
   @@index([token], map: "IX_password_reset_token_token")
+}
+
+model notificacion {
+  id_notificacion String    @id(clustered: false, map: "PK_notificacion") @default(dbgenerated("newsequentialid()"), map: "DF__notificac__id_no__05A3D694") @db.UniqueIdentifier
+  id_usuario      String    @db.UniqueIdentifier
+  titulo          String    @db.NVarChar(255)
+  mensaje         String    @db.NVarChar(Max)
+  leida           Boolean?  @default(false, map: "DF__notificac__leida__0697FACD")
+  read_at         DateTime? @db.DateTime
+  created_at      DateTime? @default(now(), map: "DF__notificac__creat__078C1F06") @db.DateTime
+  id_tarea        String?   @db.UniqueIdentifier
+  tarea           tarea?    @relation(fields: [id_tarea], references: [id_tarea], onUpdate: NoAction, map: "FK_notificacion_tarea")
+  usuario         usuario   @relation(fields: [id_usuario], references: [id_usuario], onDelete: Cascade, onUpdate: NoAction, map: "FK_notificacion_usuario")
+
+  @@index([read_at], map: "IX_notificacion_read_at")
 }

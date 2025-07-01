@@ -1292,3 +1292,61 @@ export class TokenValidationResponse {
   @Field({ nullable: true })
   message?: string;
 }
+
+// Notification Types
+@ObjectType()
+export class Notification {
+  @Field(() => ID)
+  id_notificacion: string;
+
+  @Field(() => ID)
+  id_usuario: string;
+
+  @Field()
+  titulo: string;
+
+  @Field()
+  mensaje: string;
+
+  @Field()
+  leida: boolean;
+
+  @Field({ nullable: true })
+  read_at?: Date;
+
+  @Field()
+  created_at: Date;
+
+  @Field(() => ID, { nullable: true })
+  id_tarea?: string;
+}
+
+@InputType()
+export class CreateNotificationInput {
+  @Field(() => ID)
+  @IsNotEmpty()
+  id_usuario: string;
+
+  @Field()
+  @IsString()
+  @IsNotEmpty()
+  titulo: string;
+
+  @Field()
+  @IsString()
+  @IsNotEmpty()
+  mensaje: string;
+
+  @Field(() => ID, { nullable: true })
+  @IsOptional()
+  id_tarea?: string;
+}
+
+@ObjectType()
+export class NotificationResponse {
+  @Field()
+  success: boolean;
+
+  @Field({ nullable: true })
+  message?: string;
+}

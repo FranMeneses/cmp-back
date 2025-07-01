@@ -280,6 +280,22 @@ type TokenValidationResponse {
   message: String
 }
 
+type Notification {
+  id_notificacion: ID!
+  id_usuario: ID!
+  titulo: String!
+  mensaje: String!
+  leida: Boolean!
+  read_at: DateTime
+  created_at: DateTime!
+  id_tarea: ID
+}
+
+type NotificationResponse {
+  success: Boolean!
+  message: String
+}
+
 """File upload scalar type"""
 scalar Upload
 
@@ -366,6 +382,8 @@ type Query {
   user(id: ID!): User!
   roles: [Rol!]!
   validateResetToken(token: String!): TokenValidationResponse!
+  myNotifications: [Notification!]!
+  unreadNotificationsCount: Int!
 }
 
 type Mutation {
@@ -407,6 +425,8 @@ type Mutation {
   login(loginInput: LoginInput!): AuthResponse!
   requestPasswordReset(input: RequestPasswordResetInput!): PasswordResetResponse!
   resetPassword(input: ResetPasswordInput!): PasswordResetResponse!
+  markNotificationAsRead(notificationId: String!): NotificationResponse!
+  createNotification(input: CreateNotificationInput!): Notification!
 }
 
 input CreateTaskDto {
@@ -612,4 +632,11 @@ input RequestPasswordResetInput {
 input ResetPasswordInput {
   token: String!
   newPassword: String!
+}
+
+input CreateNotificationInput {
+  id_usuario: ID!
+  titulo: String!
+  mensaje: String!
+  id_tarea: ID
 }

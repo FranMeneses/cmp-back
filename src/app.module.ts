@@ -16,6 +16,7 @@ import { EtlModule } from './etl/etl.module';
 import { HistoryModule } from './history/history.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { AuthModule } from './auth/auth.module';
     HistoryModule,
     UsersModule,
     AuthModule,
+    NotificationsModule,
   ],
   providers: [AppService, UploadScalar, DateOnlyScalar],
 })
