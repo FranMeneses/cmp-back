@@ -36,7 +36,28 @@ export class DocumentsService {
   }
 
   /**
+   * Sube un archivo a Azure Blob Storage y crea automáticamente los metadatos en la base de datos
+   */
+  async uploadFileComplete(file: Express.Multer.File, tipo_documento: number, id_tarea?: string) {
+    const blobInfo = await this.uploadBlobOnly(file);
+    
+    // Crear automáticamente los metadatos con el nombre original completo
+    const documentMetadata = await this.createDocumentMetadata({
+      tipo_documento,
+      ruta: blobInfo.ruta,
+      id_tarea,
+      nombre_archivo: file.originalname // Garantiza que se guarde con extensión
+    });
+    
+    return {
+      ...documentMetadata,
+      uploadInfo: blobInfo
+    };
+  }
+
+  /**
    * Sube un archivo a Azure Blob Storage sin guardar metadata en la base de datos
+   * @deprecated Usar uploadFileComplete para flujo completo o mantener solo para casos específicos
    */
   async uploadBlobOnly(file: Express.Multer.File) {
     if (!this.containerClient) {
@@ -162,18 +183,30 @@ export class DocumentsService {
         filename = doc.nombre_archivo;
         this.logger.debug(`Using filename from database: ${filename}`);
         
+        // Si el nombre en BD no tiene extensión, agregar la extensión del blob original
         if (!filename.includes('.')) {
           const blobExtension = blobName.split('.').pop();
           if (blobExtension) {
             filename = `${filename}.${blobExtension}`;
+            this.logger.debug(`Added extension to filename: ${filename}`);
           }
         }
       } else {
+        // Fallback: reconstruir desde el blob name removiendo timestamp
         const blobExtension = blobName.split('.').pop();
         const nameWithoutExt = blobName.replace(/\.[^/.]+$/, "");
         const nameWithoutTimestamp = nameWithoutExt.replace(/_\d+$/, "");
         filename = `${nameWithoutTimestamp}.${blobExtension}`;
-        this.logger.debug(`Extracted filename from blob: ${filename}`);
+        this.logger.debug(`Reconstructed filename from blob: ${filename}`);
+      }
+      
+      // Validación final: asegurar que tenga extensión
+      if (!filename.includes('.')) {
+        const blobExtension = blobName.split('.').pop();
+        if (blobExtension) {
+          filename = `${filename}.${blobExtension}`;
+          this.logger.warn(`Force-added extension to filename: ${filename}`);
+        }
       }
 
       this.logger.log(`File downloaded successfully: ${filename}`);
@@ -257,4 +290,6 @@ export class DocumentsService {
       }
     });
   }
+
+
 } 
