@@ -36,13 +36,14 @@ export class DocumentsController {
   async downloadFile(@Param('id') id: string, @Res() res: Response) {
     try {
       const fileData = await this.documentsService.downloadFile(id);
-      const safeFilename = fileData.filename.replace(/[^\w\s.-]/gi, '_');
+      // Permite caracteres Unicode (incluyendo acentos) pero remueve caracteres problemáticos para headers HTTP
+      const safeFilename = fileData.filename.replace(/[<>:"/\\|?*\x00-\x1f]/gi, '_');
       
       const allowedOrigin = this.configService.get<string>('FRONTEND_URL') || '*';
       
       res.set({
         'Content-Type': fileData.contentType,
-        'Content-Disposition': `attachment; filename="${safeFilename}"`,
+        'Content-Disposition': `attachment; filename*=UTF-8''${encodeURIComponent(safeFilename)}`,
         'Content-Length': fileData.size.toString(),
         'Access-Control-Expose-Headers': 'Content-Disposition, Content-Length',
         'Access-Control-Allow-Origin': allowedOrigin,

@@ -62,7 +62,7 @@ export class DocumentsService {
       const uploadOptions = {
         blobHTTPHeaders: {
           blobContentType: file.mimetype || 'application/octet-stream',
-          blobContentDisposition: `attachment; filename="${file.originalname}"`,
+          blobContentDisposition: `attachment; filename*=UTF-8''${encodeURIComponent(file.originalname)}`,
         }
       };
 
