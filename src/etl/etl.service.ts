@@ -278,7 +278,7 @@ export class EtlService {
               applies: appliesCompliance,
             };
             
-            // Crear la tarea
+            // Crear la tarea (incluye validación de duplicados automáticamente)
             const createdTask = await this.tasksService.create(taskDto);
             
             // Si aplica cumplimiento, crear automáticamente el cumplimiento con estado "No Iniciado" (ID: 1)

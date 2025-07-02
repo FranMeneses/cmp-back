@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
@@ -96,6 +96,9 @@ export class TasksService {
   }
 
   async create(createTaskDto: CreateTaskDto) {
+    // Verificar que no exista una tarea duplicada
+    await this.validateTaskDuplication(createTaskDto);
+
     const task = await this.prisma.tarea.create({
       data: this.mapToDatabase(createTaskDto),
       include: {
@@ -107,6 +110,30 @@ export class TasksService {
       }
     });
     return this.mapFromDatabase(task);
+  }
+
+  private async validateTaskDuplication(taskDto: CreateTaskDto) {
+    if (!taskDto.name || !taskDto.processId) {
+      throw new BadRequestException('El nombre y proceso son obligatorios para validar duplicados');
+    }
+
+    const existingTask = await this.prisma.tarea.findFirst({
+      where: {
+        nombre: taskDto.name,
+        proceso: taskDto.processId,
+        id_valle: taskDto.valleyId || null,
+        beneficiario: taskDto.beneficiaryId || null
+      }
+    });
+
+    if (existingTask) {
+      const valleyInfo = taskDto.valleyId ? ` en el valle ${taskDto.valleyId}` : '';
+      const beneficiaryInfo = taskDto.beneficiaryId ? ` para el beneficiario ${taskDto.beneficiaryId}` : '';
+      
+      throw new BadRequestException(
+        `Ya existe una tarea con el nombre "${taskDto.name}" en el proceso ${taskDto.processId}${valleyInfo}${beneficiaryInfo}`
+      );
+    }
   }
 
   async findAll() {
@@ -169,12 +196,7 @@ export class TasksService {
         beneficiario_rel: true,
         cumplimiento: {
           include: {
-            registro: {
-              include: {
-                solped: true,
-                memo: true
-              }
-            }
+            cumplimiento_estado: true
           }
         },
         documento: true
@@ -191,13 +213,11 @@ export class TasksService {
     let solpedMemoSap = 0;
     let hesHemSap = 0;
 
-    // Get the last registry from the compliance process
+    // Get SAP codes from the compliance process
     const cumplimiento = task.cumplimiento[0];
-    if (cumplimiento && cumplimiento.registro.length > 0) {
-      const ultimoRegistro = cumplimiento.registro[cumplimiento.registro.length - 1];
-      
-      solpedMemoSap = ultimoRegistro.SOLPED_MEMO_SAP || 0;
-      hesHemSap = ultimoRegistro.HES_HEM_SAP || 0;
+    if (cumplimiento) {
+      solpedMemoSap = cumplimiento.SOLPED_MEMO_SAP || 0;
+      hesHemSap = cumplimiento.HES_HEM_SAP || 0;
     }
 
     // Create history record with its documents

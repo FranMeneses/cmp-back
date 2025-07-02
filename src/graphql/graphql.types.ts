@@ -593,14 +593,29 @@ export class Compliance {
   @Field(() => Int, { nullable: true })
   statusId?: number;
 
+  @Field()
+  updatedAt: Date;
+
+  @Field(() => Int, { nullable: true })
+  valor?: number;
+
+  @Field(() => Int, { nullable: true })
+  ceco?: number;
+
+  @Field(() => Int, { nullable: true })
+  cuenta?: number;
+
+  @Field(() => Int, { nullable: true })
+  solpedMemoSap?: number;
+
+  @Field(() => Int, { nullable: true })
+  hesHemSap?: number;
+
   @Field(() => Task, { nullable: true })
   task?: Task;
 
   @Field(() => ComplianceStatus, { nullable: true })
   status?: ComplianceStatus;
-
-  @Field(() => [Registry], { nullable: true })
-  registries?: Registry[];
 }
 
 @InputType()
@@ -619,90 +634,15 @@ export class UpdateComplianceInput {
 
   @Field(() => Int, { nullable: true })
   statusId?: number;
-}
-
-@ObjectType()
-export class Registry {
-  @Field(() => ID)
-  id: string;
-
-  @Field(() => ID)
-  complianceId: string;
-
-  @Field({ nullable: true })
-  hes?: boolean;
-
-  @Field({ nullable: true })
-  hem?: boolean;
-
-  @Field({ nullable: true })
-  provider?: string;
-
-  @Field(() => DateOnlyScalar, { nullable: true })
-  startDate?: Date;
-
-  @Field(() => DateOnlyScalar, { nullable: true })
-  endDate?: Date;
-
-  @Field({ nullable: true })
-  carta?: boolean;
-
-  @Field({ nullable: true })
-  minuta?: boolean;
-
-  @Field({ nullable: true })
-  es_solped?: boolean;
-
-  @Field({ nullable: true })
-  es_memo?: boolean;
 
   @Field(() => Int, { nullable: true })
-  solpedMemoSap?: number;
+  valor?: number;
 
   @Field(() => Int, { nullable: true })
-  hesHemSap?: number;
+  ceco?: number;
 
-  @Field(() => Compliance, { nullable: true })
-  compliance?: Compliance;
-
-  @Field(() => [Memo], { nullable: true })
-  memos?: Memo[];
-
-  @Field(() => [Solped], { nullable: true })
-  solpeds?: Solped[];
-}
-
-@InputType()
-export class CreateRegistryInput {
-  @Field(() => ID)
-  complianceId: string;
-
-  @Field({ nullable: true })
-  hes?: boolean;
-
-  @Field({ nullable: true })
-  hem?: boolean;
-
-  @Field({ nullable: true })
-  provider?: string;
-
-  @Field(() => DateOnlyScalar, { nullable: true })
-  startDate?: Date;
-
-  @Field(() => DateOnlyScalar, { nullable: true })
-  endDate?: Date;
-
-  @Field({ nullable: true })
-  carta?: boolean;
-
-  @Field({ nullable: true })
-  minuta?: boolean;
-
-  @Field({ nullable: true })
-  es_solped?: boolean;
-
-  @Field({ nullable: true })
-  es_memo?: boolean;
+  @Field(() => Int, { nullable: true })
+  cuenta?: number;
 
   @Field(() => Int, { nullable: true })
   solpedMemoSap?: number;
@@ -711,128 +651,7 @@ export class CreateRegistryInput {
   hesHemSap?: number;
 }
 
-@InputType()
-export class UpdateRegistryInput {
-  @Field(() => ID, { nullable: true })
-  complianceId?: string;
 
-  @Field({ nullable: true })
-  hes?: boolean;
-
-  @Field({ nullable: true })
-  hem?: boolean;
-
-  @Field({ nullable: true })
-  provider?: string;
-
-  @Field(() => DateOnlyScalar, { nullable: true })
-  startDate?: Date;
-
-  @Field(() => DateOnlyScalar, { nullable: true })
-  endDate?: Date;
-
-  @Field({ nullable: true })
-  carta?: boolean;
-
-  @Field({ nullable: true })
-  minuta?: boolean;
-
-  @Field({ nullable: true })
-  es_solped?: boolean;
-
-  @Field({ nullable: true })
-  es_memo?: boolean;
-
-  @Field(() => Int, { nullable: true })
-  solpedMemoSap?: number;
-
-  @Field(() => Int, { nullable: true })
-  hesHemSap?: number;
-}
-
-@ObjectType()
-export class Memo {
-  @Field(() => ID)
-  id: string;
-
-  @Field(() => ID)
-  registryId: string;
-
-  @Field(() => Int, { nullable: true })
-  value?: number;
-
-  @Field(() => Registry, { nullable: true })
-  registry?: Registry;
-}
-
-@InputType()
-export class CreateMemoInput {
-  @Field(() => ID)
-  registryId: string;
-
-  @Field(() => Int, { nullable: true })
-  value?: number;
-}
-
-@InputType()
-export class UpdateMemoInput {
-  @Field(() => ID, { nullable: true })
-  registryId?: string;
-
-  @Field(() => Int, { nullable: true })
-  value?: number;
-}
-
-@ObjectType()
-export class Solped {
-  @Field(() => ID)
-  id: string;
-
-  @Field(() => ID)
-  registryId: string;
-
-  @Field(() => Int, { nullable: true })
-  ceco?: number;
-
-  @Field(() => Int, { nullable: true })
-  account?: number;
-
-  @Field(() => Int, { nullable: true })
-  value?: number;
-
-  @Field(() => Registry, { nullable: true })
-  registry?: Registry;
-}
-
-@InputType()
-export class CreateSolpedInput {
-  @Field(() => ID)
-  registryId: string;
-
-  @Field(() => Int, { nullable: true })
-  ceco?: number;
-
-  @Field(() => Int, { nullable: true })
-  account?: number;
-
-  @Field(() => Int, { nullable: true })
-  value?: number;
-}
-
-@InputType()
-export class UpdateSolpedInput {
-  @Field(() => ID, { nullable: true })
-  registryId?: string;
-
-  @Field(() => Int, { nullable: true })
-  ceco?: number;
-
-  @Field(() => Int, { nullable: true })
-  account?: number;
-
-  @Field(() => Int, { nullable: true })
-  value?: number;
-}
 
 @ObjectType()
 export class TipoDocumento {

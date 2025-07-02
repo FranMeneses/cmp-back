@@ -97,13 +97,14 @@ export class NotificationsService {
         JOIN rol ON u.id_rol = rol.id_rol
         WHERE c.updated_at IS NOT NULL
         AND ce.dias > 0
+        AND ce.estado != 'Completado'
         AND (
-          -- Gestionando Carta Aporte: notificar cuando lleve 3 días (faltan 2)
-          (ce.estado = 'Gestionando Carta Aporte' AND DATEDIFF(DAY, c.updated_at, GETDATE()) = 3) OR
-          -- Gestionando Minuta: notificar cuando lleve 12 días (faltan 3)
-          (ce.estado = 'Gestionando Minuta' AND DATEDIFF(DAY, c.updated_at, GETDATE()) = 12) OR
-          -- Gestionando MEMORANDUM y/o SOLPED: notificar cuando lleve 12 días (faltan 3)
-          (ce.estado = 'Gestionando MEMORANDUM y/o SOLPED' AND DATEDIFF(DAY, c.updated_at, GETDATE()) = 12)
+          -- Estados de 5 días: notificar a los 3 días transcurridos (2 días restantes)
+          (ce.dias = 5 AND DATEDIFF(DAY, c.updated_at, GETDATE()) = 3) OR
+          -- Estados de 15 días: notificar a los 10 días transcurridos (5 días restantes)
+          (ce.dias = 15 AND DATEDIFF(DAY, c.updated_at, GETDATE()) = 10) OR
+          -- Estados de 30 días: notificar a los 25 días transcurridos (5 días restantes)
+          (ce.dias = 30 AND DATEDIFF(DAY, c.updated_at, GETDATE()) = 25)
         )
       `;
 

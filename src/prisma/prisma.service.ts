@@ -12,9 +12,7 @@ export class PrismaService implements OnModuleInit {
   get contacto() { return this.ensureConnected().contacto; }
   get cumplimiento() { return this.ensureConnected().cumplimiento; }
   get cumplimiento_estado() { return this.ensureConnected().cumplimiento_estado; }
-  get registro() { return this.ensureConnected().registro; }
-  get solped() { return this.ensureConnected().solped; }
-  get memo() { return this.ensureConnected().memo; }
+
   get tarea() { return this.ensureConnected().tarea; }
   get documento() { return this.ensureConnected().documento; }
   get tipo_documento() { return this.ensureConnected().tipo_documento; }

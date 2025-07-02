@@ -44,9 +44,13 @@ model cumplimiento {
   id_tarea            String               @db.UniqueIdentifier
   id_cump_est         Int?                 @default(1, map: "DF__cumplimie__id_cu__47A6A41B")
   updated_at          DateTime?            @default(now(), map: "DF__cumplimie__updat__0A688BB1") @db.DateTime
+  valor               Int?
+  ceco                Int?
+  cuenta              Int?
+  SOLPED_MEMO_SAP     Int?
+  HES_HEM_SAP         Int?
   cumplimiento_estado cumplimiento_estado? @relation(fields: [id_cump_est], references: [id_cumplimiento_estado], onDelete: Cascade, onUpdate: NoAction, map: "FK_cump_est")
   tarea               tarea                @relation(fields: [id_tarea], references: [id_tarea], onDelete: Cascade, onUpdate: NoAction, map: "FK_cumplimiento_tarea")
-  registro            registro[]
 }
 
 model cumplimiento_estado {
@@ -104,13 +108,6 @@ model inversion {
   info_tarea   info_tarea[]
 }
 
-model memo {
-  id_memo     String   @id(clustered: false, map: "PK_memo") @default(dbgenerated("newsequentialid()"), map: "DF__memo__id_memo__503BEA1C") @db.UniqueIdentifier
-  id_registro String   @db.UniqueIdentifier
-  valor       Int?
-  registro    registro @relation(fields: [id_registro], references: [id_registro], onUpdate: NoAction, map: "FK_memo_registro")
-}
-
 model origen {
   id_origen   Int          @id(map: "PK_origen") @default(autoincrement())
   origen_name String?      @db.NVarChar(65)
@@ -130,38 +127,10 @@ model proceso {
   tareas       tarea[]     @relation("tarea_procesoToproceso")
 }
 
-model registro {
-  id_registro     String       @id(clustered: false, map: "PK_registro") @default(dbgenerated("newsequentialid()"), map: "DF__registro__id_reg__4C6B5938") @db.UniqueIdentifier
-  id_cumplimiento String       @db.UniqueIdentifier
-  hes             Boolean?
-  hem             Boolean?
-  proveedor       String?      @db.NVarChar(100)
-  fecha_inicio    DateTime?    @db.Date
-  fecha_termino   DateTime?    @db.Date
-  carta           Boolean?
-  minuta          Boolean?
-  es_solped       Boolean?
-  es_memo         Boolean?
-  SOLPED_MEMO_SAP Int?
-  HES_HEM_SAP     Int?
-  memo            memo[]
-  cumplimiento    cumplimiento @relation(fields: [id_cumplimiento], references: [id_cumplimiento], onUpdate: NoAction, map: "FK_registro_cumplimiento")
-  solped          solped[]
-}
-
 model riesgo {
   id_riesgo   Int          @id(map: "PK_riesgo") @default(autoincrement())
   tipo_riesgo String?      @db.NVarChar(50)
   info_tarea  info_tarea[]
-}
-
-model solped {
-  id_solped   String   @id(clustered: false, map: "PK_solped") @default(dbgenerated("newsequentialid()"), map: "DF__solped__id_solpe__540C7B00") @db.UniqueIdentifier
-  id_registro String   @db.UniqueIdentifier
-  ceco        Int?
-  cuenta      Int?
-  valor       Int?
-  registro    registro @relation(fields: [id_registro], references: [id_registro], onUpdate: NoAction, map: "FK_solped_registro")
 }
 
 model subtarea {

@@ -2,23 +2,45 @@ import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateComplianceDto } from './dto/create-compliance.dto';
 import { UpdateComplianceDto } from './dto/update-compliance.dto';
-import { CreateRegistryDto } from './dto/create-registry.dto';
-import { UpdateRegistryDto } from './dto/update-registry.dto';
-import { CreateSolpedDto } from './dto/create-solped.dto';
-import { UpdateSolpedDto } from './dto/update-solped.dto';
-import { CreateMemoDto } from './dto/create-memo.dto';
-import { UpdateMemoDto } from './dto/update-memo.dto';
 
 @Injectable()
 export class ComplianceService {
   constructor(private prisma: PrismaService) {}
 
-  // Compliance methods
+  // Mapping methods
   private mapToDatabase(dto: CreateComplianceDto | UpdateComplianceDto) {
-    return {
-      id_tarea: dto.taskId,
-      id_cump_est: dto.statusId
-    };
+    const mappedData: any = {};
+    
+    if ('taskId' in dto && dto.taskId) {
+      mappedData.id_tarea = dto.taskId;
+    }
+    
+    if ('statusId' in dto && dto.statusId !== undefined) {
+      mappedData.id_cump_est = dto.statusId;
+    }
+    
+    // Solo incluir campos de UpdateComplianceDto si están presentes
+    if ('valor' in dto && dto.valor !== undefined) {
+      mappedData.valor = dto.valor;
+    }
+    
+    if ('ceco' in dto && dto.ceco !== undefined) {
+      mappedData.ceco = dto.ceco;
+    }
+    
+    if ('cuenta' in dto && dto.cuenta !== undefined) {
+      mappedData.cuenta = dto.cuenta;
+    }
+    
+    if ('solpedMemoSap' in dto && dto.solpedMemoSap !== undefined) {
+      mappedData.SOLPED_MEMO_SAP = dto.solpedMemoSap;
+    }
+    
+    if ('hesHemSap' in dto && dto.hesHemSap !== undefined) {
+      mappedData.HES_HEM_SAP = dto.hesHemSap;
+    }
+    
+    return mappedData;
   }
 
   private mapFromDatabase(compliance: any) {
@@ -26,7 +48,12 @@ export class ComplianceService {
       id: compliance.id_cumplimiento,
       taskId: compliance.id_tarea,
       statusId: compliance.id_cump_est,
-      applies: compliance.aplica,
+      updatedAt: compliance.updated_at,
+      valor: compliance.valor,
+      ceco: compliance.ceco,
+      cuenta: compliance.cuenta,
+      solpedMemoSap: compliance.SOLPED_MEMO_SAP,
+      hesHemSap: compliance.HES_HEM_SAP,
       task: compliance.tarea ? {
         id: compliance.tarea.id_tarea,
         name: compliance.tarea.nombre,
@@ -37,106 +64,39 @@ export class ComplianceService {
         id: compliance.cumplimiento_estado.id_cumplimiento_estado,
         name: compliance.cumplimiento_estado.estado,
         days: compliance.cumplimiento_estado.dias
-      } : null,
-      registries: compliance.registro?.map(registry => this.mapRegistryFromDatabase(registry)) || []
-    };
-  }
-
-  // Registry methods
-  private mapRegistryToDatabase(dto: CreateRegistryDto | UpdateRegistryDto) {
-    return {
-      id_cumplimiento: dto.complianceId,
-      hes: dto.hes,
-      hem: dto.hem,
-      proveedor: dto.provider,
-      fecha_inicio: dto.startDate,
-      fecha_termino: dto.endDate,
-      carta: dto.carta,
-      minuta: dto.minuta,
-      es_solped: dto.es_solped,
-      es_memo: dto.es_memo,
-      SOLPED_MEMO_SAP: dto.solpedMemoSap,
-      HES_HEM_SAP: dto.hesHemSap
-    };
-  }
-
-  private mapRegistryFromDatabase(registry: any) {
-    return {
-      id: registry.id_registro,
-      complianceId: registry.id_cumplimiento,
-      hes: registry.hes,
-      hem: registry.hem,
-      provider: registry.proveedor,
-      startDate: registry.fecha_inicio,
-      endDate: registry.fecha_termino,
-      carta: registry.carta,
-      minuta: registry.minuta,
-      es_solped: registry.es_solped,
-      es_memo: registry.es_memo,
-      solpedMemoSap: registry.SOLPED_MEMO_SAP,
-      hesHemSap: registry.HES_HEM_SAP,
-      memos: registry.memo?.map(memo => this.mapMemoFromDatabase(memo)) || [],
-      solpeds: registry.solped?.map(solped => this.mapSolpedFromDatabase(solped)) || []
-    };
-  }
-
-  // Solped methods
-  private mapSolpedToDatabase(dto: CreateSolpedDto | UpdateSolpedDto) {
-    return {
-      id_registro: dto.registryId,
-      ceco: dto.ceco,
-      cuenta: dto.account,
-      valor: dto.value
-    };
-  }
-
-  private mapSolpedFromDatabase(solped: any) {
-    return {
-      id: solped.id_solped,
-      registryId: solped.id_registro,
-      ceco: solped.ceco,
-      account: solped.cuenta,
-      value: solped.valor
-    };
-  }
-
-  // Memo methods
-  private mapMemoToDatabase(dto: CreateMemoDto | UpdateMemoDto) {
-    return {
-      id_registro: dto.registryId,
-      valor: dto.value
-    };
-  }
-
-  private mapMemoFromDatabase(memo: any) {
-    return {
-      id: memo.id_memo,
-      registryId: memo.id_registro,
-      value: memo.valor
+      } : null
     };
   }
 
   // Compliance CRUD
   async create(createComplianceDto: CreateComplianceDto) {
+    // Verificar que no exista ya un cumplimiento para esta tarea
     const existingCompliance = await this.prisma.cumplimiento.findFirst({
       where: { id_tarea: createComplianceDto.taskId }
     });
 
     if (existingCompliance) {
-      throw new Error('Ya existe un cumplimiento asociado a esta tarea');
+      throw new BadRequestException('Ya existe un cumplimiento asociado a esta tarea');
+    }
+
+    // Verificar que la tarea existe y aplica cumplimiento
+    const task = await this.prisma.tarea.findUnique({
+      where: { id_tarea: createComplianceDto.taskId }
+    });
+
+    if (!task) {
+      throw new BadRequestException('La tarea especificada no existe');
+    }
+
+    if (!task.aplica) {
+      throw new BadRequestException('Esta tarea no aplica para cumplimiento');
     }
 
     const compliance = await this.prisma.cumplimiento.create({
       data: this.mapToDatabase(createComplianceDto),
       include: {
         tarea: true,
-        cumplimiento_estado: true,
-        registro: {
-          include: {
-            memo: true,
-            solped: true
-          }
-        }
+        cumplimiento_estado: true
       }
     });
 
@@ -147,13 +107,10 @@ export class ComplianceService {
     const compliances = await this.prisma.cumplimiento.findMany({
       include: {
         tarea: true,
-        cumplimiento_estado: true,
-        registro: {
-          include: {
-            memo: true,
-            solped: true
-          }
-        }
+        cumplimiento_estado: true
+      },
+      orderBy: {
+        updated_at: 'desc'
       }
     });
 
@@ -165,13 +122,7 @@ export class ComplianceService {
       where: { id_cumplimiento: id },
       include: {
         tarea: true,
-        cumplimiento_estado: true,
-        registro: {
-          include: {
-            memo: true,
-            solped: true
-          }
-        }
+        cumplimiento_estado: true
       }
     });
 
@@ -180,18 +131,21 @@ export class ComplianceService {
   }
 
   async update(id: string, updateComplianceDto: UpdateComplianceDto) {
+    // Verificar que el cumplimiento existe
+    const existingCompliance = await this.prisma.cumplimiento.findUnique({
+      where: { id_cumplimiento: id }
+    });
+
+    if (!existingCompliance) {
+      throw new BadRequestException('El cumplimiento especificado no existe');
+    }
+
     const compliance = await this.prisma.cumplimiento.update({
       where: { id_cumplimiento: id },
       data: this.mapToDatabase(updateComplianceDto),
       include: {
         tarea: true,
-        cumplimiento_estado: true,
-        registro: {
-          include: {
-            memo: true,
-            solped: true
-          }
-        }
+        cumplimiento_estado: true
       }
     });
 
@@ -200,43 +154,27 @@ export class ComplianceService {
 
   async remove(id: string) {
     const compliance = await this.prisma.cumplimiento.findUnique({
-      where: { id_cumplimiento: id },
-      include: {
-        registro: true
-      }
+      where: { id_cumplimiento: id }
     });
 
     if (!compliance) {
-      throw new Error('Compliance not found');
+      throw new BadRequestException('El cumplimiento especificado no existe');
     }
 
-    await this.prisma.$transaction(async (prisma) => {
-      // 1. Eliminar registros (esto eliminará en cascada los solpeds y memos)
-      for (const registro of compliance.registro) {
-        await this.removeRegistry(registro.id_registro);
-      }
-
-      // 2. Finalmente, eliminar el cumplimiento
-      await prisma.cumplimiento.delete({
-        where: { id_cumplimiento: id }
-      });
+    await this.prisma.cumplimiento.delete({
+      where: { id_cumplimiento: id }
     });
 
-    return this.mapFromDatabase(compliance);
+    return { message: 'Cumplimiento eliminado exitosamente' };
   }
 
-  async getTaskCompliance(id: string) {
+  // Método para obtener cumplimiento por tarea
+  async getTaskCompliance(taskId: string) {
     const compliance = await this.prisma.cumplimiento.findFirst({
-      where: { id_tarea: id },
+      where: { id_tarea: taskId },
       include: {
         tarea: true,
-        cumplimiento_estado: true,
-        registro: {
-          include: {
-            memo: true,
-            solped: true
-          }
-        }
+        cumplimiento_estado: true
       }
     });
 
@@ -244,8 +182,12 @@ export class ComplianceService {
     return this.mapFromDatabase(compliance);
   }
 
+  // Método para obtener todos los estados de cumplimiento
   async getAllComplianceStatuses() {
-    const statuses = await this.prisma.cumplimiento_estado.findMany();
+    const statuses = await this.prisma.cumplimiento_estado.findMany({
+      orderBy: { id_cumplimiento_estado: 'asc' }
+    });
+
     return statuses.map(status => ({
       id: status.id_cumplimiento_estado,
       name: status.estado,
@@ -253,267 +195,79 @@ export class ComplianceService {
     }));
   }
 
-  // Registry CRUD
-  async createRegistry(createRegistryDto: CreateRegistryDto) {
-    const registry = await this.prisma.registro.create({
-      data: this.mapRegistryToDatabase(createRegistryDto),
-      include: {
-        memo: true,
-        solped: true
-      }
+  // Método para avanzar el estado de cumplimiento
+  async advanceStatus(id: string) {
+    const compliance = await this.prisma.cumplimiento.findUnique({
+      where: { id_cumplimiento: id },
+      include: { cumplimiento_estado: true }
     });
 
-    return this.mapRegistryFromDatabase(registry);
-  }
-
-  async findAllRegistries() {
-    const registries = await this.prisma.registro.findMany({
-      include: {
-        memo: true,
-        solped: true
-      }
-    });
-
-    return registries.map(registry => this.mapRegistryFromDatabase(registry));
-  }
-
-  async findOneRegistry(id: string) {
-    const registry = await this.prisma.registro.findUnique({
-      where: { id_registro: id },
-      include: {
-        memo: true,
-        solped: true
-      }
-    });
-
-    if (!registry) return null;
-    return this.mapRegistryFromDatabase(registry);
-  }
-
-  async updateRegistry(id: string, updateRegistryDto: UpdateRegistryDto) {
-    const registry = await this.prisma.registro.update({
-      where: { id_registro: id },
-      data: this.mapRegistryToDatabase(updateRegistryDto),
-      include: {
-        memo: true,
-        solped: true
-      }
-    });
-
-    return this.mapRegistryFromDatabase(registry);
-  }
-
-  async removeRegistry(id: string) {
-    const registry = await this.prisma.registro.findUnique({
-      where: { id_registro: id },
-      include: {
-        solped: true,
-        memo: true
-      }
-    });
-
-    if (!registry) {
-      throw new Error('Registry not found');
+    if (!compliance) {
+      throw new BadRequestException('El cumplimiento especificado no existe');
     }
 
-    await this.prisma.$transaction(async (prisma) => {
-      // 1. Eliminar solpeds
-      if (registry.solped.length > 0) {
-        await prisma.solped.deleteMany({
-          where: { id_registro: id }
-        });
-      }
+    const currentStatusId = compliance.id_cump_est;
+    const nextStatusId = currentStatusId + 1;
 
-      // 2. Eliminar memos
-      if (registry.memo.length > 0) {
-        await prisma.memo.deleteMany({
-          where: { id_registro: id }
-        });
-      }
-
-      // 3. Finalmente, eliminar el registro
-      await prisma.registro.delete({
-        where: { id_registro: id }
-      });
+    // Verificar que existe el siguiente estado
+    const nextStatus = await this.prisma.cumplimiento_estado.findUnique({
+      where: { id_cumplimiento_estado: nextStatusId }
     });
 
-    return this.mapRegistryFromDatabase(registry);
-  }
+    if (!nextStatus) {
+      throw new BadRequestException('No existe un estado siguiente al actual');
+    }
 
-  async getComplianceRegistries(complianceId: string) {
-    const registries = await this.prisma.registro.findMany({
-      where: { id_cumplimiento: complianceId },
+    const updatedCompliance = await this.prisma.cumplimiento.update({
+      where: { id_cumplimiento: id },
+      data: { id_cump_est: nextStatusId },
       include: {
-        memo: true,
-        solped: true
+        tarea: true,
+        cumplimiento_estado: true
       }
     });
 
-    return registries.map(registry => this.mapRegistryFromDatabase(registry));
+    return this.mapFromDatabase(updatedCompliance);
   }
 
-  // Solped CRUD
-  async createSolped(createSolpedDto: CreateSolpedDto) {
-    // Check if registry exists
-    const registry = await this.prisma.registro.findUnique({
-      where: { id_registro: createSolpedDto.registryId },
+  // Método para obtener cumplimientos por estado
+  async getCompliancesByStatus(statusId: number) {
+    const compliances = await this.prisma.cumplimiento.findMany({
+      where: { id_cump_est: statusId },
       include: {
-        memo: true,
-        solped: true
+        tarea: true,
+        cumplimiento_estado: true
+      },
+      orderBy: {
+        updated_at: 'desc'
       }
     });
 
-    if (!registry) {
-      throw new BadRequestException('El registro no existe');
-    }
+    return compliances.map(compliance => this.mapFromDatabase(compliance));
+  }
 
-    // Check if registry already has a memo
-    if (registry.memo.length > 0) {
-      throw new BadRequestException('El registro ya tiene un memo asociado');
-    }
-
-    // Check if registry already has a solped
-    if (registry.solped.length > 0) {
-      throw new BadRequestException('El registro ya tiene una solped asociada');
-    }
-
-    const solped = await this.prisma.solped.create({
-      data: this.mapSolpedToDatabase(createSolpedDto)
+  // Método para obtener cumplimientos activos (no completados)
+  async getActiveCompliances() {
+    // Obtener el ID del estado "Completado"
+    const completedStatus = await this.prisma.cumplimiento_estado.findFirst({
+      where: { estado: 'Completado' }
     });
 
-    return this.mapSolpedFromDatabase(solped);
-  }
-
-  async findAllSolpeds() {
-    const solpeds = await this.prisma.solped.findMany();
-    return solpeds.map(solped => this.mapSolpedFromDatabase(solped));
-  }
-
-  async findOneSolped(id: string) {
-    const solped = await this.prisma.solped.findUnique({
-      where: { id_solped: id }
-    });
-
-    if (!solped) return null;
-    return this.mapSolpedFromDatabase(solped);
-  }
-
-  async updateSolped(id: string, updateSolpedDto: UpdateSolpedDto) {
-    const solped = await this.prisma.solped.update({
-      where: { id_solped: id },
-      data: this.mapSolpedToDatabase(updateSolpedDto)
-    });
-
-    return this.mapSolpedFromDatabase(solped);
-  }
-
-  async removeSolped(id: string) {
-    const solped = await this.prisma.solped.delete({
-      where: { id_solped: id }
-    });
-
-    return this.mapSolpedFromDatabase(solped);
-  }
-
-  async getRegistrySolped(registryId: string) {
-    const solped = await this.prisma.solped.findFirst({
-      where: { id_registro: registryId }
-    });
-
-    if (!solped) return null;
-    return this.mapSolpedFromDatabase(solped);
-  }
-
-  // Memo CRUD
-  async createMemo(createMemoDto: CreateMemoDto) {
-    // Check if registry exists
-    const registry = await this.prisma.registro.findUnique({
-      where: { id_registro: createMemoDto.registryId },
-      include: {
-        memo: true,
-        solped: true
-      }
-    });
-
-    if (!registry) {
-      throw new BadRequestException('El registro no existe');
-    }
-
-    // Check if registry already has a memo
-    if (registry.memo.length > 0) {
-      throw new BadRequestException('El registro ya tiene un memo asociado');
-    }
-
-    // Check if registry already has a solped
-    if (registry.solped.length > 0) {
-      throw new BadRequestException('El registro ya tiene una solped asociada');
-    }
-
-    const memo = await this.prisma.memo.create({
-      data: this.mapMemoToDatabase(createMemoDto)
-    });
-
-    return this.mapMemoFromDatabase(memo);
-  }
-
-  async findAllMemos() {
-    const memos = await this.prisma.memo.findMany();
-    return memos.map(memo => this.mapMemoFromDatabase(memo));
-  }
-
-  async findOneMemo(id: string) {
-    const memo = await this.prisma.memo.findUnique({
-      where: { id_memo: id }
-    });
-
-    if (!memo) return null;
-    return this.mapMemoFromDatabase(memo);
-  }
-
-  async updateMemo(id: string, updateMemoDto: UpdateMemoDto) {
-    const memo = await this.prisma.memo.update({
-      where: { id_memo: id },
-      data: this.mapMemoToDatabase(updateMemoDto)
-    });
-
-    return this.mapMemoFromDatabase(memo);
-  }
-
-  async removeMemo(id: string) {
-    const memo = await this.prisma.memo.delete({
-      where: { id_memo: id }
-    });
-
-    return this.mapMemoFromDatabase(memo);
-  }
-
-  async getRegistryMemo(registryId: string) {
-    const memo = await this.prisma.memo.findFirst({
-      where: { id_registro: registryId }
-    });
-
-    if (!memo) return null;
-    return this.mapMemoFromDatabase(memo);
-  }
-
-  async getAppliedCompliances() {
-    const tasks = await this.prisma.tarea.findMany({
-      include: {
-        cumplimiento: {
-          include: {
-            tarea: true,
-            cumplimiento_estado: true,
-            registro: {
-              include: {
-                memo: true,
-                solped: true
-              }
-            }
-          }
+    const compliances = await this.prisma.cumplimiento.findMany({
+      where: {
+        id_cump_est: {
+          not: completedStatus?.id_cumplimiento_estado || 999
         }
+      },
+      include: {
+        tarea: true,
+        cumplimiento_estado: true
+      },
+      orderBy: {
+        updated_at: 'desc'
       }
     });
 
-    return tasks.flatMap(task => Array.isArray(task.cumplimiento) ? task.cumplimiento.map(c => this.mapFromDatabase(c)) : []);
+    return compliances.map(compliance => this.mapFromDatabase(compliance));
   }
 } 

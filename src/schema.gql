@@ -157,45 +157,20 @@ type Compliance {
   id: ID!
   taskId: ID!
   statusId: Int
-  task: Task
-  status: ComplianceStatus
-  registries: [Registry!]
-}
-
-type Registry {
-  id: ID!
-  complianceId: ID!
-  hes: Boolean
-  hem: Boolean
-  provider: String
-  startDate: DateOnly
-  endDate: DateOnly
-  carta: Boolean
-  minuta: Boolean
-  es_solped: Boolean
-  es_memo: Boolean
+  updatedAt: DateTime!
+  valor: Int
+  ceco: Int
+  cuenta: Int
   solpedMemoSap: Int
   hesHemSap: Int
-  compliance: Compliance
-  memos: [Memo!]
-  solpeds: [Solped!]
+  task: Task
+  status: ComplianceStatus
 }
 
-type Memo {
-  id: ID!
-  registryId: ID!
-  value: Int
-  registry: Registry
-}
-
-type Solped {
-  id: ID!
-  registryId: ID!
-  ceco: Int
-  account: Int
-  value: Int
-  registry: Registry
-}
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
 
 type TipoDocumento {
   id_tipo_documento: Int!
@@ -259,11 +234,6 @@ type User {
   last_login: DateTime
   rol: Rol!
 }
-
-"""
-A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
-"""
-scalar DateTime
 
 type AuthResponse {
   access_token: String!
@@ -334,20 +304,12 @@ type Query {
   priorities: [Priority!]!
   subtaskStatuses: [SubtaskStatus!]!
   subtasksByMonthYearAndProcess(monthName: String!, year: Int!, processId: Int!): [Subtask!]!
-  findAll: [Compliance!]!
-  findOne(id: ID!): Compliance
-  getTaskCompliance(id: ID!): Compliance
+  findAllCompliances: [Compliance!]!
+  findOneCompliance(id: ID!): Compliance
+  getTaskCompliance(taskId: ID!): Compliance
   getAllComplianceStatuses: [ComplianceStatus!]!
-  findAllRegistries: [Registry!]!
-  findOneRegistry(id: ID!): Registry
-  getComplianceRegistries(complianceId: ID!): [Registry!]!
-  findAllSolpeds: [Solped!]!
-  findOneSolped(id: ID!): Solped
-  getRegistrySolped(registryId: ID!): Solped
-  findAllMemos: [Memo!]!
-  findOneMemo(id: ID!): Memo
-  getRegistryMemo(registryId: ID!): Memo
-  getAppliedCompliances: [Compliance!]!
+  getCompliancesByStatus(statusId: Int!): [Compliance!]!
+  getActiveCompliances: [Compliance!]!
   beneficiaries: [Beneficiary!]!
   beneficiary(id: ID!): Beneficiary!
   contacts: [Contact!]!
@@ -393,18 +355,10 @@ type Mutation {
   createSubtask(input: CreateSubtaskDto!): Subtask!
   updateSubtask(id: ID!, input: UpdateSubtaskDto!): Subtask!
   removeSubtask(id: ID!): Subtask!
-  create(createComplianceInput: CreateComplianceInput!): Compliance!
-  update(id: ID!, updateComplianceInput: UpdateComplianceInput!): Compliance!
-  remove(id: ID!): Compliance!
-  createRegistry(createRegistryInput: CreateRegistryInput!): Registry!
-  updateRegistry(id: ID!, updateRegistryInput: UpdateRegistryInput!): Registry!
-  removeRegistry(id: ID!): Registry!
-  createSolped(createSolpedInput: CreateSolpedInput!): Solped!
-  updateSolped(id: ID!, updateSolpedInput: UpdateSolpedInput!): Solped!
-  removeSolped(id: ID!): Solped!
-  createMemo(createMemoInput: CreateMemoInput!): Memo!
-  updateMemo(id: ID!, updateMemoInput: UpdateMemoInput!): Memo!
-  removeMemo(id: ID!): Memo!
+  createCompliance(createComplianceInput: CreateComplianceInput!): Compliance!
+  updateCompliance(id: ID!, updateComplianceInput: UpdateComplianceInput!): Compliance!
+  removeCompliance(id: ID!): String!
+  advanceComplianceStatus(id: ID!): Compliance!
   createBeneficiary(input: CreateBeneficiaryDto!): Beneficiary!
   updateBeneficiary(id: ID!, input: UpdateBeneficiaryDto!): Beneficiary!
   removeBeneficiary(id: ID!): Beneficiary!
@@ -485,60 +439,11 @@ input CreateComplianceInput {
 input UpdateComplianceInput {
   taskId: ID
   statusId: Int
-}
-
-input CreateRegistryInput {
-  complianceId: ID!
-  hes: Boolean
-  hem: Boolean
-  provider: String
-  startDate: DateOnly
-  endDate: DateOnly
-  carta: Boolean
-  minuta: Boolean
-  es_solped: Boolean
-  es_memo: Boolean
+  valor: Int
+  ceco: Int
+  cuenta: Int
   solpedMemoSap: Int
   hesHemSap: Int
-}
-
-input UpdateRegistryInput {
-  complianceId: ID
-  hes: Boolean
-  hem: Boolean
-  provider: String
-  startDate: DateOnly
-  endDate: DateOnly
-  carta: Boolean
-  minuta: Boolean
-  es_solped: Boolean
-  es_memo: Boolean
-  solpedMemoSap: Int
-  hesHemSap: Int
-}
-
-input CreateSolpedInput {
-  registryId: ID!
-  ceco: Int
-  account: Int
-  value: Int
-}
-
-input UpdateSolpedInput {
-  registryId: ID
-  ceco: Int
-  account: Int
-  value: Int
-}
-
-input CreateMemoInput {
-  registryId: ID!
-  value: Int
-}
-
-input UpdateMemoInput {
-  registryId: ID
-  value: Int
 }
 
 input CreateBeneficiaryDto {
