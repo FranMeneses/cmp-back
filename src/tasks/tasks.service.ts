@@ -773,6 +773,103 @@ export class TasksService {
     ));
   }
 
+  async getTasksByMonth(monthName: string, year: number) {
+    const monthId = this.getMonthNumber(monthName);
+    const startDate = new Date(Date.UTC(year, monthId, 1));
+    const endDate = new Date(Date.UTC(year, monthId + 1, 1));
+    
+    // Obtener subtareas del mes especificado
+    const subtasks = await this.prisma.subtarea.findMany({
+      where: {
+        fecha_inicio: {
+          not: null,
+          gte: startDate,
+          lt: endDate
+        }
+      },
+      select: { id_tarea: true }
+    });
+
+    if (subtasks.length === 0) {
+      return [];
+    }
+
+    // Obtener las tareas únicas asociadas a estas subtareas
+    const uniqueTaskIds = [...new Set(subtasks.map(subtask => subtask.id_tarea))];
+    
+    const tasks = await this.prisma.tarea.findMany({
+      where: {
+        id_tarea: {
+          in: uniqueTaskIds
+        }
+      },
+      include: {
+        tarea_estado: true,
+        valle: true,
+        faena: true,
+        proceso_rel: true,
+        beneficiario_rel: true
+      }
+    });
+
+    return tasks.map(task => this.mapFromDatabase(task));
+  }
+
+  async getTasksByMonthAndProcess(monthName: string, year: number, processId: number) {
+    const monthId = this.getMonthNumber(monthName);
+    const startDate = new Date(Date.UTC(year, monthId, 1));
+    const endDate = new Date(Date.UTC(year, monthId + 1, 1));
+    
+    // Primero obtener las tareas del proceso especificado
+    const processTasks = await this.prisma.tarea.findMany({
+      where: { proceso: processId },
+      select: { id_tarea: true }
+    });
+
+    if (processTasks.length === 0) {
+      return [];
+    }
+
+    // Luego filtrar por subtareas que tienen fecha de inicio en el mes especificado
+    const subtasks = await this.prisma.subtarea.findMany({
+      where: {
+        id_tarea: {
+          in: processTasks.map(task => task.id_tarea)
+        },
+        fecha_inicio: {
+          not: null,
+          gte: startDate,
+          lt: endDate
+        }
+      },
+      select: { id_tarea: true }
+    });
+
+    if (subtasks.length === 0) {
+      return [];
+    }
+
+    // Obtener las tareas únicas asociadas a estas subtareas
+    const uniqueTaskIds = [...new Set(subtasks.map(subtask => subtask.id_tarea))];
+    
+    const tasks = await this.prisma.tarea.findMany({
+      where: {
+        id_tarea: {
+          in: uniqueTaskIds
+        }
+      },
+      include: {
+        tarea_estado: true,
+        valle: true,
+        faena: true,
+        proceso_rel: true,
+        beneficiario_rel: true
+      }
+    });
+
+    return tasks.map(task => this.mapFromDatabase(task));
+  }
+
   async getTasksByProcessWithCompliance(processId: number) {
     const tasks = await this.prisma.tarea.findMany({
       where: { 

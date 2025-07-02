@@ -298,6 +298,8 @@ type Query {
   tasksByProcessAndValley(processId: Int!, valleyId: Int!): [Task!]!
   tasksByProcessAndStatus(processId: Int!, statusId: Int!): [Task!]!
   subtasksByProcess(processId: Int!): [Subtask!]!
+  tasksByMonth(monthName: String!, year: Int!): [Task!]!
+  tasksByMonthAndProcess(monthName: String!, year: Int!, processId: Int!): [Task!]!
   tasksByProcessWithCompliance(processId: Int!): [Task!]!
   subtasks: [Subtask!]!
   subtask(id: ID!): Subtask!

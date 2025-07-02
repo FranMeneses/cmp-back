@@ -184,6 +184,23 @@ export class TasksResolver {
   }
 
   @Query(() => [Task])
+  async tasksByMonth(
+    @Args('monthName', { type: () => String }) monthName: string,
+    @Args('year', { type: () => Int }) year: number
+  ) {
+    return this.tasksService.getTasksByMonth(monthName, year);
+  }
+
+  @Query(() => [Task])
+  async tasksByMonthAndProcess(
+    @Args('monthName', { type: () => String }) monthName: string,
+    @Args('year', { type: () => Int }) year: number,
+    @Args('processId', { type: () => Int }) processId: number
+  ) {
+    return this.tasksService.getTasksByMonthAndProcess(monthName, year, processId);
+  }
+
+  @Query(() => [Task])
   async tasksByProcessWithCompliance(@Args('processId', { type: () => Int }) processId: number) {
     return this.tasksService.getTasksByProcessWithCompliance(processId);
   }
