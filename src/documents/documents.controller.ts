@@ -17,19 +17,47 @@ export class DocumentsController {
   @UseInterceptors(FileInterceptor('file', {
     storage: memoryStorage() 
   }))
-  async uploadFile(@UploadedFile() file: Express.Multer.File) {
-    
+  async uploadFile(
+    @UploadedFile() file: Express.Multer.File,
+    @Body('tipo_documento') tipo_documento?: string,
+    @Body('id_tarea') id_tarea?: string
+  ) {
     if (!file) {
       throw new Error('No file received in controller');
     }
     
-    const blobInfo = await this.documentsService.uploadBlobOnly(file);
-    return { 
-      success: true, 
-      ruta: blobInfo.ruta,
-      filename: blobInfo.filename,
-      contentType: blobInfo.contentType
-    };
+    // Si se proporcionan metadatos, crear el documento completo
+    if (tipo_documento) {
+      const tipoDocumentoNum = parseInt(tipo_documento, 10);
+      if (isNaN(tipoDocumentoNum)) {
+        throw new Error('tipo_documento must be a valid number');
+      }
+      
+      const result = await this.documentsService.uploadFileComplete(
+        file, 
+        tipoDocumentoNum, 
+        id_tarea
+      );
+      
+      return { 
+        success: true, 
+        ruta: result.ruta,
+        filename: result.nombre_archivo,
+        contentType: result.uploadInfo.contentType,
+        id_documento: result.id_documento,
+        document: result,
+        message: `Archivo "${file.originalname}" subido y registrado correctamente`
+      };
+    } else {
+      // Flujo tradicional: solo subir blob (retrocompatibilidad)
+      const blobInfo = await this.documentsService.uploadBlobOnly(file);
+      return { 
+        success: true, 
+        ruta: blobInfo.ruta,
+        filename: blobInfo.filename,
+        contentType: blobInfo.contentType
+      };
+    }
   }
 
   @Get('download/:id')
@@ -75,4 +103,6 @@ export class DocumentsController {
     await this.documentsService.deleteFile(id);
     return { success: true };
   }
+
+
 } 

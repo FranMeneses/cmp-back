@@ -1,7 +1,7 @@
 import { Field, ID, ObjectType, InputType, Int, Float, Scalar } from '@nestjs/graphql';
 import { GraphQLScalarType } from 'graphql';
 import { GraphQLUpload, FileUpload } from 'graphql-upload/GraphQLUpload.js';
-import { IsEmail, IsNotEmpty, IsString, IsInt, IsOptional, MinLength, IsBoolean } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, IsInt, IsOptional, MinLength, IsBoolean, Matches } from 'class-validator';
 
 @ObjectType()
 export class Valley {
@@ -873,15 +873,25 @@ export class Document {
 @InputType()
 export class CreateDocumentInput {
   @Field(() => Int)
+  @IsInt()
   tipo_documento: number;
 
   @Field(() => String)
+  @IsString()
+  @IsNotEmpty()
   ruta: string;
 
   @Field(() => String, { nullable: true })
+  @IsString()
+  @IsOptional()
   id_tarea?: string;
 
   @Field(() => String, { nullable: true })
+  @IsString()
+  @IsOptional()
+  @Matches(/^[^<>:"/\\|?*\x00-\x1f]*$/, {
+    message: 'El nombre del archivo contiene caracteres no válidos. Evite usar los siguientes caracteres: < > : " / \\ | ? *'
+  })
   nombre_archivo?: string;
 }
 
