@@ -70,25 +70,25 @@ export class TasksService {
   }
 
   private readonly MONTH_MAPPING = {
-    'enero': 1,
-    'febrero': 2,
-    'marzo': 3,
-    'abril': 4,
-    'mayo': 5,
-    'junio': 6,
-    'julio': 7,
-    'agosto': 8,
-    'septiembre': 9,
-    'octubre': 10,
-    'noviembre': 11,
-    'diciembre': 12
+    'enero': 0,
+    'febrero': 1,
+    'marzo': 2,
+    'abril': 3,
+    'mayo': 4,
+    'junio': 5,
+    'julio': 6,
+    'agosto': 7,
+    'septiembre': 8,
+    'octubre': 9,
+    'noviembre': 10,
+    'diciembre': 11
   };
 
   private getMonthNumber(monthName: string): number {
     const normalizedMonth = monthName.toLowerCase();
     const monthNumber = this.MONTH_MAPPING[normalizedMonth];
     
-    if (!monthNumber) {
+    if (monthNumber === undefined) {
       throw new Error(`Invalid month name: ${monthName}`);
     }
     
@@ -567,8 +567,8 @@ export class TasksService {
     const monthlyBudgets = await Promise.all(
       months.map(async (month) => {
         const monthId = this.getMonthNumber(month);
-        const startDate = new Date(year, monthId - 1, 1);
-        const endDate = new Date(year, monthId, 0);
+        const startDate = new Date(Date.UTC(year, monthId, 1));
+        const endDate = new Date(Date.UTC(year, monthId + 1, 1)); // Primer día del mes siguiente
 
         const tasks = await this.prisma.tarea.findMany({
           where: { proceso: processId },
@@ -588,9 +588,8 @@ export class TasksService {
               in: tasks.map(task => task.id_tarea)
             },
             fecha_inicio: {
-              not: null,
               gte: startDate,
-              lte: endDate
+              lt: endDate
             }
           }
         });
@@ -618,8 +617,8 @@ export class TasksService {
     const monthlyExpenses = await Promise.all(
       months.map(async (month) => {
         const monthId = this.getMonthNumber(month);
-        const startDate = new Date(year, monthId - 1, 1);
-        const endDate = new Date(year, monthId, 0);
+        const startDate = new Date(Date.UTC(year, monthId, 1));
+        const endDate = new Date(Date.UTC(year, monthId + 1, 1));
 
         const tasks = await this.prisma.tarea.findMany({
           where: { proceso: processId },
@@ -639,12 +638,12 @@ export class TasksService {
               in: tasks.map(task => task.id_tarea)
             },
             fecha_inicio: {
-              not: null,
               gte: startDate,
-              lte: endDate
+              lt: endDate
             }
           }
         });
+
 
         const totalExpense = subtasks.reduce((total, subtask) => {
           return total + (subtask.gasto || 0);
