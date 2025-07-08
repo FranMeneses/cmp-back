@@ -157,13 +157,13 @@ export class ComplianceService {
       }
     });
 
-    // Si se envió el flag listo = true, cambiar automáticamente a estado "Completado" (ID: 13)
+    // Si se envió el flag listo = true, cambiar automáticamente a estado "Completado" (ID: 7)
     if (updateComplianceDto.listo === true) {
       try {
-        // Avanzar automáticamente al estado "Completado" (ID: 13)
+        // Avanzar automáticamente al estado "Completado" (ID: 7)
         const completedCompliance = await this.prisma.cumplimiento.update({
           where: { id_cumplimiento: id },
-          data: { id_cump_est: 13 }, // Estado "Completado"
+          data: { id_cump_est: 7 }, // Estado "Completado"
           include: {
             tarea: true,
             cumplimiento_estado: true
