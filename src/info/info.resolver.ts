@@ -46,6 +46,63 @@ export class InfoResolver {
     return this.infoService.getInvestmentTasksCount(investmentId);
   }
 
+  // Métodos para obtener tareas por categoría
+  @Query(() => [InfoTask])
+  async tasksByOrigin(@Args('originId', { type: () => Int }) originId: number) {
+    return this.infoService.getTasksByOrigin(originId);
+  }
+
+  @Query(() => [InfoTask])
+  async tasksByInvestment(@Args('investmentId', { type: () => Int }) investmentId: number) {
+    return this.infoService.getTasksByInvestment(investmentId);
+  }
+
+  @Query(() => [InfoTask])
+  async tasksByType(@Args('typeId', { type: () => Int }) typeId: number) {
+    return this.infoService.getTasksByType(typeId);
+  }
+
+  @Query(() => [InfoTask])
+  async tasksByScope(@Args('scopeId', { type: () => Int }) scopeId: number) {
+    return this.infoService.getTasksByScope(scopeId);
+  }
+
+  @Query(() => [InfoTask])
+  async tasksByInteraction(@Args('interactionId', { type: () => Int }) interactionId: number) {
+    return this.infoService.getTasksByInteraction(interactionId);
+  }
+
+  @Query(() => [InfoTask])
+  async tasksByRisk(@Args('riskId', { type: () => Int }) riskId: number) {
+    return this.infoService.getTasksByRisk(riskId);
+  }
+
+  // Métodos contadores por categoría
+  @Query(() => Int)
+  async originTasksCount(@Args('originId', { type: () => Int }) originId: number) {
+    return this.infoService.getOriginTasksCount(originId);
+  }
+
+  @Query(() => Int)
+  async typeTasksCount(@Args('typeId', { type: () => Int }) typeId: number) {
+    return this.infoService.getTypeTasksCount(typeId);
+  }
+
+  @Query(() => Int)
+  async scopeTasksCount(@Args('scopeId', { type: () => Int }) scopeId: number) {
+    return this.infoService.getScopeTasksCount(scopeId);
+  }
+
+  @Query(() => Int)
+  async interactionTasksCount(@Args('interactionId', { type: () => Int }) interactionId: number) {
+    return this.infoService.getInteractionTasksCount(interactionId);
+  }
+
+  @Query(() => Int)
+  async riskTasksCount(@Args('riskId', { type: () => Int }) riskId: number) {
+    return this.infoService.getRiskTasksCount(riskId);
+  }
+
   @Query(() => [Origin])
   async origins() {
     return this.infoService.findAllOrigins();

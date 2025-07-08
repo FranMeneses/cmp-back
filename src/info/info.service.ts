@@ -36,6 +36,7 @@ export class InfoService {
         statusId: info.tarea.estado,
         applies: info.tarea.aplica,
         beneficiaryId: info.tarea.beneficiario,
+        valleId: info.tarea.id_valle,
         beneficiary: info.tarea.beneficiario_rel ? {
           id: info.tarea.beneficiario_rel.id_beneficiario,
           legalName: info.tarea.beneficiario_rel.nombre_legal,
@@ -44,6 +45,10 @@ export class InfoService {
           entityType: info.tarea.beneficiario_rel.tipo_entidad,
           representative: info.tarea.beneficiario_rel.representante,
           hasLegalPersonality: info.tarea.beneficiario_rel.personalidad_juridica
+        } : null,
+        valle: info.tarea.valle ? {
+          id: info.tarea.valle.id_valle,
+          name: info.tarea.valle.valle_name
         } : null
       } : null,
       origin: info.origen ? {
@@ -87,7 +92,8 @@ export class InfoService {
       include: {
         tarea: {
           include: {
-            beneficiario_rel: true
+            beneficiario_rel: true,
+            valle: true
           }
         },
         origen: true,
@@ -107,7 +113,8 @@ export class InfoService {
       include: {
         tarea: {
           include: {
-            beneficiario_rel: true
+            beneficiario_rel: true,
+            valle: true
           }
         },
         origen: true,
@@ -128,7 +135,8 @@ export class InfoService {
       include: {
         tarea: {
           include: {
-            beneficiario_rel: true
+            beneficiario_rel: true,
+            valle: true
           }
         },
         origen: true,
@@ -151,7 +159,8 @@ export class InfoService {
       include: {
         tarea: {
           include: {
-            beneficiario_rel: true
+            beneficiario_rel: true,
+            valle: true
           }
         },
         origen: true,
@@ -172,7 +181,8 @@ export class InfoService {
       include: {
         tarea: {
           include: {
-            beneficiario_rel: true
+            beneficiario_rel: true,
+            valle: true
           }
         },
         origen: true,
@@ -193,7 +203,8 @@ export class InfoService {
       include: {
         tarea: {
           include: {
-            beneficiario_rel: true
+            beneficiario_rel: true,
+            valle: true
           }
         },
         origen: true,
@@ -318,9 +329,177 @@ export class InfoService {
     } : null;
   }
 
+  // Métodos para obtener tareas por categoría
+  async getTasksByOrigin(originId: number) {
+    const infos = await this.prisma.info_tarea.findMany({
+      where: { id_origen: originId },
+      include: {
+        tarea: {
+          include: {
+            beneficiario_rel: true,
+            valle: true
+          }
+        },
+        origen: true,
+        inversion: true,
+        tipo: true,
+        alcance: true,
+        interaccion: true,
+        riesgo: true
+      }
+    });
+
+    return infos.map(info => this.mapFromDatabase(info));
+  }
+
+  async getTasksByInvestment(investmentId: number) {
+    const infos = await this.prisma.info_tarea.findMany({
+      where: { id_inversion: investmentId },
+      include: {
+        tarea: {
+          include: {
+            beneficiario_rel: true,
+            valle: true
+          }
+        },
+        origen: true,
+        inversion: true,
+        tipo: true,
+        alcance: true,
+        interaccion: true,
+        riesgo: true
+      }
+    });
+
+    return infos.map(info => this.mapFromDatabase(info));
+  }
+
+  async getTasksByType(typeId: number) {
+    const infos = await this.prisma.info_tarea.findMany({
+      where: { id_tipo: typeId },
+      include: {
+        tarea: {
+          include: {
+            beneficiario_rel: true,
+            valle: true
+          }
+        },
+        origen: true,
+        inversion: true,
+        tipo: true,
+        alcance: true,
+        interaccion: true,
+        riesgo: true
+      }
+    });
+
+    return infos.map(info => this.mapFromDatabase(info));
+  }
+
+  async getTasksByScope(scopeId: number) {
+    const infos = await this.prisma.info_tarea.findMany({
+      where: { id_alcance: scopeId },
+      include: {
+        tarea: {
+          include: {
+            beneficiario_rel: true,
+            valle: true
+          }
+        },
+        origen: true,
+        inversion: true,
+        tipo: true,
+        alcance: true,
+        interaccion: true,
+        riesgo: true
+      }
+    });
+
+    return infos.map(info => this.mapFromDatabase(info));
+  }
+
+  async getTasksByInteraction(interactionId: number) {
+    const infos = await this.prisma.info_tarea.findMany({
+      where: { id_interaccion: interactionId },
+      include: {
+        tarea: {
+          include: {
+            beneficiario_rel: true,
+            valle: true
+          }
+        },
+        origen: true,
+        inversion: true,
+        tipo: true,
+        alcance: true,
+        interaccion: true,
+        riesgo: true
+      }
+    });
+
+    return infos.map(info => this.mapFromDatabase(info));
+  }
+
+  async getTasksByRisk(riskId: number) {
+    const infos = await this.prisma.info_tarea.findMany({
+      where: { id_riesgo: riskId },
+      include: {
+        tarea: {
+          include: {
+            beneficiario_rel: true,
+            valle: true
+          }
+        },
+        origen: true,
+        inversion: true,
+        tipo: true,
+        alcance: true,
+        interaccion: true,
+        riesgo: true
+      }
+    });
+
+    return infos.map(info => this.mapFromDatabase(info));
+  }
+
   async getInvestmentTasksCount(investmentId: number) {
     const count = await this.prisma.info_tarea.count({
       where: { id_inversion: investmentId }
+    });
+    return count;
+  }
+
+  async getOriginTasksCount(originId: number) {
+    const count = await this.prisma.info_tarea.count({
+      where: { id_origen: originId }
+    });
+    return count;
+  }
+
+  async getTypeTasksCount(typeId: number) {
+    const count = await this.prisma.info_tarea.count({
+      where: { id_tipo: typeId }
+    });
+    return count;
+  }
+
+  async getScopeTasksCount(scopeId: number) {
+    const count = await this.prisma.info_tarea.count({
+      where: { id_alcance: scopeId }
+    });
+    return count;
+  }
+
+  async getInteractionTasksCount(interactionId: number) {
+    const count = await this.prisma.info_tarea.count({
+      where: { id_interaccion: interactionId }
+    });
+    return count;
+  }
+
+  async getRiskTasksCount(riskId: number) {
+    const count = await this.prisma.info_tarea.count({
+      where: { id_riesgo: riskId }
     });
     return count;
   }
