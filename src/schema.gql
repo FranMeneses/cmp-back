@@ -320,6 +320,17 @@ type Query {
   infoTask(id: ID!): InfoTask!
   taskInfo(id: ID!): InfoTask!
   investmentTasksCount(investmentId: Int!): Int!
+  tasksByOrigin(originId: Int!): [InfoTask!]!
+  tasksByInvestment(investmentId: Int!): [InfoTask!]!
+  tasksByType(typeId: Int!): [InfoTask!]!
+  tasksByScope(scopeId: Int!): [InfoTask!]!
+  tasksByInteraction(interactionId: Int!): [InfoTask!]!
+  tasksByRisk(riskId: Int!): [InfoTask!]!
+  originTasksCount(originId: Int!): Int!
+  typeTasksCount(typeId: Int!): Int!
+  scopeTasksCount(scopeId: Int!): Int!
+  interactionTasksCount(interactionId: Int!): Int!
+  riskTasksCount(riskId: Int!): Int!
   origins: [Origin!]!
   origin(id: Int!): Origin!
   investments: [Investment!]!

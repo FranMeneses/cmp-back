@@ -36,7 +36,7 @@ export class InfoService {
         statusId: info.tarea.estado,
         applies: info.tarea.aplica,
         beneficiaryId: info.tarea.beneficiario,
-        valleId: info.tarea.id_valle,
+        valleyId: info.tarea.id_valle,
         beneficiary: info.tarea.beneficiario_rel ? {
           id: info.tarea.beneficiario_rel.id_beneficiario,
           legalName: info.tarea.beneficiario_rel.nombre_legal,
@@ -46,7 +46,7 @@ export class InfoService {
           representative: info.tarea.beneficiario_rel.representante,
           hasLegalPersonality: info.tarea.beneficiario_rel.personalidad_juridica
         } : null,
-        valle: info.tarea.valle ? {
+        valley: info.tarea.valle ? {
           id: info.tarea.valle.id_valle,
           name: info.tarea.valle.valle_name
         } : null
