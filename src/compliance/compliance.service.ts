@@ -39,6 +39,10 @@ export class ComplianceService {
     if ('hesHemSap' in dto && dto.hesHemSap !== undefined) {
       mappedData.HES_HEM_SAP = dto.hesHemSap;
     }
+
+    if ('listo' in dto && dto.listo !== undefined) {
+      mappedData.listo = dto.listo;
+    }
     
     return mappedData;
   }
@@ -54,6 +58,7 @@ export class ComplianceService {
       cuenta: compliance.cuenta,
       solpedMemoSap: compliance.SOLPED_MEMO_SAP,
       hesHemSap: compliance.HES_HEM_SAP,
+      listo: compliance.listo,
       task: compliance.tarea ? {
         id: compliance.tarea.id_tarea,
         name: compliance.tarea.nombre,
@@ -133,7 +138,10 @@ export class ComplianceService {
   async update(id: string, updateComplianceDto: UpdateComplianceDto) {
     // Verificar que el cumplimiento existe
     const existingCompliance = await this.prisma.cumplimiento.findUnique({
-      where: { id_cumplimiento: id }
+      where: { id_cumplimiento: id },
+      include: {
+        cumplimiento_estado: true
+      }
     });
 
     if (!existingCompliance) {
@@ -148,6 +156,26 @@ export class ComplianceService {
         cumplimiento_estado: true
       }
     });
+
+    // Si se envió el flag listo = true, cambiar automáticamente a estado "Completado" (ID: 13)
+    if (updateComplianceDto.listo === true) {
+      try {
+        // Avanzar automáticamente al estado "Completado" (ID: 13)
+        const completedCompliance = await this.prisma.cumplimiento.update({
+          where: { id_cumplimiento: id },
+          data: { id_cump_est: 13 }, // Estado "Completado"
+          include: {
+            tarea: true,
+            cumplimiento_estado: true
+          }
+        });
+
+        return this.mapFromDatabase(completedCompliance);
+      } catch (error) {
+        console.error('Error auto-completing compliance:', error);
+        // Si falla el auto-completado, devolver el compliance actualizado sin auto-completar
+      }
+    }
 
     return this.mapFromDatabase(compliance);
   }

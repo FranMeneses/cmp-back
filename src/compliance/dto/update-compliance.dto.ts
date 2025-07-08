@@ -1,6 +1,6 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { CreateComplianceDto } from './create-compliance.dto';
-import { IsInt, IsOptional } from 'class-validator';
+import { IsInt, IsOptional, IsBoolean } from 'class-validator';
 
 export class UpdateComplianceDto extends PartialType(CreateComplianceDto) {
   @IsInt()
@@ -22,4 +22,8 @@ export class UpdateComplianceDto extends PartialType(CreateComplianceDto) {
   @IsInt()
   @IsOptional()
   hesHemSap?: number;
+
+  @IsBoolean()
+  @IsOptional()
+  listo?: boolean;
 } 

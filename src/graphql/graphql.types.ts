@@ -611,6 +611,9 @@ export class Compliance {
   @Field(() => Int, { nullable: true })
   hesHemSap?: number;
 
+  @Field(() => Boolean, { nullable: true })
+  listo?: boolean;
+
   @Field(() => Task, { nullable: true })
   task?: Task;
 
@@ -649,6 +652,9 @@ export class UpdateComplianceInput {
 
   @Field(() => Int, { nullable: true })
   hesHemSap?: number;
+
+  @Field(() => Boolean, { nullable: true })
+  listo?: boolean;
 }
 
 

@@ -49,6 +49,7 @@ model cumplimiento {
   cuenta              Int?
   SOLPED_MEMO_SAP     Int?
   HES_HEM_SAP         Int?
+  listo               Boolean              @default(false, map: "DF__cumplimie__listo__0C50D423")
   cumplimiento_estado cumplimiento_estado? @relation(fields: [id_cump_est], references: [id_cumplimiento_estado], onDelete: Cascade, onUpdate: NoAction, map: "FK_cump_est")
   tarea               tarea                @relation(fields: [id_tarea], references: [id_tarea], onDelete: Cascade, onUpdate: NoAction, map: "FK_cumplimiento_tarea")
 }

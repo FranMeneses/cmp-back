@@ -178,7 +178,12 @@ export class TasksService {
 
     // Si la tarea cambió a estado "Completada", crear registro histórico
     if (updateTaskDto.statusId === this.COMPLETED_STATUS_ID) {
-      await this.createHistoryFromTask(id);
+      try {
+        await this.createHistoryFromTask(id);
+      } catch (error) {
+        // Log del error pero no fallar la actualización
+        console.error('Error creating historical record:', error.message);
+      }
     }
 
     return this.mapFromDatabase(task);
