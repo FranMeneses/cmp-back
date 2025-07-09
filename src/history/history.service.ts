@@ -358,4 +358,86 @@ export class HistoryService {
       filename: historyDoc.nombre_archivo
     };
   }
+
+  /**
+   * Elimina un historial completo con todos sus documentos en cascada
+   */
+  async deleteHistory(id_historial: string) {
+    if (!this.containerClient) {
+      throw new Error('Azure Storage is not configured. Cannot delete history.');
+    }
+
+    const history = await this.prisma.historial.findUnique({
+      where: { id_historial },
+      include: {
+        historial_doc: true,
+        proceso: true,
+        valle: true,
+        faena: true,
+        beneficiario_rel: true
+      }
+    });
+
+    if (!history) {
+      throw new Error(`History with ID ${id_historial} not found`);
+    }
+
+    const totalDocuments = history.historial_doc.length;
+    let deletedDocuments = 0;
+    let deletedBlobs = 0;
+
+    // Eliminar todos los documentos históricos asociados
+    for (const doc of history.historial_doc) {
+      try {
+        // Eliminar blob de Azure Storage
+        if (doc.ruta) {
+          try {
+            const url = new URL(doc.ruta);
+            const encodedBlobName = url.pathname.split('/').pop();
+            
+            if (encodedBlobName) {
+              const blobName = decodeURIComponent(encodedBlobName);
+              const blockBlobClient = this.containerClient.getBlockBlobClient(blobName);
+              
+              const exists = await blockBlobClient.exists();
+              if (exists) {
+                await blockBlobClient.delete();
+                deletedBlobs++;
+                this.logger.log(`History document blob deleted: ${blobName}`);
+              }
+            }
+          } catch (error) {
+            this.logger.error(`Failed to delete blob for document ${doc.id_his_doc}:`, error.message);
+            // Continuar con la siguiente eliminación
+          }
+        }
+
+        // Eliminar metadata del documento histórico
+        await this.prisma.historial_doc.delete({
+          where: { id_his_doc: doc.id_his_doc }
+        });
+        deletedDocuments++;
+        
+      } catch (error) {
+        this.logger.error(`Failed to delete history document ${doc.id_his_doc}:`, error.message);
+        // Continuar con la siguiente eliminación
+      }
+    }
+
+    // Eliminar el registro del historial
+    await this.prisma.historial.delete({
+      where: { id_historial }
+    });
+
+    this.logger.log(`History completely deleted: ${id_historial} (${deletedDocuments}/${totalDocuments} documents, ${deletedBlobs} blobs)`);
+
+    return {
+      deleted: true,
+      id: id_historial,
+      name: history.nombre,
+      totalDocuments,
+      deletedDocuments,
+      deletedBlobs
+    };
+  }
 } 

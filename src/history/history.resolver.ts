@@ -1,6 +1,6 @@
-import { Resolver, Query, Args, ID, Int } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, ID, Int } from '@nestjs/graphql';
 import { HistoryService } from './history.service';
-import { History } from '../graphql/graphql.types';
+import { History, DeleteHistoryDocumentResponse, DeleteHistoryResponse } from '../graphql/graphql.types';
 
 @Resolver(() => History)
 export class HistoryResolver {
@@ -34,5 +34,15 @@ export class HistoryResolver {
   @Query(() => [History])
   async historiesByBeneficiary(@Args('beneficiaryId', { type: () => ID }) beneficiaryId: string): Promise<History[]> {
     return this.historyService.findByBeneficiary(beneficiaryId);
+  }
+
+  @Mutation(() => DeleteHistoryDocumentResponse)
+  async deleteHistoryDocument(@Args('id', { type: () => ID }) id: string): Promise<DeleteHistoryDocumentResponse> {
+    return this.historyService.deleteHistoryDocument(id);
+  }
+
+  @Mutation(() => DeleteHistoryResponse)
+  async deleteHistory(@Args('id', { type: () => ID }) id: string): Promise<DeleteHistoryResponse> {
+    return this.historyService.deleteHistory(id);
   }
 } 

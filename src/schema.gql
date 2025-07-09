@@ -267,6 +267,21 @@ type NotificationResponse {
   message: String
 }
 
+type DeleteHistoryDocumentResponse {
+  deleted: Boolean!
+  id: ID!
+  filename: String
+}
+
+type DeleteHistoryResponse {
+  deleted: Boolean!
+  id: ID!
+  name: String
+  totalDocuments: Int!
+  deletedDocuments: Int!
+  deletedBlobs: Int!
+}
+
 """File upload scalar type"""
 scalar Upload
 
@@ -384,6 +399,8 @@ type Mutation {
   removeInfoTask(id: ID!): InfoTask!
   createDocument(input: CreateDocumentInput!): Document!
   deleteDocument(id_documento: String!): Boolean!
+  deleteHistoryDocument(id: ID!): DeleteHistoryDocumentResponse!
+  deleteHistory(id: ID!): DeleteHistoryResponse!
   createUser(createUserInput: CreateUserInput!): User!
   updateUser(id: ID!, updateUserInput: UpdateUserInput!): User!
   removeUser(id: ID!): Boolean!
