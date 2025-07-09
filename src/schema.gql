@@ -163,6 +163,7 @@ type Compliance {
   cuenta: Int
   solpedMemoSap: Int
   hesHemSap: Int
+  listo: Boolean
   task: Task
   status: ComplianceStatus
 }
@@ -457,6 +458,7 @@ input UpdateComplianceInput {
   cuenta: Int
   solpedMemoSap: Int
   hesHemSap: Int
+  listo: Boolean
 }
 
 input CreateBeneficiaryDto {

@@ -17,6 +17,7 @@ export class PrismaService implements OnModuleInit {
   get documento() { return this.ensureConnected().documento; }
   get tipo_documento() { return this.ensureConnected().tipo_documento; }
   get historial() { return this.ensureConnected().historial; }
+  get historial_doc() { return this.ensureConnected().historial_doc; }
   get info_tarea() { return this.ensureConnected().info_tarea; }
   get origen() { return this.ensureConnected().origen; }
   get inversion() { return this.ensureConnected().inversion; }
