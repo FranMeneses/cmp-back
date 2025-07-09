@@ -55,4 +55,21 @@ export class HistoryController {
       );
     }
   }
+
+  @Delete(':id')
+  async deleteHistory(@Param('id') id: string) {
+    try {
+      const result = await this.historyService.deleteHistory(id);
+      return { 
+        success: true, 
+        message: `History "${result.name}" deleted successfully with ${result.deletedDocuments}/${result.totalDocuments} documents`,
+        ...result 
+      };
+    } catch (error) {
+      throw new HttpException(
+        error.message || 'Failed to delete history',
+        HttpStatus.NOT_FOUND
+      );
+    }
+  }
 } 

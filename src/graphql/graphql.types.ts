@@ -1185,36 +1185,3 @@ export class NotificationResponse {
   @Field({ nullable: true })
   message?: string;
 }
-
-@ObjectType()
-export class DeleteHistoryDocumentResponse {
-  @Field()
-  deleted: boolean;
-
-  @Field(() => ID)
-  id: string;
-
-  @Field({ nullable: true })
-  filename?: string;
-}
-
-@ObjectType()
-export class DeleteHistoryResponse {
-  @Field()
-  deleted: boolean;
-
-  @Field(() => ID)
-  id: string;
-
-  @Field({ nullable: true })
-  name?: string;
-
-  @Field(() => Int)
-  totalDocuments: number;
-
-  @Field(() => Int)
-  deletedDocuments: number;
-
-  @Field(() => Int)
-  deletedBlobs: number;
-}
