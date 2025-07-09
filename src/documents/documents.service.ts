@@ -123,6 +123,76 @@ export class DocumentsService {
   }
 
   /**
+   * Verifica si una tarea tiene registro en el historial
+   */
+  private async taskHasHistory(taskId: string): Promise<boolean> {
+    const historyCount = await this.prisma.historial.count({
+      where: {
+        // Buscar por el nombre de la tarea ya que así se copia al historial
+        nombre: {
+          in: await this.prisma.tarea.findFirst({
+            where: { id_tarea: taskId },
+            select: { nombre: true }
+          }).then(task => task?.nombre ? [task.nombre] : [])
+        }
+      }
+    });
+    return historyCount > 0;
+  }
+
+  /**
+   * Elimina solo los metadatos del documento (mantiene el blob)
+   */
+  private async deleteMetadataOnly(id_documento: string) {
+    await this.prisma.documento.delete({
+      where: { id_documento }
+    });
+    this.logger.log(`Document metadata deleted (blob preserved): ${id_documento}`);
+  }
+
+  /**
+   * Elimina el blob de Azure Storage y los metadatos
+   */
+  private async deleteBlobAndMetadata(id_documento: string) {
+    const doc = await this.prisma.documento.findUnique({
+      where: { id_documento }
+    });
+
+    if (!doc) {
+      throw new Error(`Document ${id_documento} not found`);
+    }
+
+    // Eliminar blob de Azure Storage
+    if (doc.ruta && this.containerClient) {
+      try {
+        const url = new URL(doc.ruta);
+        const encodedBlobName = url.pathname.split('/').pop();
+        
+        if (encodedBlobName) {
+          const blobName = decodeURIComponent(encodedBlobName);
+          const blockBlobClient = this.containerClient.getBlockBlobClient(blobName);
+          
+          const exists = await blockBlobClient.exists();
+          if (exists) {
+            await blockBlobClient.delete();
+            this.logger.log(`Blob deleted from Azure Storage: ${blobName}`);
+          }
+        }
+      } catch (error) {
+        this.logger.error(`Failed to delete blob for document ${id_documento}:`, error.message);
+        // No fallar la operación si el blob no se puede eliminar
+      }
+    }
+
+    // Eliminar metadatos de la base de datos
+    await this.prisma.documento.delete({
+      where: { id_documento }
+    });
+    
+    this.logger.log(`Document and blob completely deleted: ${id_documento}`);
+  }
+
+  /**
    * Descarga un archivo desde Azure Blob Storage
    */
   async downloadFile(id_documento: string) {
@@ -243,35 +313,44 @@ export class DocumentsService {
     });
   }
 
+  /**
+   * Elimina un documento aplicando la lógica de historial:
+   * - Si la tarea NO tiene historial: borra blob + metadata
+   * - Si la tarea SÍ tiene historial: borra solo metadata (preserva blob para historial)
+   */
   async deleteFile(id_documento: string) {
     const doc = await this.prisma.documento.findUnique({
-      where: { id_documento }
+      where: { id_documento },
+      include: {
+        tarea: true
+      }
     });
 
     if (!doc) {
       throw new Error(`Document with ID ${id_documento} not found`);
     }
 
-    if (this.containerClient && doc.ruta) {
-      try {
-        const url = new URL(doc.ruta);
-        const encodedBlobName = url.pathname.split('/').pop();
-
-        if (encodedBlobName) {
-          const blobName = decodeURIComponent(encodedBlobName);
-          const blockBlobClient = this.containerClient.getBlockBlobClient(blobName);
-          await blockBlobClient.delete();
-          this.logger.log(`Blob deleted successfully: ${blobName}`);
-        }
-      } catch (error) {
-        this.logger.error(`Failed to delete blob for document ${id_documento}`, error.message);
-        // Continue with database deletion even if blob deletion fails
-      }
+    if (!doc.id_tarea) {
+      // Documento sin tarea asociada, borrar completamente
+      this.logger.warn(`Document ${id_documento} has no associated task, deleting completely`);
+      await this.deleteBlobAndMetadata(id_documento);
+      return { deleted: true, method: 'complete', reason: 'no_task' };
     }
 
-    return this.prisma.documento.delete({
-      where: { id_documento }
-    });
+    // Verificar si la tarea tiene historial
+    const hasHistory = await this.taskHasHistory(doc.id_tarea);
+
+    if (hasHistory) {
+      // Tarea en historial: borrar solo metadata (preservar blob para documentos históricos)
+      this.logger.log(`Task ${doc.id_tarea} has history, preserving blob for document ${id_documento}`);
+      await this.deleteMetadataOnly(id_documento);
+      return { deleted: true, method: 'metadata_only', reason: 'task_has_history' };
+    } else {
+      // Tarea sin historial: borrar blob + metadata
+      this.logger.log(`Task ${doc.id_tarea} has no history, completely deleting document ${id_documento}`);
+      await this.deleteBlobAndMetadata(id_documento);
+      return { deleted: true, method: 'complete', reason: 'task_no_history' };
+    }
   }
 
   async getAllDocumentTypes() {
