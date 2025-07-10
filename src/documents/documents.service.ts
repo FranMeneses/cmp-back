@@ -5,6 +5,24 @@ import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateDocumentInput } from '../graphql/graphql.types';
 
+/**
+ * Servicio de gestión completa de documentos con almacenamiento en Azure Blob Storage.
+ * 
+ * @description Proporciona funcionalidades avanzadas para el manejo integral de documentos:
+ * - Integración nativa con Azure Blob Storage usando DefaultAzureCredential
+ * - Upload completo de archivos con creación automática de metadatos
+ * - Download optimizado con manejo de nombres Unicode y extensiones
+ * - Lógica inteligente de eliminación basada en historial de tareas
+ * - Preservación de archivos históricos para cumplimiento normativo
+ * - Gestión de metadatos independiente del almacenamiento físico
+ * - Catálogos de tipos de documento y consultas especializadas
+ * - Configuración flexible con fallback para entornos sin Azure
+ * - Logging detallado para troubleshooting y auditoría
+ * - Manejo robusto de errores y validaciones de integridad
+ * 
+ * @class DocumentsService
+ * @since 1.0.0
+ */
 @Injectable()
 export class DocumentsService {
   private containerClient: ContainerClient;
@@ -36,7 +54,18 @@ export class DocumentsService {
   }
 
   /**
-   * Sube un archivo a Azure Blob Storage y crea automáticamente los metadatos en la base de datos
+   * Sube un archivo a Azure Blob Storage y crea automáticamente los metadatos en la base de datos.
+   * 
+   * @description Flujo completo de upload que combina almacenamiento físico y metadatos:
+   * 1. Sube el archivo a Azure Blob Storage con timestamp único
+   * 2. Preserva el nombre original con caracteres Unicode
+   * 3. Crea automáticamente el registro de metadatos en BD
+   * 4. Retorna información completa del documento y upload
+   * 
+   * @param file - Archivo de Multer con buffer en memoria
+   * @param tipo_documento - ID del tipo de documento del catálogo
+   * @param id_tarea - ID opcional de la tarea asociada
+   * @returns Metadatos del documento creado más información del upload
    */
   async uploadFileComplete(file: Express.Multer.File, tipo_documento: number, id_tarea?: string) {
     const blobInfo = await this.uploadBlobOnly(file);
@@ -56,8 +85,18 @@ export class DocumentsService {
   }
 
   /**
-   * Sube un archivo a Azure Blob Storage sin guardar metadata en la base de datos
+   * Sube un archivo a Azure Blob Storage sin guardar metadata en la base de datos.
+   * 
+   * @description Método de upload básico que solo maneja el almacenamiento físico:
+   * 1. Genera nombre único con timestamp para evitar colisiones
+   * 2. Configura headers HTTP para download optimizado
+   * 3. Preserva información de tipo MIME y nombre original
+   * 4. Retorna URL de acceso directo al blob
+   * 
    * @deprecated Usar uploadFileComplete para flujo completo o mantener solo para casos específicos
+   * @param file - Archivo de Multer con buffer en memoria
+   * @returns Información del blob subido (URL, nombre, tipo, tamaño)
+   * @throws Error si Azure Storage no está configurado o el archivo es inválido
    */
   async uploadBlobOnly(file: Express.Multer.File) {
     if (!this.containerClient) {
@@ -104,7 +143,16 @@ export class DocumentsService {
   }
 
   /**
-   * Crea un registro de documento en la base de datos con la ruta del blob
+   * Crea un registro de documento en la base de datos con la ruta del blob.
+   * 
+   * @description Método para crear únicamente los metadatos del documento:
+   * 1. Registra información del documento en la tabla documento
+   * 2. Asocia con tarea si se proporciona ID
+   * 3. Establece fecha de carga automática
+   * 4. Incluye relaciones con tarea y tipo de documento
+   * 
+   * @param input - Datos del documento según CreateDocumentInput
+   * @returns Documento creado con relaciones incluidas
    */
   async createDocumentMetadata(input: CreateDocumentInput) {
     return this.prisma.documento.create({
@@ -123,7 +171,15 @@ export class DocumentsService {
   }
 
   /**
-   * Verifica si una tarea tiene registro en el historial
+   * Verifica si una tarea tiene registro en el historial.
+   * 
+   * @description Método crítico para la lógica de preservación de documentos:
+   * 1. Busca el nombre de la tarea por ID
+   * 2. Verifica si existe en la tabla historial
+   * 3. Determina si se deben preservar documentos asociados
+   * 
+   * @param taskId - ID de la tarea a verificar
+   * @returns true si la tarea está en el historial, false en caso contrario
    */
   private async taskHasHistory(taskId: string): Promise<boolean> {
     const historyCount = await this.prisma.historial.count({
@@ -141,7 +197,14 @@ export class DocumentsService {
   }
 
   /**
-   * Elimina solo los metadatos del documento (mantiene el blob)
+   * Elimina solo los metadatos del documento (mantiene el blob).
+   * 
+   * @description Eliminación parcial para preservar archivos históricos:
+   * 1. Elimina el registro de la tabla documento
+   * 2. Preserva el archivo físico en Azure Blob Storage
+   * 3. Útil cuando la tarea asociada está en el historial
+   * 
+   * @param id_documento - ID del documento a eliminar parcialmente
    */
   private async deleteMetadataOnly(id_documento: string) {
     await this.prisma.documento.delete({
@@ -151,7 +214,16 @@ export class DocumentsService {
   }
 
   /**
-   * Elimina el blob de Azure Storage y los metadatos
+   * Elimina el blob de Azure Storage y los metadatos.
+   * 
+   * @description Eliminación completa del documento:
+   * 1. Localiza y elimina el blob de Azure Storage
+   * 2. Elimina el registro de metadatos de la BD
+   * 3. Maneja errores de Azure gracefully (no falla si blob no existe)
+   * 4. Usado cuando la tarea no está en historial
+   * 
+   * @param id_documento - ID del documento a eliminar completamente
+   * @throws Error si el documento no existe en BD
    */
   private async deleteBlobAndMetadata(id_documento: string) {
     const doc = await this.prisma.documento.findUnique({
@@ -193,7 +265,18 @@ export class DocumentsService {
   }
 
   /**
-   * Descarga un archivo desde Azure Blob Storage
+   * Descarga un archivo desde Azure Blob Storage.
+   * 
+   * @description Proceso completo de download con manejo inteligente de nombres:
+   * 1. Busca metadatos del documento en BD
+   * 2. Localiza y descarga el blob de Azure Storage
+   * 3. Reconstruye nombre original con extensión correcta
+   * 4. Retorna buffer, metadata y headers para respuesta HTTP
+   * 5. Maneja fallbacks para nombres y extensiones faltantes
+   * 
+   * @param id_documento - ID del documento a descargar
+   * @returns Objeto con buffer, filename, contentType y size
+   * @throws Error si Azure Storage no está configurado, documento no existe o blob no encontrado
    */
   async downloadFile(id_documento: string) {
     if (!this.containerClient) {
@@ -293,6 +376,12 @@ export class DocumentsService {
     }
   }
 
+  /**
+   * Obtiene los metadatos de un documento específico.
+   * 
+   * @param id_documento - ID del documento
+   * @returns Metadatos del documento con relaciones incluidas
+   */
   async getFile(id_documento: string) {
     return this.prisma.documento.findUnique({
       where: { id_documento },
@@ -303,6 +392,12 @@ export class DocumentsService {
     });
   }
 
+  /**
+   * Lista documentos con filtro opcional por tipo.
+   * 
+   * @param tipo_documento - ID opcional del tipo de documento para filtrar
+   * @returns Lista de documentos con metadatos y relaciones
+   */
   async listFiles(tipo_documento?: number) {
     return this.prisma.documento.findMany({
       where: tipo_documento ? { tipo_documento } : undefined,
@@ -314,9 +409,19 @@ export class DocumentsService {
   }
 
   /**
-   * Elimina un documento aplicando la lógica de historial:
-   * - Si la tarea NO tiene historial: borra blob + metadata
+   * Elimina un documento aplicando la lógica de historial inteligente.
+   * 
+   * @description Lógica de eliminación basada en preservación histórica:
+   * - Si la tarea NO tiene historial: borra blob + metadata (eliminación completa)
    * - Si la tarea SÍ tiene historial: borra solo metadata (preserva blob para historial)
+   * - Si no hay tarea asociada: borra blob + metadata (eliminación completa)
+   * 
+   * Esta lógica garantiza el cumplimiento normativo preservando documentos
+   * de tareas que han sido movidas al historial del sistema.
+   * 
+   * @param id_documento - ID del documento a eliminar
+   * @returns Objeto con información del método de eliminación aplicado
+   * @throws Error si el documento no existe
    */
   async deleteFile(id_documento: string) {
     const doc = await this.prisma.documento.findUnique({
@@ -353,10 +458,25 @@ export class DocumentsService {
     }
   }
 
+  /**
+   * Obtiene el catálogo completo de tipos de documento.
+   * 
+   * @returns Lista de todos los tipos de documento disponibles
+   */
   async getAllDocumentTypes() {
     return this.prisma.tipo_documento.findMany();
   }
 
+  /**
+   * Busca un documento específico por tarea y tipo.
+   * 
+   * @description Útil para verificar si una tarea ya tiene un documento
+   * de un tipo específico o para recuperar documentos conocidos.
+   * 
+   * @param taskId - ID de la tarea
+   * @param documentType - ID del tipo de documento
+   * @returns Primer documento encontrado que coincida con los criterios
+   */
   async getDocumentByTaskAndType(taskId: string, documentType: number) {
     return this.prisma.documento.findFirst({
       where: {

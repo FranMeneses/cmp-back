@@ -1,0 +1,28 @@
+{
+  "entryPoints": ["src"],
+  "entryPointStrategy": "expand",
+  "out": "docs",
+  "exclude": [
+    "**/*.spec.ts",
+    "**/*.test.ts", 
+    "**/__tests__/**/*",
+    "**/test/**/*",
+    "test/**/*",
+    "src/**/__tests__/**/*",
+    "src/**/*.spec.ts",
+    "src/**/*.test.ts",
+    "node_modules/**/*"
+  ],
+  "skipErrorChecking": true,
+  "name": "CMP Backend API Documentation",
+  "theme": "default",
+  "includeVersion": true,
+  "readme": "README.md",
+  "excludePrivate": false,
+  "excludeProtected": false,
+  "excludeInternal": false,
+  "validation": {
+    "notExported": false,
+    "invalidLink": true
+  }
+} 

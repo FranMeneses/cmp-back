@@ -10,6 +10,28 @@ import { HttpModule } from '@nestjs/axios';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { RolesGuard } from './guards/roles.guard';
 
+/**
+ * Módulo de autenticación que maneja la autenticación JWT, autorización basada en roles,
+ * y funcionalidades de reseteo de contraseña.
+ * 
+ * @description Este módulo proporciona:
+ * - Autenticación JWT con tokens de 24 horas de duración
+ * - Sistema de roles y permisos
+ * - Funcionalidad de reseteo de contraseña via email
+ * - Guards para proteger rutas según autenticación y roles
+ * - Estrategias de Passport para validación JWT
+ * 
+ * @module AuthModule
+ * @requires UsersModule Para gestión de usuarios
+ * @requires PassportModule Para estrategias de autenticación
+ * @requires JwtModule Para generación y validación de tokens JWT
+ * @requires HttpModule Para comunicación con servicios externos (Azure Logic Apps)
+ * 
+ * @exports AuthService Servicio principal de autenticación
+ * @exports PasswordResetService Servicio para reseteo de contraseñas
+ * 
+ * @since 1.0.0
+ */
 @Module({
   imports: [
     UsersModule,

@@ -5,6 +5,21 @@ import { firstValueFrom } from 'rxjs';
 import * as crypto from 'crypto';
 import * as bcrypt from 'bcryptjs';
 
+/**
+ * Servicio para gestionar el reseteo de contraseñas mediante tokens seguros.
+ * 
+ * @description Maneja todo el flujo de reseteo de contraseña:
+ * - Generación de tokens criptográficamente seguros
+ * - Envío de emails de reseteo via Azure Logic Apps
+ * - Validación de tokens con verificación de expiración
+ * - Actualización segura de contraseñas con hash bcrypt
+ * - Invalidación automática de tokens anteriores
+ * 
+ * @class PasswordResetService
+ * @injectable
+ * 
+ * @since 1.0.0
+ */
 @Injectable()
 export class PasswordResetService {
   constructor(
@@ -12,6 +27,26 @@ export class PasswordResetService {
     private httpService: HttpService,
   ) {}
 
+  /**
+   * Solicita el reseteo de contraseña para un usuario mediante email.
+   * 
+   * @description Realiza el proceso completo de solicitud de reseteo:
+   * 1. Verifica que el usuario exista y esté activo
+   * 2. Invalida todos los tokens anteriores del usuario
+   * 3. Genera un nuevo token seguro con expiración de 1 hora
+   * 4. Envía email con instrucciones via Azure Logic App
+   * 
+   * @param {string} email - Email del usuario que solicita el reseteo
+   * @param {string} frontendUrl - URL base del frontend para construir el enlace de reseteo
+   * 
+   * @returns {Promise<{success: boolean, message: string}>} Confirmación del envío del email
+   * 
+   * @throws {NotFoundException} Cuando el usuario no existe en la base de datos
+   * @throws {BadRequestException} Cuando el usuario está desactivado
+   * @throws {BadRequestException} Si hay error en el servicio de envío de email
+   * 
+   * @since 1.0.0
+   */
   async requestPasswordReset(email: string, frontendUrl: string): Promise<{ success: boolean; message: string }> {
     // Verificar que el usuario existe
     const user = await this.prisma.usuario.findUnique({
@@ -79,6 +114,28 @@ export class PasswordResetService {
     }
   }
 
+  /**
+   * Cambia la contraseña de un usuario usando un token de reseteo válido.
+   * 
+   * @description Proceso completo de cambio de contraseña:
+   * 1. Busca y valida el token de reseteo
+   * 2. Verifica que no haya expirado ni sido usado
+   * 3. Confirma que el usuario esté activo
+   * 4. Genera hash seguro de la nueva contraseña (bcrypt, 12 rounds)
+   * 5. Actualiza la contraseña y marca el token como usado en una transacción
+   * 
+   * @param {string} token - Token de reseteo recibido por email
+   * @param {string} newPassword - Nueva contraseña en texto plano
+   * 
+   * @returns {Promise<{success: boolean, message: string}>} Confirmación del cambio exitoso
+   * 
+   * @throws {BadRequestException} Cuando el token es inválido
+   * @throws {BadRequestException} Cuando el token ya fue utilizado
+   * @throws {BadRequestException} Cuando el token ha expirado
+   * @throws {BadRequestException} Cuando el usuario está desactivado
+   * 
+   * @since 1.0.0
+   */
   async resetPassword(token: string, newPassword: string): Promise<{ success: boolean; message: string }> {
     // Buscar token válido
     const resetToken = await this.prisma.password_reset_token.findUnique({
@@ -127,6 +184,21 @@ export class PasswordResetService {
     };
   }
 
+  /**
+   * Valida si un token de reseteo de contraseña es válido y utilizable.
+   * 
+   * @description Realiza todas las validaciones necesarias:
+   * - Verifica que el token exista en la base de datos
+   * - Confirma que no haya sido usado previamente
+   * - Verifica que no haya expirado (1 hora de validez)
+   * - Confirma que el usuario asociado esté activo
+   * 
+   * @param {string} token - Token de reseteo a validar
+   * 
+   * @returns {Promise<{valid: boolean, message?: string}>} Estado de validez con mensaje explicativo
+   * 
+   * @since 1.0.0
+   */
   async validateResetToken(token: string): Promise<{ valid: boolean; message?: string }> {
     const resetToken = await this.prisma.password_reset_token.findUnique({
       where: { token },

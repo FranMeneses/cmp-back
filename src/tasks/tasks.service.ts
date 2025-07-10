@@ -5,6 +5,23 @@ import { UpdateTaskDto } from './dto/update-task.dto';
 import { SubtasksService } from '../subtasks/subtasks.service';
 import { ComplianceService } from '../compliance/compliance.service';
 
+/**
+ * Servicio principal para la gestión integral de tareas del sistema.
+ * 
+ * @description Servicio central que maneja:
+ * - CRUD completo de tareas con validación de duplicados
+ * - Transformación de datos entre formatos de BD y GraphQL
+ * - Análisis de progreso y estados de tareas
+ * - Cálculos financieros: presupuestos y gastos
+ * - Consultas complejas por múltiples criterios (valle, proceso, mes, etc.)
+ * - Integración con subtareas y sistema de compliance
+ * - Generación de reportes y estadísticas de gestión
+ * - Gestión de historial y auditoría de cambios
+ * 
+ * @class TasksService
+ * @injectable
+ * @since 1.0.0
+ */
 @Injectable()
 export class TasksService {
   private readonly COMPLETED_STATUS_ID = 5;
@@ -15,6 +32,18 @@ export class TasksService {
     private complianceService: ComplianceService
   ) {}
 
+  /**
+   * Mapea un DTO de tarea al formato esperado por la base de datos.
+   * 
+   * @description Transforma los nombres de campos del formato GraphQL/API
+   * al formato de columnas de la base de datos.
+   * 
+   * @param {CreateTaskDto | UpdateTaskDto} taskDto - DTO con datos de la tarea
+   * @returns {any} Objeto con nombres de campos de base de datos
+   * 
+   * @private
+   * @since 1.0.0
+   */
   private mapToDatabase(taskDto: CreateTaskDto | UpdateTaskDto) {
     const data: any = {};
     
@@ -30,6 +59,19 @@ export class TasksService {
     return data;
   }
 
+  /**
+   * Mapea una tarea de base de datos al formato GraphQL/API.
+   * 
+   * @description Transforma los datos de la BD incluyendo relaciones
+   * al formato esperado por el frontend, con nombres de campos en camelCase
+   * y estructura anidada para entidades relacionadas.
+   * 
+   * @param {any} task - Tarea de BD con relaciones incluidas
+   * @returns {any} Objeto tarea en formato GraphQL
+   * 
+   * @private
+   * @since 1.0.0
+   */
   private mapFromDatabase(task: any) {
     return {
       id: task.id_tarea,
@@ -69,6 +111,10 @@ export class TasksService {
     };
   }
 
+  /**
+   * Mapeo de nombres de meses en español a números (base 0).
+   * @private
+   */
   private readonly MONTH_MAPPING = {
     'enero': 0,
     'febrero': 1,
@@ -84,6 +130,17 @@ export class TasksService {
     'diciembre': 11
   };
 
+  /**
+   * Convierte el nombre de un mes en español a su número correspondiente.
+   * 
+   * @param {string} monthName - Nombre del mes en español (ej: 'enero', 'febrero')
+   * @returns {number} Número del mes (0-11, donde 0 = enero)
+   * 
+   * @throws {Error} Si el nombre del mes no es válido
+   * 
+   * @private
+   * @since 1.0.0
+   */
   private getMonthNumber(monthName: string): number {
     const normalizedMonth = monthName.toLowerCase();
     const monthNumber = this.MONTH_MAPPING[normalizedMonth];
@@ -95,6 +152,22 @@ export class TasksService {
     return monthNumber;
   }
 
+  /**
+   * Crea una nueva tarea en el sistema con validación de duplicados.
+   * 
+   * @description Proceso de creación:
+   * 1. Valida que no exista una tarea duplicada
+   * 2. Crea la tarea en base de datos
+   * 3. Incluye todas las relaciones necesarias
+   * 4. Transforma al formato GraphQL
+   * 
+   * @param {CreateTaskDto} createTaskDto - Datos de la nueva tarea
+   * @returns {Promise<any>} Tarea creada con relaciones incluidas
+   * 
+   * @throws {BadRequestException} Si la tarea está duplicada o hay datos inválidos
+   * 
+   * @since 1.0.0
+   */
   async create(createTaskDto: CreateTaskDto) {
     // Verificar que no exista una tarea duplicada
     await this.validateTaskDuplication(createTaskDto);
@@ -112,6 +185,20 @@ export class TasksService {
     return this.mapFromDatabase(task);
   }
 
+  /**
+   * Valida que no exista una tarea duplicada con los mismos criterios.
+   * 
+   * @description Verifica duplicación basada en: nombre, proceso, valle y beneficiario.
+   * Una tarea se considera duplicada si tiene el mismo nombre y proceso,
+   * en el mismo valle (si aplica) y para el mismo beneficiario (si aplica).
+   * 
+   * @param {CreateTaskDto} taskDto - Datos de la tarea a validar
+   * 
+   * @throws {BadRequestException} Si faltan datos obligatorios o existe duplicado
+   * 
+   * @private
+   * @since 1.0.0
+   */
   private async validateTaskDuplication(taskDto: CreateTaskDto) {
     if (!taskDto.name || !taskDto.processId) {
       throw new BadRequestException('El nombre y proceso son obligatorios para validar duplicados');
@@ -136,6 +223,16 @@ export class TasksService {
     }
   }
 
+  /**
+   * Obtiene todas las tareas del sistema con sus relaciones.
+   * 
+   * @description Retorna lista completa de tareas incluyendo estado, valle,
+   * faena, proceso y beneficiario asociados.
+   * 
+   * @returns {Promise<any[]>} Array de tareas en formato GraphQL
+   * 
+   * @since 1.0.0
+   */
   async findAll() {
     const tasks = await this.prisma.tarea.findMany({
       include: {
@@ -149,6 +246,14 @@ export class TasksService {
     return tasks.map(task => this.mapFromDatabase(task));
   }
 
+  /**
+   * Busca una tarea específica por su ID.
+   * 
+   * @param {string} id - ID único de la tarea
+   * @returns {Promise<any|null>} Tarea encontrada o null si no existe
+   * 
+   * @since 1.0.0
+   */
   async findOne(id: string) {
     const task = await this.prisma.tarea.findUnique({
       where: { id_tarea: id },
@@ -163,6 +268,15 @@ export class TasksService {
     return task ? this.mapFromDatabase(task) : null;
   }
 
+  /**
+   * Actualiza una tarea existente con nuevos datos.
+   * 
+   * @param {string} id - ID de la tarea a actualizar
+   * @param {UpdateTaskDto} updateTaskDto - Datos a actualizar
+   * @returns {Promise<any>} Tarea actualizada en formato GraphQL
+   * 
+   * @since 1.0.0
+   */
   async update(id: string, updateTaskDto: UpdateTaskDto) {
     const task = await this.prisma.tarea.update({
       where: { id_tarea: id },
@@ -179,8 +293,24 @@ export class TasksService {
     return this.mapFromDatabase(task);
   }
 
+  /**
+   * Crea un registro de historial a partir de una tarea completada.
+   * 
+   * @description Genera un snapshot completo de la tarea incluyendo:
+   * - Datos básicos de la tarea
+   * - Gastos totales calculados
+   * - Códigos SAP del compliance
+   * - Documentos asociados copiados al historial
+   * 
+   * @param {string} taskId - ID de la tarea a historificar
+   * @returns {Promise<any>} Registro de historial creado
+   * 
+   * @throws {Error} Si la tarea no existe
+   * 
+   * @private
+   * @since 1.0.0
+   */
   private async createHistoryFromTask(taskId: string): Promise<any> {
-    // Get the task with all its related data
     const task = await this.prisma.tarea.findUnique({
       where: { id_tarea: taskId },
       include: {
@@ -245,6 +375,22 @@ export class TasksService {
     return history;
   }
 
+  /**
+   * Elimina una tarea completa del sistema incluyendo todas sus dependencias.
+   * 
+   * @description Proceso de eliminación en transacción:
+   * 1. Elimina documentos asociados
+   * 2. Elimina registros de compliance (con cascada a solpeds y memos)
+   * 3. Elimina subtareas
+   * 4. Elimina la tarea principal
+   * 
+   * @param {string} id - ID de la tarea a eliminar
+   * @returns {Promise<any>} Tarea eliminada en formato GraphQL
+   * 
+   * @throws {Error} Si la tarea no existe
+   * 
+   * @since 1.0.0
+   */
   async remove(id: string) {
     const task = await this.prisma.tarea.findUnique({
       where: { id_tarea: id },
@@ -293,6 +439,14 @@ export class TasksService {
     return this.mapFromDatabase(task);
   }
 
+  /**
+   * Obtiene todas las subtareas asociadas a una tarea específica.
+   * 
+   * @param {string} id - ID de la tarea padre
+   * @returns {Promise<any[]>} Array de subtareas con información completa
+   * 
+   * @since 1.0.0
+   */
   async getTaskSubtasks(id: string) {
     const subtasks = await this.prisma.subtarea.findMany({
       where: { id_tarea: id }
@@ -303,6 +457,17 @@ export class TasksService {
     ));
   }
 
+  /**
+   * Calcula el progreso promedio de una tarea basado en sus subtareas.
+   * 
+   * @description El progreso se calcula como el promedio de los porcentajes
+   * de todas las subtareas asociadas. Si no hay subtareas, retorna 0.
+   * 
+   * @param {string} id - ID de la tarea
+   * @returns {Promise<number>} Porcentaje de progreso (0-100)
+   * 
+   * @since 1.0.0
+   */
   async getTaskProgress(id: string) {
     const subtasks = await this.prisma.subtarea.findMany({
       where: { id_tarea: id },
@@ -322,6 +487,14 @@ export class TasksService {
     return totalProgress / subtasks.length;
   }
 
+  /**
+   * Calcula el presupuesto total de una tarea sumando presupuestos de subtareas.
+   * 
+   * @param {string} id - ID de la tarea
+   * @returns {Promise<number>} Presupuesto total en CLP
+   * 
+   * @since 1.0.0
+   */
   async getTotalBudget(id: string) {
     const subtasks = await this.prisma.subtarea.findMany({
       where: { id_tarea: id }
@@ -336,6 +509,14 @@ export class TasksService {
     }, 0);
   }
 
+  /**
+   * Calcula el gasto total real de una tarea sumando gastos de subtareas.
+   * 
+   * @param {string} id - ID de la tarea
+   * @returns {Promise<number>} Gasto total en CLP
+   * 
+   * @since 1.0.0
+   */
   async getTotalExpense(id: string) {
     const subtasks = await this.prisma.subtarea.findMany({
       where: { id_tarea: id }
@@ -350,12 +531,28 @@ export class TasksService {
     }, 0);
   }
 
+  /**
+   * Cuenta el número total de tareas asignadas a un valle específico.
+   * 
+   * @param {number} valleyId - ID del valle
+   * @returns {Promise<number>} Cantidad de tareas del valle
+   * 
+   * @since 1.0.0
+   */
   async getValleyTasksCount(valleyId: number) {
     return this.prisma.tarea.count({
       where: { id_valle: valleyId }
     });
   }
 
+  /**
+   * Obtiene todas las subtareas de todas las tareas de un valle específico.
+   * 
+   * @param {number} valleyId - ID del valle
+   * @returns {Promise<any[]>} Array de subtareas del valle
+   * 
+   * @since 1.0.0
+   */
   async getValleySubtasks(valleyId: number) {
     const tasks = await this.prisma.tarea.findMany({
       where: { id_valle: valleyId },
@@ -379,6 +576,15 @@ export class TasksService {
     ));
   }
 
+  /**
+   * Calcula el presupuesto total de todas las subtareas que inician en un mes específico.
+   * 
+   * @param {string} monthName - Nombre del mes en español
+   * @param {number} year - Año de consulta
+   * @returns {Promise<number>} Presupuesto total del mes
+   * 
+   * @since 1.0.0
+   */
   async getTotalBudgetByMonth(monthName: string, year: number) {
     const monthId = this.getMonthNumber(monthName);
     
@@ -401,6 +607,15 @@ export class TasksService {
     }, 0);
   }
 
+  /**
+   * Calcula el gasto total de todas las subtareas que inician en un mes específico.
+   * 
+   * @param {string} monthName - Nombre del mes en español
+   * @param {number} year - Año de consulta
+   * @returns {Promise<number>} Gasto total del mes
+   * 
+   * @since 1.0.0
+   */
   async getTotalExpenseByMonth(monthName: string, year: number) {
     const monthId = this.getMonthNumber(monthName);
     
@@ -423,6 +638,16 @@ export class TasksService {
     }, 0);
   }
 
+  /**
+   * Calcula gastos totales por mes filtrado por proceso específico.
+   * 
+   * @param {string} monthName - Nombre del mes en español
+   * @param {number} year - Año de consulta
+   * @param {number} processId - ID del proceso a filtrar
+   * @returns {Promise<number>} Gasto total del mes y proceso
+   * 
+   * @since 1.0.0
+   */
   async getTotalExpenseByMonthAndProcess(monthName: string, year: number, processId: number) {
     const monthId = this.getMonthNumber(monthName);
     
@@ -457,6 +682,16 @@ export class TasksService {
     }, 0);
   }
 
+  /**
+   * Calcula presupuesto total por mes filtrado por proceso específico.
+   * 
+   * @param {string} monthName - Nombre del mes en español
+   * @param {number} year - Año de consulta
+   * @param {number} processId - ID del proceso a filtrar
+   * @returns {Promise<number>} Presupuesto total del mes y proceso
+   * 
+   * @since 1.0.0
+   */
   async getTotalBudgetByMonthAndProcess(monthName: string, year: number, processId: number) {
     const monthId = this.getMonthNumber(monthName);
     
@@ -491,6 +726,14 @@ export class TasksService {
     }, 0);
   }
 
+  /**
+   * Obtiene todas las tareas asignadas a un valle específico.
+   * 
+   * @param {number} valleyId - ID del valle
+   * @returns {Promise<any[]>} Array de tareas del valle con relaciones
+   * 
+   * @since 1.0.0
+   */
   async getTasksByValley(valleyId: number) {
     const tasks = await this.prisma.tarea.findMany({
       where: { id_valle: valleyId },
@@ -505,6 +748,15 @@ export class TasksService {
     return tasks.map(task => this.mapFromDatabase(task));
   }
 
+  /**
+   * Cuenta tareas de un valle que están asociadas a una inversión específica.
+   * 
+   * @param {number} valleyId - ID del valle
+   * @param {number} investmentId - ID de la inversión
+   * @returns {Promise<number>} Cantidad de tareas que coinciden
+   * 
+   * @since 1.0.0
+   */
   async getValleyInvestmentTasksCount(valleyId: number, investmentId: number) {
     const tasks = await this.prisma.tarea.findMany({
       where: { id_valle: valleyId },
@@ -525,6 +777,13 @@ export class TasksService {
     });
   }
 
+  /**
+   * Obtiene el catálogo completo de valles disponibles en el sistema.
+   * 
+   * @returns {Promise<any[]>} Array de valles con id y nombre
+   * 
+   * @since 1.0.0
+   */
   async getAllValleys() {
     const valleys = await this.prisma.valle.findMany({
       select: {
@@ -539,6 +798,13 @@ export class TasksService {
     }));
   }
 
+  /**
+   * Obtiene el catálogo completo de faenas disponibles en el sistema.
+   * 
+   * @returns {Promise<any[]>} Array de faenas con id y nombre
+   * 
+   * @since 1.0.0
+   */
   async getAllFaenas() {
     const faenas = await this.prisma.faena.findMany({
       select: {
@@ -553,6 +819,18 @@ export class TasksService {
     }));
   }
 
+  /**
+   * Genera reporte de presupuestos mensuales para un proceso específico.
+   * 
+   * @description Calcula el presupuesto total por cada mes del año,
+   * basado en las fechas de inicio de las subtareas del proceso.
+   * 
+   * @param {number} processId - ID del proceso
+   * @param {number} year - Año de consulta
+   * @returns {Promise<any[]>} Array con presupuesto por mes
+   * 
+   * @since 1.0.0
+   */
   async getProcessMonthlyBudgets(processId: number, year: number) {
     const months = [
       'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
@@ -603,6 +881,18 @@ export class TasksService {
     return monthlyBudgets;
   }
 
+  /**
+   * Genera reporte de gastos mensuales para un proceso específico.
+   * 
+   * @description Calcula el gasto total por cada mes del año,
+   * basado en las fechas de inicio de las subtareas del proceso.
+   * 
+   * @param {number} processId - ID del proceso
+   * @param {number} year - Año de consulta
+   * @returns {Promise<any[]>} Array con gastos por mes
+   * 
+   * @since 1.0.0
+   */
   async getProcessMonthlyExpenses(processId: number, year: number) {
     const months = [
       'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
@@ -654,6 +944,13 @@ export class TasksService {
     return monthlyExpenses;
   }
 
+  /**
+   * Obtiene el catálogo completo de estados de tareas disponibles.
+   * 
+   * @returns {Promise<any[]>} Array de estados con id y nombre
+   * 
+   * @since 1.0.0
+   */
   async getAllTaskStatuses() {
     const statuses = await this.prisma.tarea_estado.findMany({
       select: {
@@ -668,6 +965,15 @@ export class TasksService {
     }));
   }
 
+  /**
+   * Obtiene tareas filtradas por valle y estado específicos.
+   * 
+   * @param {number} valleyId - ID del valle
+   * @param {number} statusId - ID del estado
+   * @returns {Promise<any[]>} Array de tareas que coinciden con los filtros
+   * 
+   * @since 1.0.0
+   */
   async getTasksByValleyAndStatus(valleyId: number, statusId: number) {
     const tasks = await this.prisma.tarea.findMany({
       where: {
@@ -685,6 +991,13 @@ export class TasksService {
     return tasks.map(task => this.mapFromDatabase(task));
   }
 
+  /**
+   * Obtiene el catálogo completo de procesos empresariales disponibles.
+   * 
+   * @returns {Promise<any[]>} Array de procesos con id y nombre
+   * 
+   * @since 1.0.0
+   */
   async getAllProcesses() {
     const processes = await this.prisma.proceso.findMany();
     return processes.map(process => ({
@@ -693,6 +1006,14 @@ export class TasksService {
     }));
   }
 
+  /**
+   * Obtiene todas las tareas asociadas a un proceso específico.
+   * 
+   * @param {number} processId - ID del proceso
+   * @returns {Promise<any[]>} Array de tareas del proceso con relaciones
+   * 
+   * @since 1.0.0
+   */
   async getTasksByProcess(processId: number) {
     const tasks = await this.prisma.tarea.findMany({
       where: { 
@@ -709,6 +1030,15 @@ export class TasksService {
     return tasks.map(task => this.mapFromDatabase(task));
   }
 
+  /**
+   * Obtiene tareas filtradas por proceso y valle específicos.
+   * 
+   * @param {number} processId - ID del proceso
+   * @param {number} valleyId - ID del valle
+   * @returns {Promise<any[]>} Array de tareas que coinciden con ambos filtros
+   * 
+   * @since 1.0.0
+   */
   async getTasksByProcessAndValley(processId: number, valleyId: number) {
     const tasks = await this.prisma.tarea.findMany({
       where: {
@@ -726,6 +1056,15 @@ export class TasksService {
     return tasks.map(task => this.mapFromDatabase(task));
   }
 
+  /**
+   * Obtiene tareas filtradas por proceso y estado específicos.
+   * 
+   * @param {number} processId - ID del proceso
+   * @param {number} statusId - ID del estado
+   * @returns {Promise<any[]>} Array de tareas que coinciden con ambos filtros
+   * 
+   * @since 1.0.0
+   */
   async getTasksByProcessAndStatus(processId: number, statusId: number) {
     const tasks = await this.prisma.tarea.findMany({
       where: {
@@ -743,6 +1082,17 @@ export class TasksService {
     return tasks.map(task => this.mapFromDatabase(task));
   }
 
+  /**
+   * Obtiene todas las subtareas de tareas asociadas a un proceso específico.
+   * 
+   * @description Busca todas las tareas del proceso y luego obtiene
+   * todas las subtareas asociadas a esas tareas.
+   * 
+   * @param {number} processId - ID del proceso
+   * @returns {Promise<any[]>} Array de subtareas del proceso
+   * 
+   * @since 1.0.0
+   */
   async getSubtasksByProcess(processId: number) {
     const tasks = await this.prisma.tarea.findMany({
       where: { 
@@ -768,6 +1118,19 @@ export class TasksService {
     ));
   }
 
+  /**
+   * Obtiene tareas que tienen subtareas iniciadas en un mes específico.
+   * 
+   * @description Busca tareas cuyas subtareas tienen fecha de inicio
+   * dentro del mes especificado. Una tarea aparece si al menos una
+   * de sus subtareas inició en el mes consultado.
+   * 
+   * @param {string} monthName - Nombre del mes en español
+   * @param {number} year - Año de consulta
+   * @returns {Promise<any[]>} Array de tareas con actividad en el mes
+   * 
+   * @since 1.0.0
+   */
   async getTasksByMonth(monthName: string, year: number) {
     const monthId = this.getMonthNumber(monthName);
     const startDate = new Date(Date.UTC(year, monthId, 1));
@@ -810,6 +1173,19 @@ export class TasksService {
     return tasks.map(task => this.mapFromDatabase(task));
   }
 
+  /**
+   * Obtiene tareas de un proceso que tienen subtareas iniciadas en un mes específico.
+   * 
+   * @description Combina filtros de proceso y temporal: busca tareas del proceso
+   * especificado que tienen al menos una subtarea iniciada en el mes consultado.
+   * 
+   * @param {string} monthName - Nombre del mes en español
+   * @param {number} year - Año de consulta
+   * @param {number} processId - ID del proceso
+   * @returns {Promise<any[]>} Array de tareas del proceso con actividad en el mes
+   * 
+   * @since 1.0.0
+   */
   async getTasksByMonthAndProcess(monthName: string, year: number, processId: number) {
     const monthId = this.getMonthNumber(monthName);
     const startDate = new Date(Date.UTC(year, monthId, 1));
@@ -865,6 +1241,18 @@ export class TasksService {
     return tasks.map(task => this.mapFromDatabase(task));
   }
 
+  /**
+   * Obtiene tareas de un proceso que tienen registros de compliance asociados.
+   * 
+   * @description Filtra las tareas del proceso que tienen al menos un
+   * registro de cumplimiento/compliance creado, útil para reportes
+   * de seguimiento regulatorio.
+   * 
+   * @param {number} processId - ID del proceso
+   * @returns {Promise<any[]>} Array de tareas del proceso con compliance
+   * 
+   * @since 1.0.0
+   */
   async getTasksByProcessWithCompliance(processId: number) {
     const tasks = await this.prisma.tarea.findMany({
       where: { 
