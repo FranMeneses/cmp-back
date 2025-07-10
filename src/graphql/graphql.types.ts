@@ -512,6 +512,9 @@ export class InfoTask {
   @Field(() => Int, { nullable: true })
   riskId?: number;
 
+  @Field({ nullable: true })
+  quantity?: string;
+
   @Field(() => Task, { nullable: true })
   task?: Task;
 
@@ -556,6 +559,9 @@ export class CreateInfoTaskInput {
 
   @Field(() => Int, { nullable: true })
   riskId?: number;
+
+  @Field({ nullable: true })
+  quantity?: string;
 }
 
 @InputType()
@@ -580,6 +586,9 @@ export class UpdateInfoTaskInput {
 
   @Field(() => Int, { nullable: true })
   riskId?: number;
+
+  @Field({ nullable: true })
+  quantity?: string;
 }
 
 @ObjectType()

@@ -28,4 +28,8 @@ export class CreateInfoDto {
   @IsInt()
   @IsOptional()
   riskId?: number;
+
+  @IsString()
+  @IsOptional()
+  quantity?: string;
 } 

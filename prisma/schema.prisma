@@ -88,6 +88,7 @@ model info_tarea {
   id_alcance     Int?
   id_interaccion Int?
   id_riesgo      Int?
+  cantidad       String?      @db.VarChar(50)
   tarea          tarea        @relation(fields: [id_tarea], references: [id_tarea], onDelete: Cascade, onUpdate: NoAction, map: "FK_info_tarea")
   alcance        alcance?     @relation(fields: [id_alcance], references: [id_alcance], onDelete: Cascade, onUpdate: NoAction, map: "FK_info_tarea_alcance")
   interaccion    interaccion? @relation(fields: [id_interaccion], references: [id_interaccion], onDelete: Cascade, onUpdate: NoAction, map: "FK_info_tarea_interaccion")

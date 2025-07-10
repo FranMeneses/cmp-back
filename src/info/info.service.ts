@@ -16,6 +16,7 @@ export class InfoService {
       id_alcance: dto.scopeId,
       id_interaccion: dto.interactionId,
       id_riesgo: dto.riskId,
+      cantidad: dto.quantity,
     };
   }
 
@@ -29,6 +30,7 @@ export class InfoService {
       scopeId: info.id_alcance,
       interactionId: info.id_interaccion,
       riskId: info.id_riesgo,
+      quantity: info.cantidad,
       task: info.tarea ? {
         id: info.tarea.id_tarea,
         name: info.tarea.nombre,
