@@ -10,6 +10,30 @@ import { CreateTaskDto } from '../tasks/dto/create-task.dto';
 import { CreateSubtaskDto } from '../subtasks/dto/create-subtask.dto';
 import { CreateInfoTaskInput } from '../graphql/graphql.types';
 
+/**
+ * Servicio de ETL (Extract, Transform, Load) para carga masiva de datos desde archivos Excel.
+ * 
+ * @description Proporciona funcionalidades avanzadas para importación masiva de datos empresariales:
+ * - Procesamiento completo de archivos Excel (.xlsx/.xls) con múltiples hojas de trabajo
+ * - Carga masiva de tareas con validación automática de duplicados
+ * - Resolución inteligente de IDs mediante búsqueda fuzzy en catálogos
+ * - Sistema de caché optimizado para minimizar consultas repetidas a base de datos
+ * - Creación automática de registros de compliance cuando aplica
+ * - Procesamiento robusto con manejo individual de errores por fila
+ * - Integración con Azure Blob Storage para preservación de archivos procesados
+ * - Soporte para entidades relacionadas: valle, faena, proceso, origen, inversión, tipo, alcance, interacción y riesgo
+ * - Transformación automática de datos de Excel a DTOs del sistema
+ * - Logging detallado de resultados con estadísticas de éxito y fallos
+ * - Limpieza automática de caché entre procesamiento de archivos
+ * - Validación de formatos y estructura de datos de entrada
+ * 
+ * El servicio procesa dos hojas principales:
+ * - 'Tareas': Información básica de tareas con datos de proceso empresarial
+ * - 'Info': Información adicional de tareas con datos de análisis y clasificación
+ * 
+ * @class EtlService
+ * @since 1.0.0
+ */
 @Injectable()
 export class EtlService {
   // Cache para evitar consultas repetidas durante el procesamiento
@@ -32,7 +56,21 @@ export class EtlService {
     private complianceService: ComplianceService,
   ) {}
 
-  // Métodos dinámicos para obtener IDs desde la base de datos
+  /**
+   * Resuelve el ID de un valle mediante búsqueda inteligente con caché.
+   * 
+   * @description Proceso de resolución optimizado:
+   * 1. Verifica caché primero para evitar consultas repetidas
+   * 2. Intenta búsqueda exacta por nombre
+   * 3. Si no encuentra, usa búsqueda fuzzy con CONTAINS
+   * 4. Almacena resultado en caché para futuras consultas
+   * 
+   * @param valleyName - Nombre del valle a buscar
+   * @returns ID del valle encontrado o null si no existe
+   * 
+   * @private
+   * @since 1.0.0
+   */
   private async getValleyId(valleyName: string): Promise<number | null> {
     if (!valleyName) return null;
     
@@ -61,6 +99,18 @@ export class EtlService {
     return id;
   }
 
+  /**
+   * Resuelve el ID de una faena mediante búsqueda fuzzy con caché.
+   * 
+   * @description Búsqueda optimizada usando CONTAINS para mayor flexibilidad
+   * en coincidencias de nombres de faena, con sistema de caché para rendimiento.
+   * 
+   * @param faenaName - Nombre de la faena a buscar
+   * @returns ID de la faena encontrada o null si no existe
+   * 
+   * @private
+   * @since 1.0.0
+   */
   private async getFaenaId(faenaName: string): Promise<number | null> {
     if (!faenaName) return null;
     
@@ -81,6 +131,18 @@ export class EtlService {
     return id;
   }
 
+  /**
+   * Resuelve el ID de un proceso empresarial mediante búsqueda fuzzy con caché.
+   * 
+   * @description Búsqueda de procesos empresariales usando CONTAINS para
+   * mayor flexibilidad en coincidencias de nombres, con caché de rendimiento.
+   * 
+   * @param processName - Nombre del proceso a buscar
+   * @returns ID del proceso encontrado o null si no existe
+   * 
+   * @private
+   * @since 1.0.0
+   */
   private async getProcessId(processName: string): Promise<number | null> {
     if (!processName) return null;
     
@@ -101,6 +163,20 @@ export class EtlService {
     return id;
   }
 
+  /**
+   * Resuelve el ID de un origen mediante búsqueda inteligente con caché.
+   * 
+   * @description Proceso de resolución con fallback:
+   * 1. Intenta búsqueda exacta por nombre de origen
+   * 2. Si no encuentra, usa búsqueda fuzzy con CONTAINS
+   * 3. Utiliza caché para optimizar consultas repetidas
+   * 
+   * @param originName - Nombre del origen a buscar
+   * @returns ID del origen encontrado o null si no existe
+   * 
+   * @private
+   * @since 1.0.0
+   */
   private async getOriginId(originName: string): Promise<number | null> {
     if (!originName) return null;
     
@@ -129,6 +205,18 @@ export class EtlService {
     return id;
   }
 
+  /**
+   * Resuelve el ID de una línea de inversión mediante búsqueda fuzzy con caché.
+   * 
+   * @description Búsqueda en el campo 'linea' de la tabla inversión usando
+   * CONTAINS para mayor flexibilidad en coincidencias.
+   * 
+   * @param investmentName - Nombre de la línea de inversión a buscar
+   * @returns ID de la inversión encontrada o null si no existe
+   * 
+   * @private
+   * @since 1.0.0
+   */
   private async getInvestmentId(investmentName: string): Promise<number | null> {
     if (!investmentName) return null;
     
@@ -149,6 +237,18 @@ export class EtlService {
     return id;
   }
 
+  /**
+   * Resuelve el ID de un tipo de iniciativa mediante búsqueda fuzzy con caché.
+   * 
+   * @description Búsqueda en tipos de iniciativa usando CONTAINS para
+   * mayor flexibilidad en coincidencias de nombres.
+   * 
+   * @param typeName - Nombre del tipo a buscar
+   * @returns ID del tipo encontrado o null si no existe
+   * 
+   * @private
+   * @since 1.0.0
+   */
   private async getTypeId(typeName: string): Promise<number | null> {
     if (!typeName) return null;
     
@@ -169,6 +269,18 @@ export class EtlService {
     return id;
   }
 
+  /**
+   * Resuelve el ID de un alcance mediante búsqueda fuzzy con caché.
+   * 
+   * @description Búsqueda en alcances usando CONTAINS para mayor
+   * flexibilidad en coincidencias de nombres de alcance.
+   * 
+   * @param scopeName - Nombre del alcance a buscar
+   * @returns ID del alcance encontrado o null si no existe
+   * 
+   * @private
+   * @since 1.0.0
+   */
   private async getScopeId(scopeName: string): Promise<number | null> {
     if (!scopeName) return null;
     
@@ -189,6 +301,18 @@ export class EtlService {
     return id;
   }
 
+  /**
+   * Resuelve el ID de una interacción mediante búsqueda fuzzy con caché.
+   * 
+   * @description Búsqueda en el campo 'operacion' de la tabla interacción
+   * usando CONTAINS para mayor flexibilidad en coincidencias.
+   * 
+   * @param interactionName - Nombre de la operación/interacción a buscar
+   * @returns ID de la interacción encontrada o null si no existe
+   * 
+   * @private
+   * @since 1.0.0
+   */
   private async getInteractionId(interactionName: string): Promise<number | null> {
     if (!interactionName) return null;
     
@@ -209,6 +333,18 @@ export class EtlService {
     return id;
   }
 
+  /**
+   * Resuelve el ID de un riesgo mediante búsqueda fuzzy con caché.
+   * 
+   * @description Búsqueda en el campo 'tipo_riesgo' usando CONTAINS
+   * para mayor flexibilidad en coincidencias de tipos de riesgo.
+   * 
+   * @param riskName - Nombre del tipo de riesgo a buscar
+   * @returns ID del riesgo encontrado o null si no existe
+   * 
+   * @private
+   * @since 1.0.0
+   */
   private async getRiskId(riskName: string): Promise<number | null> {
     if (!riskName) return null;
     
@@ -229,7 +365,16 @@ export class EtlService {
     return id;
   }
 
-  // Método para limpiar cache entre procesamiento de archivos
+  /**
+   * Limpia todos los cachés de entidades para nuevo procesamiento.
+   * 
+   * @description Elimina todas las entradas de caché para garantizar
+   * datos frescos en el siguiente procesamiento de archivo Excel.
+   * Se ejecuta automáticamente al inicio de cada procesamiento.
+   * 
+   * @private
+   * @since 1.0.0
+   */
   private clearCache(): void {
     this.cacheValley.clear();
     this.cacheFaena.clear();
@@ -242,6 +387,45 @@ export class EtlService {
     this.cacheRisk.clear();
   }
 
+  /**
+   * Procesa un archivo Excel completo para carga masiva de datos del sistema.
+   * 
+   * @description Flujo completo de ETL (Extract, Transform, Load):
+   * 
+   * **EXTRACT:**
+   * 1. Sube el archivo Excel a Azure Blob Storage para preservación
+   * 2. Lee el archivo Excel en memoria usando la librería XLSX
+   * 3. Extrae datos de las hojas 'Tareas' e 'Info'
+   * 
+   * **TRANSFORM:**
+   * 1. Limpia caché de entidades para datos frescos
+   * 2. Resuelve dinámicamente IDs de entidades relacionadas por nombre
+   * 3. Transforma filas de Excel a DTOs del sistema
+   * 4. Aplica validaciones y lógica de negocio
+   * 
+   * **LOAD:**
+   * 1. Crea tareas masivamente con validación de duplicados
+   * 2. Genera automáticamente registros de compliance cuando aplica
+   * 3. Asocia información adicional (origen, inversión, tipo, etc.)
+   * 4. Maneja errores individuales sin afectar el procesamiento total
+   * 
+   * **HOJA 'TAREAS':**
+   * - Nombre, Descripción, Valle, Faena, Proceso, Cumplimiento
+   * - Crea tareas con todas las validaciones del sistema
+   * - Genera compliance automático con estado "No Iniciado" si aplica
+   * 
+   * **HOJA 'INFO':**
+   * - Busca tareas por nombre y asocia información adicional
+   * - Origen, Línea Inversión, Tipo Iniciativa, Alcance, Interacción, Riesgo
+   * - Enriquece las tareas con datos de análisis y clasificación
+   * 
+   * @param file - Archivo Excel (.xlsx/.xls) con datos a procesar
+   * @returns Estadísticas detalladas del procesamiento con éxitos, fallos y errores
+   * 
+   * @throws BadRequestException si el archivo no es válido o hay errores críticos
+   * 
+   * @since 1.0.0
+   */
   async processExcelFile(file: Express.Multer.File) {
     try {
       // Limpiar cache al inicio del procesamiento

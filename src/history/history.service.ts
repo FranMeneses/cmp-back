@@ -4,6 +4,26 @@ import { BlobServiceClient, ContainerClient } from '@azure/storage-blob';
 import { DefaultAzureCredential } from '@azure/identity';
 import { ConfigService } from '@nestjs/config';
 
+/**
+ * Servicio de gestión completa del historial de tareas completadas con preservación de documentos.
+ * 
+ * @description Proporciona funcionalidades avanzadas para el manejo integral del historial del sistema:
+ * - Consulta completa de registros históricos con relaciones de proceso, valle, faena y beneficiario
+ * - Integración nativa con Azure Blob Storage para gestión de documentos históricos
+ * - Descarga optimizada de documentos preservados con manejo Unicode y extensiones
+ * - Eliminación selectiva de documentos históricos individuales o historial completo
+ * - Transformación inteligente entre formatos de base de datos y GraphQL
+ * - Filtros especializados por proceso, valle, faena y beneficiario
+ * - Preservación de metadatos SAP (SOLPED_MEMO_SAP, HES_HEM_SAP) para auditoría
+ * - Gestión de archivos con nombres originales y fallbacks inteligentes
+ * - Configuración flexible con fallback para entornos sin Azure Storage
+ * - Logging detallado para troubleshooting y auditoría de operaciones
+ * - Manejo robusto de errores con operaciones transaccionales
+ * - Soporte para limpieza masiva de registros históricos obsoletos
+ * 
+ * @class HistoryService
+ * @since 1.0.0
+ */
 @Injectable()
 export class HistoryService {
   private containerClient: ContainerClient;
@@ -34,6 +54,21 @@ export class HistoryService {
     }
   }
 
+  /**
+   * Transforma un registro de historial de formato de base de datos a formato GraphQL.
+   * 
+   * @description Mapeo completo que incluye:
+   * 1. Transformación de nombres de campos de snake_case a camelCase
+   * 2. Construcción de objetos relacionados (proceso, valle, faena, beneficiario)
+   * 3. Mapeo de documentos históricos con información de tipo
+   * 4. Preservación de metadatos SAP y fechas
+   * 
+   * @param history - Registro de historial con relaciones de Prisma
+   * @returns Objeto History en formato GraphQL con todas las relaciones
+   * 
+   * @private
+   * @since 1.0.0
+   */
   private mapToGraphql(history: any) {
     return {
       id: history.id_historial,
@@ -82,6 +117,19 @@ export class HistoryService {
     };
   }
 
+  /**
+   * Obtiene todos los registros de historial del sistema ordenados por fecha.
+   * 
+   * @description Consulta completa que incluye:
+   * 1. Todos los registros de la tabla historial
+   * 2. Relaciones con proceso, valle, faena y beneficiario
+   * 3. Documentos históricos con tipos de documento
+   * 4. Ordenamiento descendente por fecha final
+   * 
+   * @returns Array de registros de historial en formato GraphQL
+   * 
+   * @since 1.0.0
+   */
   async findAll() {
     const histories = await this.prisma.historial.findMany({
       include: {
@@ -102,6 +150,14 @@ export class HistoryService {
     return histories.map(this.mapToGraphql);
   }
 
+  /**
+   * Busca un registro de historial específico por su ID.
+   * 
+   * @param id - ID único del registro de historial
+   * @returns Registro de historial con relaciones o null si no existe
+   * 
+   * @since 1.0.0
+   */
   async findOne(id: string) {
     const history = await this.prisma.historial.findUnique({
       where: { id_historial: id },
@@ -120,6 +176,19 @@ export class HistoryService {
     return history ? this.mapToGraphql(history) : null;
   }
 
+  /**
+   * Obtiene todos los registros de historial asociados a un proceso específico.
+   * 
+   * @description Filtra el historial por proceso empresarial con:
+   * 1. Búsqueda por ID de proceso
+   * 2. Inclusión de todas las relaciones
+   * 3. Ordenamiento por fecha descendente
+   * 
+   * @param processId - ID del proceso empresarial
+   * @returns Array de registros de historial del proceso
+   * 
+   * @since 1.0.0
+   */
   async findByProcess(processId: number) {
     const histories = await this.prisma.historial.findMany({
       where: { id_proceso: processId },
@@ -141,6 +210,19 @@ export class HistoryService {
     return histories.map(this.mapToGraphql);
   }
 
+  /**
+   * Obtiene todos los registros de historial asociados a un valle específico.
+   * 
+   * @description Filtra el historial por valle geográfico con:
+   * 1. Búsqueda por ID de valle
+   * 2. Inclusión de todas las relaciones
+   * 3. Ordenamiento por fecha descendente
+   * 
+   * @param valleyId - ID del valle
+   * @returns Array de registros de historial del valle
+   * 
+   * @since 1.0.0
+   */
   async findByValley(valleyId: number) {
     const histories = await this.prisma.historial.findMany({
       where: { id_valle: valleyId },
@@ -162,6 +244,19 @@ export class HistoryService {
     return histories.map(this.mapToGraphql);
   }
 
+  /**
+   * Obtiene todos los registros de historial asociados a una faena específica.
+   * 
+   * @description Filtra el historial por faena operacional con:
+   * 1. Búsqueda por ID de faena
+   * 2. Inclusión de todas las relaciones
+   * 3. Ordenamiento por fecha descendente
+   * 
+   * @param faenaId - ID de la faena
+   * @returns Array de registros de historial de la faena
+   * 
+   * @since 1.0.0
+   */
   async findByFaena(faenaId: number) {
     const histories = await this.prisma.historial.findMany({
       where: { id_faena: faenaId },
@@ -183,6 +278,19 @@ export class HistoryService {
     return histories.map(this.mapToGraphql);
   }
 
+  /**
+   * Obtiene todos los registros de historial asociados a un beneficiario específico.
+   * 
+   * @description Filtra el historial por beneficiario con:
+   * 1. Búsqueda por ID de beneficiario
+   * 2. Inclusión de todas las relaciones
+   * 3. Ordenamiento por fecha descendente
+   * 
+   * @param beneficiaryId - ID del beneficiario
+   * @returns Array de registros de historial del beneficiario
+   * 
+   * @since 1.0.0
+   */
   async findByBeneficiary(beneficiaryId: string) {
     const histories = await this.prisma.historial.findMany({
       where: { beneficiario: beneficiaryId },
@@ -205,8 +313,28 @@ export class HistoryService {
   }
 
   /**
-   * Descarga un documento histórico desde Azure Blob Storage
-   * Los documentos históricos reutilizan las mismas URLs del blob que los documentos originales
+   * Descarga un documento histórico desde Azure Blob Storage.
+   * 
+   * @description Proceso completo de descarga de documentos preservados:
+   * 1. Busca el documento histórico en la base de datos
+   * 2. Extrae el nombre del blob de la URL almacenada
+   * 3. Verifica existencia del archivo en Azure Storage
+   * 4. Descarga el blob completo en memoria
+   * 5. Reconstruye el nombre original con extensión correcta
+   * 6. Aplica fallbacks inteligentes para nombres faltantes
+   * 7. Obtiene propiedades del blob (content-type, etc.)
+   * 
+   * Los documentos históricos reutilizan las mismas URLs del blob que los documentos originales,
+   * garantizando la integridad y accesibilidad de los archivos preservados.
+   * 
+   * @param id_his_doc - ID único del documento histórico
+   * @returns Objeto con buffer, filename, contentType y size del archivo
+   * 
+   * @throws Error si Azure Storage no está configurado
+   * @throws Error si el documento histórico no existe
+   * @throws Error si el archivo no se encuentra en Azure Storage
+   * 
+   * @since 1.0.0
    */
   async downloadHistoryDocument(id_his_doc: string) {
     if (!this.containerClient) {
@@ -304,7 +432,25 @@ export class HistoryService {
   }
 
   /**
-   * Elimina un documento histórico completamente (blob + metadata histórica)
+   * Elimina un documento histórico completamente del sistema.
+   * 
+   * @description Eliminación completa que incluye:
+   * 1. Búsqueda del documento histórico en la base de datos
+   * 2. Eliminación del blob físico de Azure Storage
+   * 3. Eliminación de los metadatos de la tabla historial_doc
+   * 4. Manejo graceful de errores de Azure (no falla si blob no existe)
+   * 5. Logging detallado de todas las operaciones
+   * 
+   * Esta operación es irreversible y elimina permanentemente tanto el archivo
+   * físico como sus metadatos del historial.
+   * 
+   * @param id_his_doc - ID único del documento histórico a eliminar
+   * @returns Objeto con información de la eliminación realizada
+   * 
+   * @throws Error si Azure Storage no está configurado
+   * @throws Error si el documento histórico no existe
+   * 
+   * @since 1.0.0
    */
   async deleteHistoryDocument(id_his_doc: string) {
     if (!this.containerClient) {
@@ -360,7 +506,27 @@ export class HistoryService {
   }
 
   /**
-   * Elimina un historial completo con todos sus documentos en cascada
+   * Elimina un registro de historial completo con todos sus documentos en cascada.
+   * 
+   * @description Eliminación masiva y transaccional que incluye:
+   * 1. Búsqueda del registro de historial con todos sus documentos
+   * 2. Eliminación iterativa de todos los blobs de Azure Storage
+   * 3. Eliminación de todos los metadatos de documentos históricos
+   * 4. Eliminación del registro principal del historial
+   * 5. Contabilización detallada de elementos eliminados
+   * 6. Manejo robusto de errores parciales (continúa eliminando otros elementos)
+   * 7. Logging granular de cada operación realizada
+   * 
+   * Esta operación es especialmente útil para limpieza de registros históricos
+   * obsoletos o corrección de datos inconsistentes.
+   * 
+   * @param id_historial - ID único del registro de historial a eliminar
+   * @returns Objeto con estadísticas completas de la eliminación
+   * 
+   * @throws Error si Azure Storage no está configurado
+   * @throws Error si el registro de historial no existe
+   * 
+   * @since 1.0.0
    */
   async deleteHistory(id_historial: string) {
     if (!this.containerClient) {
